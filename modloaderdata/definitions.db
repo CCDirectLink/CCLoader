@@ -1,0 +1,111 @@
+{
+	"type": "object",
+	"name": "cc",
+	"members": [{
+		"type": "member",
+		"name": "error",
+		"parent": "",
+		"compiled": {
+			"type": "fixed",
+			"pattern": "f"
+		}
+	},{
+		"type": "object",
+		"name": "ig",
+		"members": [{
+			"type": "member",
+			"name": "define",
+			"parent": "ig",
+			"compiled": {
+				"type": "before",
+				"test": {
+					"type": "literal",
+					"pattern": "impact.base.worker"
+				}
+			}
+		},{
+			"type": "member",
+			"name": "modules",
+			"parent": "ig",
+			"compiled": {
+				"type": "before",
+				"test": {
+					"type": "literal",
+					"pattern": "dom.ready"
+				}
+			}
+		},{
+			"type": "member",
+			"name": "gameMain",
+			"parent": "ig",
+			"compiled": {
+				"type": "fixed",
+				"pattern": "t"
+			}
+		},{
+			"type": "member",
+			"name": "entityList",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "object.property.name",
+				"from": {
+					"type": "MemberExpression",
+					"values": [{
+						"name": "property.name",
+						"value": "TeleportStairs"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"name": "baseEntity",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "right.callee.object.property.name",
+				"from" : {
+					"type": "AssignmentExpression",
+					"values": [{
+						"name": "left.property.name",
+						"value": "TeleportStairs"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"name": "events",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "object.property.name",
+				"from" : {
+					"type": "MemberExpression",
+					"values": [{
+						"name": "property.name",
+						"value": "SELECT_RANDOM"
+					}]
+				}
+			}
+		}]
+	},{
+		"type": "object",
+		"name": "sc",
+		"members": [{
+			"type": "member",
+			"name": "playerInstance",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "callee.object.object.property.name",
+				"from" : {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.0.value",
+						"value": "MENU_CIRCUIT"
+					}]
+				}
+			}
+		}]
+	}]
+}
