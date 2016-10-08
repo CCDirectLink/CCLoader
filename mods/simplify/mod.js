@@ -5,13 +5,15 @@ var simplify = new function(){
 	var dummyEntity = cc.ig.baseEntity.extend({isDummy: true, f: function(a, b, c, d) { this.parent(a, b, c, d);}, update: function(){
 			simplify.fireUpdate();
 		}});
-	var dummyIndex = 0;
 	var registeredFuncs = [];
 	var loadEvent, unloadEvent;
 	
 	var initialize = function(){
 		cc.ig.gameMain.spawnEntity = function(name, x, y, z, data, isHidden){
 			return cc.ig.gameMain.$e(name, x, y, z, data, isHidden);
+		}
+		cc.ig.gameMain.getEntityPosition = function(entity){
+			return entity.b.i;
 		}
 		_initializeEvents();
 		_hookUpdate();
@@ -24,13 +26,13 @@ var simplify = new function(){
 	
 	var _hookUpdate = function(){
 		var intId = setInterval(function(){
-			if(!cc.ig.gameMain.$a[0] && dummyIndex !== -1){
+			/*if(!cc.ig.gameMain.$a[0] && dummyIndex !== -1){
 				document.body.dispatchEvent(new Event("returnToMenu"));
 				dummyIndex = -1;
-			}
-			if(cc.ig.gameMain.$a[0] && (!cc.ig.gameMain.entities[dummyIndex] || cc.ig.gameMain.entities[dummyIndex].isDummy !== true)){
-				dummyIndex = cc.ig.gameMain.entities.length;
+			}*/
+			if(cc.ig.gameMain.entities.length > 0 && ((!cc.ig.gameMain.entities[0]) || (cc.ig.gameMain.entities[0].isDummy !== true))){
 				cc.ig.gameMain.spawnEntity(dummyEntity, 0, 0, -128, {});
+				cc.ig.gameMain.entities.unshift(cc.ig.gameMain.entities.pop());
 				document.body.dispatchEvent(new Event("mapLoaded"));
 			}
 		}, 1000);
@@ -59,6 +61,10 @@ var simplify = new function(){
 		script.onload = callback;
 		script.type = "text/javascript";
 		script.src = url;
+	}
+	
+	this.getActiveMapName = function(){
+		return cc.ig.gameMain[cc.ig.mapNameVarName]
 	}
 	
 	initialize();

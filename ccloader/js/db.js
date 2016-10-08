@@ -11,20 +11,47 @@ function Db(name){
 		this.data.members.push({type: "member", name: name, parent: parent, compiledName: compiledName});
 	}
 	
+	this.addMemberReference = function(name, parent, compiledName){
+		this.data.members.push({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
+	}
+	
+	this.addRawMember = function(name, value){
+		this.data.members.push({type: "rawmember", name: name, value: value});
+	}
+	
 	this.executeDb = function(parent, root){
 		parent[this.data.name] = {};
 		var child = parent[this.data.name];
+		var result = true;
 		
 		for(var i = 0; i < this.data.members.length; i++){
-			if(this.data.members[i].type === "object"){
-				var ndb = new Db(this.data.members[i].name);
-				ndb.data = this.data.members[i];
-				ndb.executeDb(child, root);
-			}else{
-				var member = this.data.members[i];
-				child[member.name] = this._getParent(member.parent, root)[member.compiledName];
+			switch(this.data.members[i].type){
+				case "object":
+					var ndb = new Db(this.data.members[i].name);
+					ndb.data = this.data.members[i];
+					var res = ndb.executeDb(child, root);
+					if(!res)
+						result = false;
+					break;
+				case "rawmember":
+					var member = this.data.members[i];
+					child[member.name] = member.value;
+					break;
+				case "memberReference":
+					var instance = this;
+					var member = this.data.members[i];
+					child[member.name] = function(){ return instance._getParent(member.parent, root)[member.compiledName]};
+					break;
+				default:
+					var member = this.data.members[i];
+					child[member.name] = this._getParent(member.parent, root)[member.compiledName];
+					if(child[member.name] === undefined)
+						result = false;
+					break;
 			}
 		}
+		
+		return result;
 	}
 	
 	this._getParent = function(parentString, root){

@@ -39,8 +39,15 @@
 			"name": "gameMain",
 			"parent": "ig",
 			"compiled": {
-				"type": "fixed",
-				"pattern": "t"
+				"type": "select",
+				"pattern": "body.10.expression.left.property.name",
+				"from": {
+					"type": "BlockStatement",
+					"values": [{
+						"name": "body.11.expression.left.property.name",
+						"value": "GAME_ERROR_CALLBACK"
+					}]
+				}
 			}
 		},{
 			"type": "member",
@@ -87,13 +94,46 @@
 					}]
 				}
 			}
+		},{
+			"type": "member",
+			"name": "mapNameVarName",
+			"parent": "ig.t",
+			"compiled": {
+				"type": "raw",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.property.name",
+					"from": {
+						"type": "LogicalExpression",
+						"values": [{
+							"name": "right.value",
+							"value": "NO MAP"
+						}]
+					}
+				}
+			}
+		},{
+			"type": "member",
+			"name": "playerInstance",
+			"parent": "cc.ig.gameMain",
+			"compiled": {
+				"type": "selectReference",
+				"pattern": "arguments.0.property.name",
+				"from" : {
+					"type": "NewExpression",
+					"values": [{
+						"name": "arguments.1.value",
+						"value": "Elemental Overload"
+					}]
+				}
+			}
 		}]
 	},{
 		"type": "object",
 		"name": "sc",
 		"members": [{
 			"type": "member",
-			"name": "playerInstance",
+			"name": "playerModelInstance",
 			"parent": "sc",
 			"compiled": {
 				"type": "select",

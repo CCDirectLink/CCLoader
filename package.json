@@ -1,16 +1,12 @@
 {
   "name": "CrossCode",
-  "version": "0.2.2",
+  "version" : "0.2.2",
   "main": "ccloader/index.html",
-  "window": {
-    "toolbar": false,
-    "icon": "favicon.png",
-    "width": 1136,
-    "height": 640,
-    "fullscreen": false
-  },
-  "dependencies": {
-    "acorn": "^3.2.0",
-    "md5-file": "^3.1.1"
+  "window" : {
+	"toolbar" : false,
+	"icon" : "favicon.png",
+	"width" : 1136,
+	"height": 640,
+	"fullscreen" : false
   }
 }

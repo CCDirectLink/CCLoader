@@ -10,15 +10,17 @@ function Acorn(){
 				for(var key in node){
 					for(var subkey in node[key])
 						for(var subkey2 in node[key][subkey])
-							if(typeof node[key][subkey][subkey2]=== "string" && node[key][subkey][subkey2] === "SELECT_RANDOM") 
-								return true;
+							for(var subkey3 in node[key][subkey][subkey2])
+								for(var subkey4 in node[key][subkey][subkey2][subkey3])
+									for(var subkey5 in node[key][subkey][subkey2][subkey3][subkey4])
+										if(typeof node[key][subkey][subkey2][subkey3][subkey4][subkey5] === "string" && node[key][subkey][subkey2][subkey3][subkey4][subkey5] === "GAME_ERROR_CALLBACK") 
+											return true;
 				}
 				return false;
 			});
 	}
 	
-	this.analyse = function(dbtext){
-		var dbDefinition = JSON.parse(dbtext);
+	this.analyse = function(dbDefinition){
 		var db = new Db(dbDefinition.name);
 		return this._buildDb(db, dbDefinition);
 	}
@@ -46,6 +48,12 @@ function Acorn(){
 				break;
 			case "select":
 				this._getSelect(db, member.name, member.parent, member.compiled.pattern, member.compiled.from);
+				break;
+			case "selectReference":
+				this._getSelectReference(db, member.name, member.parent, member.compiled.pattern, member.compiled.from);
+				break;
+			case "raw":
+				this._getRaw(db, member.name, member.parent, member.compiled.compiled);
 				break;
 		}
 	}
@@ -77,6 +85,53 @@ function Acorn(){
 		}).node;
 		var compiledName = this._getNodeMember(node, pattern);
 		db.addMember(name, parent, compiledName);
+	}
+	this._getSelectReference = function(db, name, parent, pattern, selectFrom){
+		var instance = this;
+		var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
+			if(nodeType !== selectFrom.type){
+				return false;
+			}
+			
+			for(var valuePairIndex in selectFrom.values){
+				var valuePair = selectFrom.values[valuePairIndex];
+				var realValue = instance._getNodeMember(node, valuePair.name);
+				if(realValue === undefined || realValue !== valuePair.value)
+					return false;
+			}
+			
+			return true;
+		}).node;
+		var compiledName = this._getNodeMember(node, pattern);
+		db.addMemberReference(name, parent, compiledName);
+	}
+	this._getRaw = function(db, name, parent, compiled){
+		var instance = this;
+		var selectFrom = compiled.from;
+		switch(compiled.type)
+		{
+			case "select":
+				var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
+					if(nodeType !== selectFrom.type){
+						return false;
+					}
+					
+					for(var valuePairIndex in selectFrom.values){
+						var valuePair = selectFrom.values[valuePairIndex];
+						var realValue = instance._getNodeMember(node, valuePair.name);
+						if(realValue === undefined || realValue !== valuePair.value)
+							return false;
+					}
+					
+					return true;
+				}).node;
+				var value = this._getNodeMember(node, compiled.pattern);
+				db.addRawMember(name, value);
+				break;
+			case "fixed":
+				db.addRawMember(name, compiled.pattern);
+				break;
+		}
 	}
 	
 	this._getTest = function(type, pattern){
