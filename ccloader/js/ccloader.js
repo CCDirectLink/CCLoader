@@ -131,18 +131,18 @@ function ModLoader(databaseName){
 	
 	this._getAllModsFilesFromFolder = function(dir){
 		var results = [];
-
-		fs.readdirSync(dir).forEach(function(file) {
-			file = dir+'/'+file;
-			
-			var stat = fs.statSync(file);
-			if (stat && stat.isDirectory()) {
-				results = results.concat(_instance._getAllModsFilesFromFolder(file))
-			} else if(file.endsWith('/mod.js')){
-				results.push(file);
-			}
-		});
-
+		try{
+			fs.readdirSync(dir).forEach(function(file) {
+				file = dir+'/'+file;
+				
+				var stat = fs.statSync(file);
+				if (stat && stat.isDirectory()) {
+					results = results.concat(_instance._getAllModsFilesFromFolder(file))
+				} else if(file.endsWith('/mod.js')){
+					results.push(file);
+				}
+			});
+		} catch(e) { }
 		return results;
 	}
 	
@@ -153,16 +153,18 @@ function ModLoader(databaseName){
 	this._getAllDbFilesFromFolder = function(dir){
 		var results = [];
 
-		fs.readdirSync(dir).forEach(function(file) {
-			file = dir+'/'+file;
-			
-			var stat = fs.statSync(file);
-			if (stat && stat.isDirectory()) {
-				results = results.concat(_instance._getAllDbFilesFromFolder(file))
-			} else if(file.endsWith('/definitions.db') || file.endsWith('.table')){
-				results.push(file);
-			}
-		});
+		try{
+			fs.readdirSync(dir).forEach(function(file) {
+				file = dir+'/'+file;
+				
+				var stat = fs.statSync(file);
+				if (stat && stat.isDirectory()) {
+					results = results.concat(_instance._getAllDbFilesFromFolder(file))
+				} else if(file.endsWith('/definitions.db') || file.endsWith('.table')){
+					results.push(file);
+				}
+			});
+		} catch(e) { }
 
 		return results;
 	}
@@ -198,4 +200,3 @@ function ModLoader(databaseName){
 		_instance.frame.contentDocument.body.appendChild(script);
 	}
 }
-
