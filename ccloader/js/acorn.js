@@ -6,18 +6,18 @@ function Acorn(){
 	
 	this.parse = function(jscode){
 		this.tree = ac.parse(jscode, {onToken: function(){}});
-		var result = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
+		/*var result = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
 				for(var key in node){
 					for(var subkey in node[key])
 						for(var subkey2 in node[key][subkey])
 							for(var subkey3 in node[key][subkey][subkey2])
-								for(var subkey4 in node[key][subkey][subkey2][subkey3])
-									for(var subkey5 in node[key][subkey][subkey2][subkey3][subkey4])
-										if(typeof node[key][subkey][subkey2][subkey3][subkey4][subkey5] === "string" && node[key][subkey][subkey2][subkey3][subkey4][subkey5] === "GAME_ERROR_CALLBACK") 
+								//for(var subkey4 in node[key][subkey][subkey2][subkey3])
+								//	for(var subkey5 in node[key][subkey][subkey2][subkey3][subkey4])
+										if(typeof node[key][subkey][subkey2][subkey3] === "string" && node[key][subkey][subkey2][subkey3] === "throwHits") 
 											return true;
 				}
 				return false;
-			});
+			});*/
 	}
 	
 	this.analyse = function(dbDefinition){
@@ -39,43 +39,51 @@ function Acorn(){
 	}
 	
 	this._buildMember = function(db, member){
-		switch(member.compiled.type){
-			case "fixed":
-				this._getFixed(db, member.name, member.parent, member.compiled);
-				break;
-			case "before":
-				this._getBefore(db, member.name, member.parent, member.compiled.test);
-				break;
-			case "select":
-				this._getSelect(db, member.name, member.parent, member.compiled.pattern, member.compiled.from);
-				break;
-			case "selectReference":
-				this._getSelectReference(db, member.name, member.parent, member.compiled.pattern, member.compiled.from);
-				break;
+		var value = this._getVar(member.compiled);
+		
+		switch(member.refType){
 			case "raw":
-				this._getRaw(db, member.name, member.parent, member.compiled.compiled);
+				db.addRawMember(member.name, value);
+				break;
+			case "ref":
+				db.addMemberReference(member.name, member.parent, value);
+				break;
+			case "var":
+			default:
+				db.addMember(member.name, member.parent, value);
 				break;
 		}
 	}
 	
-	this._getFixed = function(db, name, parent, compiled){
-		db.addMember(name, parent, compiled.pattern);
+	this._getVar = function(compiled){
+		switch(compiled.type){
+			case "fixed":
+				return this._getFixed(compiled);
+			case "before":
+				return this._getBefore(compiled);
+			case "select":
+				return this._getSelect(compiled);
+		}
 	}
-	this._getBefore = function(db, name, parent, test){
-		var node = walker.findNodeAt(this.tree, null, null, this._getTest(test.type, test.pattern)).node;
+	
+	this._getFixed = function(compiled){
+		return compiled.pattern;
+	}
+	this._getBefore = function(compiled){
+		var node = walker.findNodeAt(this.tree, null, null, this._getTest(compiled.test.type, compiled.test.pattern)).node;
 		node = walker.findNodeAround(this.tree, node.start - 1).node;
 		
-		db.addMember(name, parent, this._getNodeName(node));
+		return this._getNodeName(node);
 	}
-	this._getSelect = function(db, name, parent, pattern, selectFrom){
+	this._getSelect = function(compiled){
 		var instance = this;
 		var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
-			if(nodeType !== selectFrom.type){
+			if(nodeType !== compiled.from.type){
 				return false;
 			}
 			
-			for(var valuePairIndex in selectFrom.values){
-				var valuePair = selectFrom.values[valuePairIndex];
+			for(var valuePairIndex in compiled.from.values){
+				var valuePair = compiled.from.values[valuePairIndex];
 				var realValue = instance._getNodeMember(node, valuePair.name);
 				if(realValue === undefined || realValue !== valuePair.value)
 					return false;
@@ -83,55 +91,7 @@ function Acorn(){
 			
 			return true;
 		}).node;
-		var compiledName = this._getNodeMember(node, pattern);
-		db.addMember(name, parent, compiledName);
-	}
-	this._getSelectReference = function(db, name, parent, pattern, selectFrom){
-		var instance = this;
-		var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
-			if(nodeType !== selectFrom.type){
-				return false;
-			}
-			
-			for(var valuePairIndex in selectFrom.values){
-				var valuePair = selectFrom.values[valuePairIndex];
-				var realValue = instance._getNodeMember(node, valuePair.name);
-				if(realValue === undefined || realValue !== valuePair.value)
-					return false;
-			}
-			
-			return true;
-		}).node;
-		var compiledName = this._getNodeMember(node, pattern);
-		db.addMemberReference(name, parent, compiledName);
-	}
-	this._getRaw = function(db, name, parent, compiled){
-		var instance = this;
-		var selectFrom = compiled.from;
-		switch(compiled.type)
-		{
-			case "select":
-				var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
-					if(nodeType !== selectFrom.type){
-						return false;
-					}
-					
-					for(var valuePairIndex in selectFrom.values){
-						var valuePair = selectFrom.values[valuePairIndex];
-						var realValue = instance._getNodeMember(node, valuePair.name);
-						if(realValue === undefined || realValue !== valuePair.value)
-							return false;
-					}
-					
-					return true;
-				}).node;
-				var value = this._getNodeMember(node, compiled.pattern);
-				db.addRawMember(name, value);
-				break;
-			case "fixed":
-				db.addRawMember(name, compiled.pattern);
-				break;
-		}
+		return this._getNodeMember(node, compiled.pattern);
 	}
 	
 	this._getTest = function(type, pattern){

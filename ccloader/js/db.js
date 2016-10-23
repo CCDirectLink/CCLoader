@@ -40,18 +40,38 @@ function Db(name){
 				case "memberReference":
 					var instance = this;
 					var member = this.data.members[i];
-					child[member.name] = function(){ return instance._getParent(member.parent, root)[member.compiledName]};
+					this._resolve(member.name, child)[this._last(member.name)] = function(){ return instance._getParent(member.parent, root)[member.compiledName]};
 					break;
 				default:
 					var member = this.data.members[i];
-					child[member.name] = this._getParent(member.parent, root)[member.compiledName];
-					if(child[member.name] === undefined)
+					this._resolve(member.name, child)[this._last(member.name)] = this._getParent(member.parent, root)[member.compiledName];
+					if(this._resolve(member.name, child)[this._last(member.name)] === undefined)
 						result = false;
 					break;
 			}
 		}
 		
 		return result;
+	}
+	
+	this._resolve = function(path, root){
+		if(path === undefined || path === ""){
+			return root;
+		}
+		
+		var res = root;
+		var pathArr = path.split(".");
+		
+		for(var i = 0; i < pathArr.length - 1; i++){
+			res = res[pathArr[i]];
+		}
+		
+		return res;
+	}
+	
+	this._last = function(path){
+		var res = path.split(".");
+		return res[res.length - 1];
 	}
 	
 	this._getParent = function(parentString, root){

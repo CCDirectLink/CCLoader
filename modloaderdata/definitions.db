@@ -3,6 +3,7 @@
 	"name": "cc",
 	"members": [{
 		"type": "member",
+		"refType": "var",
 		"name": "error",
 		"parent": "",
 		"compiled": {
@@ -14,6 +15,7 @@
 		"name": "ig",
 		"members": [{
 			"type": "member",
+			"refType": "var",
 			"name": "define",
 			"parent": "ig",
 			"compiled": {
@@ -25,6 +27,7 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
 			"name": "modules",
 			"parent": "ig",
 			"compiled": {
@@ -36,6 +39,7 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
 			"name": "gameMain",
 			"parent": "ig",
 			"compiled": {
@@ -51,6 +55,7 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
 			"name": "entityList",
 			"parent": "ig",
 			"compiled": {
@@ -66,6 +71,7 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
 			"name": "baseEntity",
 			"parent": "ig",
 			"compiled": {
@@ -81,6 +87,7 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
 			"name": "events",
 			"parent": "ig",
 			"compiled": {
@@ -96,28 +103,26 @@
 			}
 		},{
 			"type": "member",
+			"refType": "raw",
 			"name": "mapNameVarName",
-			"parent": "ig.t",
 			"compiled": {
-				"type": "raw",
-				"compiled": {
-					"type": "select",
-					"pattern": "left.property.name",
-					"from": {
-						"type": "LogicalExpression",
-						"values": [{
-							"name": "right.value",
-							"value": "NO MAP"
-						}]
-					}
+				"type": "select",
+				"pattern": "left.property.name",
+				"from": {
+					"type": "LogicalExpression",
+					"values": [{
+						"name": "right.value",
+						"value": "NO MAP"
+					}]
 				}
 			}
 		},{
 			"type": "member",
+			"refType": "ref",
 			"name": "playerInstance",
 			"parent": "cc.ig.gameMain",
 			"compiled": {
-				"type": "selectReference",
+				"type": "select",
 				"pattern": "arguments.0.property.name",
 				"from" : {
 					"type": "NewExpression",
@@ -133,6 +138,7 @@
 		"name": "sc",
 		"members": [{
 			"type": "member",
+			"refType": "var",
 			"name": "playerModelInstance",
 			"parent": "sc",
 			"compiled": {
@@ -143,6 +149,44 @@
 					"values": [{
 						"name": "arguments.0.value",
 						"value": "MENU_CIRCUIT"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "stats",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "callee.object.property.name",
+				"from": {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.1.value",
+						"value": "throwHits"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "stats.getStat",
+			"parent": "cc.sc.stats",
+			"compiled": {
+				"type": "select",
+				"pattern": "callee.property.name",
+				"from": {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.length",
+						"value": 2
+					},{
+						"name": "arguments.0.value",
+						"value": "combat"
+					},{
+						"name": "arguments.1.value",
+						"value": "totalKilled"
 					}]
 				}
 			}
