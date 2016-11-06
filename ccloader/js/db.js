@@ -20,9 +20,12 @@ function Db(name){
 	}
 	
 	this.executeDb = function(parent, root){
-		parent[this.data.name] = {};
+		if(!parent[this.data.name])
+			parent[this.data.name] = {};
 		var child = parent[this.data.name];
 		var result = true;
+		
+		root.modloaderdb = {instance: this, root: root};
 		
 		for(var i = 0; i < this.data.members.length; i++){
 			switch(this.data.members[i].type){
@@ -38,9 +41,8 @@ function Db(name){
 					child[member.name] = member.value;
 					break;
 				case "memberReference":
-					var instance = this;
 					var member = this.data.members[i];
-					this._resolve(member.name, child)[this._last(member.name)] = function(){ return instance._getParent(member.parent, root)[member.compiledName]};
+					this._resolve(member.name, child)[this._last(member.name)] = new Function('window', 'return function(){ return window.modloaderdb.instance._getParent(\'' + member.parent + '\', window.modloaderdb.root)[\'' + member.compiledName + '\']}')(root);
 					break;
 				default:
 					var member = this.data.members[i];

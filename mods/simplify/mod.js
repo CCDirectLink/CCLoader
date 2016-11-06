@@ -2,18 +2,19 @@ if(!cc)
 	throw "No Modloader Found!";
 
 var simplify = new function(){
-	var dummyEntity = cc.ig.baseEntity.extend({isDummy: true, f: function(a, b, c, d) { this.parent(a, b, c, d);}, update: function(){
-			simplify.fireUpdate();
-		}});
 	var registeredFuncs = [];
-	var loadEvent, unloadEvent;
+	var loadEvent, unloadEvent, lastMap;
 	
 	var initialize = function(){
-		cc.ig.gameMain.spawnEntity = function(name, x, y, z, data, isHidden){
-			return cc.ig.gameMain.$e(name, x, y, z, data, isHidden);
-		}
+		cc.ig.gameMain.spawnEntity = cc.ig.gameMain.spawnEntity();
 		cc.ig.gameMain.getEntityPosition = function(entity){
+			if(!entity || !entity.b)
+				return {x: -1, y: -1, z: -1};
 			return entity.b.i;
+		}
+		cc.ig.gameMain.setEntityPosition = function(entity, pos){
+			if(entity && entity.b)
+				entity.b.i = pos;
 		}
 		_initializeEvents();
 		_hookUpdate();
@@ -25,23 +26,16 @@ var simplify = new function(){
 	}
 	
 	var _hookUpdate = function(){
-		var intId = setInterval(function(){
-			/*if(!cc.ig.gameMain.$a[0] && dummyIndex !== -1){
-				document.body.dispatchEvent(new Event("returnToMenu"));
-				dummyIndex = -1;
-			}*/
-			if(cc.ig.gameMain.entities.length > 0 && ((!cc.ig.gameMain.entities[0]) || (cc.ig.gameMain.entities[0].isDummy !== true))){
-				cc.ig.gameMain.spawnEntity(dummyEntity, 0, 0, -128, {});
-				cc.ig.gameMain.entities.unshift(cc.ig.gameMain.entities.pop());
-				document.body.dispatchEvent(new Event("mapLoaded"));
-			}
-		}, 1000);
-		/*cc.ig.gameMain.update = (function(original) {
-			return function() {
+		cc.ig.gameMain.originalUpdate = cc.ig.gameMain.update;
+		cc.ig.gameMain.update = function(){
+				cc.ig.gameMain.originalUpdate();
+				var mapName = cc.ig.getMapName();
+				if(mapName !== lastMap){
+					document.body.dispatchEvent(new Event("mapLoaded"));
+				}
+				lastMap = mapName;
 				simplify.fireUpdate();
-				return original.apply(this, arguments);
 			};
-		})(cc.ig.gameMain.update, this.fireUpdate);*/
 	}
 	
 	this.registerUpdate = function(func){

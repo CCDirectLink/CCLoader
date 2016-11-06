@@ -132,6 +132,42 @@
 					}]
 				}
 			}
+		},{
+			"type": "member",
+			"refType": "ref",
+			"name": "getMapName",
+			"parent": "cc.ig.gameMain",
+			"compiled": {
+				"type": "select",
+				"pattern": "arguments.0.property.name",
+				"from": {
+					"type": "CallExpression",
+					"values": [{
+						"name": "callee.property.name",
+						"value": "seedrandomSeed"
+					}]
+				}
+			}
+		},{
+			"type": "object",
+			"name": "gameMain",
+			"members": [{
+				"type": "member",
+				"refType": "ref",
+				"name": "spawnEntity",
+				"parent": "cc.ig.gameMain",
+				"compiled": {
+					"type": "select",
+					"pattern": "key.name",
+					"from": {
+						"type": "Property",
+						"values": [{
+							"name": "value.body.body.2.expression.right.arguments.0.arguments.0.left.value",
+							"value": "Can't spawn entity of type "
+						}]
+					}
+				}
+			}]
 		}]
 	},{
 		"type": "object",

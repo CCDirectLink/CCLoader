@@ -7,16 +7,19 @@ function Acorn(){
 	this.parse = function(jscode){
 		this.tree = ac.parse(jscode, {onToken: function(){}});
 		/*var result = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
-				for(var key in node){
-					for(var subkey in node[key])
-						for(var subkey2 in node[key][subkey])
-							for(var subkey3 in node[key][subkey][subkey2])
-								//for(var subkey4 in node[key][subkey][subkey2][subkey3])
-								//	for(var subkey5 in node[key][subkey][subkey2][subkey3][subkey4])
-										if(typeof node[key][subkey][subkey2][subkey3] === "string" && node[key][subkey][subkey2][subkey3] === "throwHits") 
-											return true;
+				function search(n, layers){
+					if(layers <= 0)
+						return n === "Can't spawn entity of type ";
+					
+					for(var key in n){
+						if(search(n[key], layers - 1))
+							return true;
+					}
+					
+					return false;
 				}
-				return false;
+				
+				return search(node, 12);
 			});*/
 	}
 	
