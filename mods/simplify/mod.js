@@ -4,20 +4,34 @@ if(!cc)
 var simplify = new function(){
 	var registeredFuncs = [];
 	var loadEvent, unloadEvent, lastMap;
+	var nextActionVarName = undefined;
 	
 	var initialize = function(){
 		cc.ig.gameMain.spawnEntity = cc.ig.gameMain.spawnEntity();
 		cc.ig.gameMain.getEntityPosition = function(entity){
-			if(!entity || !entity.b)
+			if(!entity || !entity[cc.ig.varNames.entityData])
 				return {x: -1, y: -1, z: -1};
-			return entity.b.i;
+			return entity[cc.ig.varNames.entityData][cc.ig.varNames.entityPosition];
 		}
 		cc.ig.gameMain.setEntityPosition = function(entity, pos){
-			if(entity && entity.b)
-				entity.b.i = pos;
+			if(entity && entity[cc.ig.varNames.entityData])
+				entity[cc.ig.varNames.entityData][cc.ig.varNames.entityPosition] = pos;
 		}
 		_initializeEvents();
 		_hookUpdate();
+	}
+	
+	function findNextAction(action){
+		for(var i in action) {
+			if(typeof action[i] === "object") {
+				for(var j in action[i]) {
+					if(i === j){
+						nextActionVarName = i;
+						return;
+					}
+				}
+			}
+		}
 	}
 	
 	var _initializeEvents = function(){
@@ -58,7 +72,34 @@ var simplify = new function(){
 	}
 	
 	this.getActiveMapName = function(){
-		return cc.ig.gameMain[cc.ig.mapNameVarName]
+		return cc.ig.gameMain[cc.ig.varNames.mapName]
+	}
+	
+	this.getAnimation = function(entity){
+		return entity[cc.ig.varNames.currentAnimation];
+	}
+	this.setAnimation = function(entity, value){
+		entity[cc.ig.varNames.currentAnimation] = value;
+	}
+	
+	this.runCombatAction = function(cAction) {
+		return cAction[cc.ig.varNames.runCombatAction].apply(cAction, Array.prototype.slice.call(arguments, 1));
+	}
+	this.getEntityProxies = function(entity) {
+		return entity[cc.ig.varNames.proxies];
+	}
+	
+	this.getProxyAction = function(action){
+		return action[cc.ig.varNames.proxyActions];
+	}
+	this.getNextProxyAction = function(action){
+		if(nextActionVarName === undefined)
+			findNextAction(action);
+		
+		if(nextActionVarName !== undefined)
+			return action[nextActionVarName];
+		else
+			return undefined;
 	}
 	
 	initialize();
