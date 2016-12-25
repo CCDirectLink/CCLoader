@@ -28,6 +28,22 @@
 		},{
 			"type": "member",
 			"refType": "var",
+			"name": "GUI",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "callee.object.property.name",
+				"from" : {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.0.value",
+						"value": "__parallaxGui__"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
 			"name": "modules",
 			"parent": "ig",
 			"compiled": {
@@ -103,16 +119,17 @@
 			}
 		},{
 			"type": "member",
-			"refType": "raw",
-			"name": "mapNameVarName",
+			"refType": "var",
+			"name": "combatActions",
+			"parent": "ig",
 			"compiled": {
 				"type": "select",
-				"pattern": "left.property.name",
-				"from": {
-					"type": "LogicalExpression",
+				"pattern": "object.property.name",
+				"from" : {
+					"type": "MemberExpression",
 					"values": [{
-						"name": "right.value",
-						"value": "NO MAP"
+						"name": "property.name",
+						"value": "FACE_TO_TARGET"
 					}]
 				}
 			}
@@ -167,7 +184,166 @@
 						}]
 					}
 				}
+			},{
+				"type": "member",
+				"refType": "ref",
+				"name": "getLoadingState",
+				"parent": "cc.ig.gameMain",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "right.left.value",
+							"value": "LOADING MAP: "
+						}]
+					}
+				}
 			}]
+		},{
+			"type": "object",
+			"name": "varNames",
+			"members": [{
+				"type": "member",
+				"refType": "raw",
+				"name": "animation",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.0.expression.left.object.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.1.expression.arguments.0.value",
+							"value": "symbolAppear"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "currentAnimation",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "right.property.name",
+							"value": "currentAnim"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "mapName",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.property.name",
+					"from": {
+						"type": "LogicalExpression",
+						"values": [{
+							"name": "right.value",
+							"value": "NO MAP"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "entityData",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.3.expression.left.object.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.right.arguments.0.arguments.0.value",
+							"value": "Called Entity .onKill() outside of ig.game.kill()"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "entityPosition",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.1.declarations.1.init.left.object.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.right.arguments.0.arguments.0.value",
+							"value": "Spawned Particle after effects has been killed!"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "runCombatAction",
+				"compiled": {
+					"type": "select",
+					"pattern": "test.left.argument.property.name",
+					"from": {
+						"type": "IfStatement",
+						"values": [{
+							"name": "alternate.expression.arguments.0.arguments.0.value",
+							"value": "System.setDelegate: No run() function in object"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "proxies",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.object.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "right.callee.property.right.value",
+							"value": "BALL"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "proxyActions",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.2.expression.left.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.right.right.value",
+							"value": "[UNNAMED]"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "slowDownModifier",
+				"compiled": {
+					"type": "select",
+					"pattern": "key.name",
+					"from": {
+						"type": "Property",
+						"values": [{
+							"name": "value.properties.1.value.value",
+							"value": "How much to slow down the time. 0.5 = half the speed"
+						}]
+					}
+				}
+			}]
+		},{
+			"type": "object",
+			"name": "GUI",
+			"members": []
 		}]
 	},{
 		"type": "object",
