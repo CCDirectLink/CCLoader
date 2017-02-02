@@ -16,18 +16,6 @@
 		"members": [{
 			"type": "member",
 			"refType": "var",
-			"name": "define",
-			"parent": "ig",
-			"compiled": {
-				"type": "before",
-				"test": {
-					"type": "literal",
-					"pattern": "impact.base.worker"
-				}
-			}
-		},{
-			"type": "member",
-			"refType": "var",
 			"name": "GUI",
 			"parent": "ig",
 			"compiled": {
@@ -39,18 +27,6 @@
 						"name": "arguments.0.value",
 						"value": "__parallaxGui__"
 					}]
-				}
-			}
-		},{
-			"type": "member",
-			"refType": "var",
-			"name": "modules",
-			"parent": "ig",
-			"compiled": {
-				"type": "before",
-				"test": {
-					"type": "literal",
-					"pattern": "dom.ready"
 				}
 			}
 		},{
@@ -336,6 +312,21 @@
 						"values": [{
 							"name": "value.properties.1.value.value",
 							"value": "How much to slow down the time. 0.5 = half the speed"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "innerGUI",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.1.expression.left.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.arguments.0.value",
+							"value": "InputForcer"
 						}]
 					}
 				}

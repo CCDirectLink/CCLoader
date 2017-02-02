@@ -1,7 +1,13 @@
-var fs = require('fs');
-var md5file = require('md5-file');
-
 function ModLoader(databaseName){
+	var fs, md5file;
+	function init(){
+		if(require){
+			fs = require('fs');
+			md5file = require('md5-file');
+		}
+	}
+	init();
+	
 	var _instance = this;
 	this.databaseName = databaseName;
 	this.tableName = "";
@@ -14,9 +20,11 @@ function ModLoader(databaseName){
 	this.modsLoaded = 0;
 	
 	this.initialize = function(){
-		fs.mkdir('modloaderdata', function(err){});
-		fs.mkdir('modloaderdata/mods', function(err){});
-		fs.mkdir('mods', function(err){});
+		if(require){
+			fs.mkdir('modloaderdata', function(err){});
+			fs.mkdir('modloaderdata/mods', function(err){});
+			fs.mkdir('mods', function(err){});
+		}
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
@@ -51,14 +59,15 @@ function ModLoader(databaseName){
 		this.acorn.parse(jscode);
 		console.log('Analysing...');
 		this.table = this.acorn.analyse(dbdef);
-		console.log('Writing...');
-		fs.writeFileSync('modloaderdata/' + this.tableName, JSON.stringify(this.table.data), 'utf-8');
-		fs.writeFileSync('modloaderdata/' + this.tableName, JSON.stringify(this.table.data), 'utf-8');
-		for(var i in this.modTables){
-			try {
-				fs.mkdirSync('modloaderdata/' + i.replace(/\/definitions\.db/g, ""), function(err){});
-			} catch(e) {}
-			fs.writeFileSync('modloaderdata/' + i.replace(/\/definitions\.db/g, "") + "/" + this.tableName, JSON.stringify(this.modTables[i].data), 'utf-8');
+		if(require){
+			console.log('Writing...');
+			fs.writeFileSync('modloaderdata/' + this.tableName, JSON.stringify(this.table.data), 'utf-8');
+			for(var i in this.modTables){
+				try {
+					fs.mkdirSync('modloaderdata/' + i.replace(/\/definitions\.db/g, ""), function(err){});
+				} catch(e) {}
+				fs.writeFileSync('modloaderdata/' + i.replace(/\/definitions\.db/g, "") + "/" + this.tableName, JSON.stringify(this.modTables[i].data), 'utf-8');
+			}
 		}
 		console.log('Finished!');
 	}
