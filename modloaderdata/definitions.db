@@ -330,6 +330,21 @@
 						}]
 					}
 				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "jump",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.1.expression.callee.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.2.expression.arguments.0.value",
+							"value": "jumpTrail"
+						}]
+					}
+				}
 			}]
 		},{
 			"type": "object",
