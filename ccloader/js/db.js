@@ -6,19 +6,15 @@ function Db(name){
 		this.data.members.push(newDb.data);
 		return newDb;
 	}
-	
 	this.addMember = function(name, parent, compiledName){
 		this.data.members.push({type: "member", name: name, parent: parent, compiledName: compiledName});
 	}
-	
 	this.addMemberReference = function(name, parent, compiledName){
 		this.data.members.push({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
 	}
-	
 	this.addRawMember = function(name, value){
 		this.data.members.push({type: "rawmember", name: name, value: value});
 	}
-	
 	this.executeDb = function(parent, root){
 		if(!parent[this.data.name])
 			parent[this.data.name] = {};
@@ -42,38 +38,18 @@ function Db(name){
 					break;
 				case "memberReference":
 					var member = this.data.members[i];
-					this._resolve(member.name, child)[this._last(member.name)] = new Function('window', 'return function(){ return window.modloaderdb.instance._getParent(\'' + member.parent + '\', window.modloaderdb.root)[\'' + member.compiledName + '\']}')(root);
+					_resolve(member.name, child)[_last(member.name)] = new Function('window', 'return function(){ return window.modloaderdb.instance._getParent(\'' + member.parent + '\', window.modloaderdb.root)[\'' + member.compiledName + '\']}')(root);
 					break;
 				default:
 					var member = this.data.members[i];
-					this._resolve(member.name, child)[this._last(member.name)] = this._getParent(member.parent, root)[member.compiledName];
-					if(this._resolve(member.name, child)[this._last(member.name)] === undefined)
+					_resolve(member.name, child)[_last(member.name)] = this._getParent(member.parent, root)[member.compiledName];
+					if(_resolve(member.name, child)[_last(member.name)] === undefined)
 						result = false;
 					break;
 			}
 		}
 		
 		return result;
-	}
-	
-	this._resolve = function(path, root){
-		if(path === undefined || path === ""){
-			return root;
-		}
-		
-		var res = root;
-		var pathArr = path.split(".");
-		
-		for(var i = 0; i < pathArr.length - 1; i++){
-			res = res[pathArr[i]];
-		}
-		
-		return res;
-	}
-	
-	this._last = function(path){
-		var res = path.split(".");
-		return res[res.length - 1];
 	}
 	
 	this._getParent = function(parentString, root){
@@ -89,5 +65,24 @@ function Db(name){
 		}
 		
 		return parent;
+	}
+	
+	function _resolve(path, root){
+		if(path === undefined || path === ""){
+			return root;
+		}
+		
+		var res = root;
+		var pathArr = path.split(".");
+		
+		for(var i = 0; i < pathArr.length - 1; i++){
+			res = res[pathArr[i]];
+		}
+		
+		return res;
+	}
+	function _last(path){
+		var res = path.split(".");
+		return res[res.length - 1];
 	}
 }

@@ -1,34 +1,41 @@
 function Acorn(){
-	var acorn, walker,
+	var ac, walker,
 	    acornLoaded = false, 
 	    walkerLoaded = false;
-	if(require){
-		var acorn = require("acorn");
-		var walker = require("acorn/dist/walk");
+	
+	var tree = undefined;
+	
+	this.initialize = function(cb){
+		if(window.require){
+		ac = require("acorn");
+		walker = require("acorn/dist/walk");
 		acornLoaded = true;
 		walkerLoaded = true;
 	}else{
-		this.loadScript("node_modules/acorn/dist/acorn.js", function(){
-			acorn = window.acorn;
+		_loadScript("/node_modules/acorn/dist/acorn.js", function(){
+			ac = window.acorn;
 			acornLoaded = true;
+			if(walkerLoaded)
+				cb();
 		})
-		this.loadScript("node_modules/acorn/dist/walk.js", function(){
+		_loadScript("/node_modules/acorn/dist/walk.js", function(){
 			walker = window.acorn.walk;
 			walkerLoaded = true;
+			if(acornLoaded)
+				cb();
 		})
 	}
 	
-	
-	this.tree = undefined;
-	
+	}
 	this.parse = function(jscode){
-		var i = 0;
-		while(!acornLoaded) {}
-		this.tree = acorn.parse(jscode, {onToken: function(){}});
-		/*var result = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
+		tree = ac.parse(jscode, {onToken: function(){}});
+		/*var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 				function search(n, layers){
 					if(layers <= 0)
-						return (n === "Achievements" && i === 1) || i++ === -1;
+						if(n === "jumpTrail")
+							return true;
+						else
+							return false;
 					
 					for(var key in n){
 						if(search(n[key], layers - 1))
@@ -42,37 +49,27 @@ function Acorn(){
 			});
 		console.log(result);*/
 			
-	}
-	
+	}	
 	this.analyse = function(dbDefinition){
-		while(!walkerLoaded) {}
 		var db = new Db(dbDefinition.name);
-		return this._buildDb(db, dbDefinition);
+		return _buildDb(db, dbDefinition);
 	}
 	
-	this.loadScript = function(url, callback){
-		var script = document.createElement("script");
-		document.body.appendChild(script);
-		script.onload = callback;
-		script.type = "text/javascript";
-		script.src = url;
-	}
 	
-	this._buildDb = function(db, definition){
+	function _buildDb(db, definition){
 		for(var i = 0; i < definition.members.length; i++){
 			var member = definition.members[i];
 			if(member.type === "object"){
-				this._buildDb(db.addObject(member.name), member);
+				_buildDb(db.addObject(member.name), member);
 			}else{
-				this._buildMember(db, member);
+				_buildMember(db, member);
 			}
 		}
 		
 		return db;
 	}
-	
-	this._buildMember = function(db, member){
-		var value = this._getVar(member.compiled);
+	function _buildMember(db, member){
+		var value = _getVar(member.compiled);
 		
 		switch(member.refType){
 			case "raw":
@@ -87,40 +84,35 @@ function Acorn(){
 				break;
 		}
 	}
-	
-	this._getVar = function(compiled){
+	function _getVar(compiled){
 		switch(compiled.type){
 			case "fixed":
-				return this._getFixedVar(compiled);
+				return _getFixedVar(compiled);
 			case "select":
-				return this._getSelectVar(compiled);
+				return _getSelectVar(compiled);
 		}
 	}
-	
-	this._getFixedVar = function(compiled){
+	function _getFixedVar(compiled){
 		return compiled.pattern;
 	}
-	
-	this._getSelectVar = function(compiled){
-		var instance = this;
-		var node = walker.findNodeAt(this.tree, null, null, function(nodeType, node){
+	function _getSelectVar(compiled){
+		var node = walker.findNodeAt(tree, null, null, function(nodeType, node){
 			if(nodeType !== compiled.from.type){
 				return false;
 			}
 			
 			for(var valuePairIndex in compiled.from.values){
 				var valuePair = compiled.from.values[valuePairIndex];
-				var realValue = instance._getNodeMember(node, valuePair.name);
+				var realValue = _getNodeMember(node, valuePair.name);
 				if(realValue === undefined || realValue !== valuePair.value)
 					return false;
 			}
 			
 			return true;
 		}).node;
-		return this._getNodeMember(node, compiled.pattern);
+		return _getNodeMember(node, compiled.pattern);
 	}
-	
-	this._getNodeMember = function(node, path){
+	function _getNodeMember(node, path){
 		var split = path.split(".");
 		var result = node;
 		
@@ -131,5 +123,12 @@ function Acorn(){
 		}
 		
 		return result;
+	}
+	function _loadScript(url, callback){
+		var script = document.createElement("script");
+		document.body.appendChild(script);
+		script.onload = callback;
+		script.type = "text/javascript";
+		script.src = url;
 	}
 }
