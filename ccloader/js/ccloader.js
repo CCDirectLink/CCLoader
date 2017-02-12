@@ -24,7 +24,7 @@ function ModLoader(){
 		this.frame.style.display = 'block';
 		this.overlay.style.display = 'block';
 		this.frame.onload = _onGameInitialized;
-		this.frame.src = '/node-webkit.html';
+		this.frame.src = window.require ? '../node-webkit.html' : '/node-webkit.html';
 	}
 	this.reloadTables = function(){
 		_instance.modTables = {};
@@ -47,8 +47,8 @@ function ModLoader(){
 	}
 	function _createTable(tableName){
 		console.log('Reading files...');
-		var jscode = filemanager.getResource('/js/game.compiled.js');
-		var dbtext = filemanager.getResource('/modloaderdata/definitions.db');
+		var jscode = filemanager.getResource('js/game.compiled.js');
+		var dbtext = filemanager.getResource('modloaderdata/definitions.db');
 		var dbdef = JSON.parse(dbtext);
 		_createModTables();
 		console.log('Parsing...');
@@ -68,11 +68,11 @@ function ModLoader(){
 		}
 	}
 	function _loadTable(){
-		var text = filemanager.getResource('/modloaderdata/' + _instance.tableName);
+		var text = filemanager.getResource('modloaderdata/' + _instance.tableName);
 		_instance.table = new Db("");
 		_instance.table.data = JSON.parse(text);
 		
-		var files = filemanager.getAllDbFiles('/modloaderdata/mods');
+		var files = filemanager.getAllDbFiles('modloaderdata/mods');
 		for(var i in files){
 			text = filemanager.getResource(files[i]);
 			var table = new Db("");

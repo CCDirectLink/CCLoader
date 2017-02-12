@@ -11,6 +11,7 @@ function Acorn(){
 		walker = require("acorn/dist/walk");
 		acornLoaded = true;
 		walkerLoaded = true;
+		cb();
 	}else{
 		_loadScript("/node_modules/acorn/dist/acorn.js", function(){
 			ac = window.acorn;

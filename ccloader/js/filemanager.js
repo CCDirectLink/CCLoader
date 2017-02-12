@@ -29,7 +29,7 @@ var filemanager = new function(){
 	}
 	this.getTableName = function(callback){
 		if(isLocal)
-			return md5file('/js/game.compiled.js', function(hash){
+			return md5file('js/game.compiled.js', function(hash){
 				callback(hash + '.table');
 			});
 		else {
@@ -76,7 +76,7 @@ var filemanager = new function(){
 		if(!table)
 			return false;
 		
-		return _resourceExists('/modloaderdata/' + table);
+		return _resourceExists('modloaderdata/' + table);
 	}
 	this.getResource = function(resource){
 		if(isLocal)
@@ -84,7 +84,7 @@ var filemanager = new function(){
 		else {
 			try{
 				var req = new XMLHttpRequest();
-				req.open('GET', resource, false);
+				req.open('GET', '/' + resource, false);
 				req.send(null);
 
 				if(req.status === 200) {
@@ -121,7 +121,7 @@ var filemanager = new function(){
 		} else {
 			try{
 				var req = new XMLHttpRequest();
-				req.open('HEAD', resource, false);
+				req.open('HEAD', '/' + resource, false);
 				req.send();
 				return req.status != 404;
 			}catch(e){
