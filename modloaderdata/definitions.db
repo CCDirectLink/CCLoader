@@ -345,6 +345,83 @@
 						}]
 					}
 				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "AnimationState",
+				"compiled": {
+					"type": "select",
+					"pattern": "right.callee.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "left.property.name",
+							"value": "cc.ig.varNames.animation",
+							"type": "dynamic"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "timer",
+				"compiled": {
+					"type": "select",
+					"pattern": "right.arguments.0.properties.10.value.body.body.0.expression.left.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "left.property.name",
+							"value": "cc.ig.varNames.AnimationState",
+							"type": "dynamic"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "gameMainTeleport",
+				"compiled": {
+					"type": "select",
+					"pattern": "callee.property.name",
+					"from": {
+						"type": "CallExpression",
+						"values": [{
+							"name": "arguments.0.value",
+							"value": "rookie-harbor.west"
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "gameMainLoadMap",
+				"compiled": {
+					"type": "select",
+					"pattern": "key.name",
+					"from": {
+						"type": "Property",
+						"values": [{
+							"name": "value.body.body.0.expression.right.left.value",
+							"value": "CREATING MAP:  "
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "gameMainBeginLoadMap",
+				"compiled": {
+					"type": "select",
+					"pattern": "key.name",
+					"from": {
+						"type": "Property",
+						"values": [{
+							"name": "value.body.body.1.expression.right.left.value",
+							"value": "LOADING MAP: "
+						}]
+					}
+				}
 			}]
 		},{
 			"type": "object",

@@ -4,6 +4,7 @@ function Acorn(){
 	    walkerLoaded = false;
 	
 	var tree = undefined;
+	var db;
 	
 	this.initialize = function(cb){
 		if(window.require){
@@ -30,12 +31,16 @@ function Acorn(){
 	}
 	this.parse = function(jscode){
 		tree = ac.parse(jscode, {onToken: function(){}});
-		/*var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
+		/*var i = 0, steps = 8;
+		var pattern = "LOADING MAP: ";
+		var searched = "gsb";
+		var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 				function search(n, layers){
 					if(layers <= 0)
-						if(n === "jumpTrail")
-							return true;
-						else
+						if(n === pattern){
+							i++;
+							return i > 0;
+						}else
 							return false;
 					
 					for(var key in n){
@@ -46,13 +51,36 @@ function Acorn(){
 					return false;
 				}
 				
-				return search(node, 6);
+				return search(node, steps);
 			});
-		console.log(result);*/
+		console.log(result);
+		
+		if(result){
+			var selec, pat;
+			
+			function search(node, i, path){
+				if(!node)
+					return;
+				for(var key in node){
+					if(node[key] === searched){
+						selec = path + key;
+					} else if(node[key] === pattern){
+						pat = path + key;
+					} else if(i <= steps * 2){
+						search(node[key], i + 1, path + key + ".");
+					}
+				}
+			}
+			
+			search(result, 0, "");
+			
+			console.log("pattern: " + selec);
+			console.log("value: " + pat);
+		}*/
 			
 	}	
 	this.analyse = function(dbDefinition){
-		var db = new Db(dbDefinition.name);
+		db = new Db(dbDefinition.name);
 		return _buildDb(db, dbDefinition);
 	}
 	
@@ -105,13 +133,35 @@ function Acorn(){
 			for(var valuePairIndex in compiled.from.values){
 				var valuePair = compiled.from.values[valuePairIndex];
 				var realValue = _getNodeMember(node, valuePair.name);
-				if(realValue === undefined || realValue !== valuePair.value)
+				if(realValue === undefined || realValue !== _resolveValue(valuePair))
 					return false;
 			}
 			
 			return true;
 		}).node;
 		return _getNodeMember(node, compiled.pattern);
+	}
+	function _resolveValue(pair){
+		if(pair.type === "dynamic"){
+			var split = pair.value.split(".");
+			var result = db.data;
+			
+			for(var step in split){
+				var name = split[step];
+				for(var i in result.members){
+					if(name === result.members[i].name){
+						if(result.members[i].type === "object"){
+							result = result.members[i];
+							break;
+						}else{
+							return result.members[i].value;
+						}
+					}
+				}
+			}
+		}else{
+			return pair.value;
+		}
 	}
 	function _getNodeMember(node, path){
 		var split = path.split(".");

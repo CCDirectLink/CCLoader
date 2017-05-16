@@ -29,28 +29,28 @@ var filemanager = new function(){
 	}
 	this.getTableName = function(callback){
 		if(isLocal)
-			return md5file('js/game.compiled.js', function(hash){
+			return md5file('assets/js/game.compiled.js', function(err, hash){
 				callback(hash + '.table');
 			});
 		else {
 			if(!md5Loaded){
 				setTimeout(this.getTableName, 100, callback);
 			} else {
-				callback(Crypto.MD5(filemanager.getResource('/js/game.compiled.js')) + '.table');
+				callback(Crypto.MD5(filemanager.getResource('assets/js/game.compiled.js')) + '.table');
 			}
 		}
 	}
 	this.getAllDbFiles = function(folder){
 		if(!folder)
-			folder = 'mods/';
+			folder = 'assets/mods/';
 		
 		if(isLocal)
 			return _getAllDbFilesFromFolder(folder);
 		else {
 			var results = [];
 			for(var i in modList){
-				if(_resourceExists('/mods/' + modList[i] + '/definitions.db')){
-					results.push('/mods/' + modList[i] + '/definitions.db');
+				if(_resourceExists('assets/mods/' + modList[i] + '/definitions.db')){
+					results.push('mods/' + modList[i] + '/definitions.db');
 				}
 			}
 			return results;
@@ -58,15 +58,31 @@ var filemanager = new function(){
 	};
 	this.getAllModsFiles = function(folder){
 		if(!folder)
-			folder = 'mods/';
+			folder = 'assets/mods/';
 		
 		if(isLocal)
 			return _getAllModsFilesFromFolder(folder);
 		else {
 			var results = [];
 			for(var i in modList){
-				if(_resourceExists('/mods/' + modList[i] + '/mod.js')){
-					results.push('/mods/' + modList[i] + '/mod.js');
+				if(_resourceExists('assets/mods/' + modList[i] + '/mod.js')){
+					results.push('mods/' + modList[i] + '/mod.js');
+				}
+			}
+			return results;
+		}
+	};
+	this.getAllItemDbFiles = function(folder){
+		if(!folder)
+			folder = 'assets/mods/';
+		
+		if(isLocal)
+			return _getAllItemDbFilesFromFolder(folder);
+		else {
+			var results = [];
+			for(var i in modList){
+				if(_resourceExists('assets/mods/' + modList[i] + '/item-database.json')){
+					results.push('mods/' + modList[i] + '/item-database.json');
 				}
 			}
 			return results;
@@ -149,7 +165,7 @@ var filemanager = new function(){
 							var innerResults = _getAllModsFilesFromFolder(file);
 							results = results.concat(innerResults);
 						} else if(file.endsWith('/mod.js')){
-							results.push(file);
+							results.push(file.substring(7));
 						}
 					} catch(e) { }
 				});
@@ -180,6 +196,28 @@ var filemanager = new function(){
 
 		return results;
 	}
+	function _getAllItemDbFilesFromFolder(dir){
+		var results = [];
+
+		if(isLocal) {
+			try{
+				fs.readdirSync(dir).forEach(function(file) {
+					try {
+						file = dir + '/' + file;
+						
+						if (_isDirectory(file)) {
+							var innerResults = _getAllItemDbFilesFromFolder(file);
+							results = results.concat(innerResults);
+						} else if(file.endsWith('/item-database.json')){
+							results.push(file.substring(7));
+						}
+					} catch(e) { }
+				});
+			} catch(e) { }
+		}
+
+		return results;
+	}
 	function _isDirectory(file){
 		var stat = fs.statSync(file);
 		return stat && stat.isDirectory();
@@ -188,7 +226,7 @@ var filemanager = new function(){
 		if(isLocal){
 			fs.mkdir('modloaderdata', function(err){});
 			fs.mkdir('modloaderdata/mods', function(err){});
-			fs.mkdir('mods', function(err){});
+			fs.mkdir('assets/mods', function(err){});
 		}
 	}
 };

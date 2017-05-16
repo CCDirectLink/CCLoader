@@ -2,6 +2,7 @@
   "name": "CrossCode",
   "version" : "0.2.2",
   "main": "ccloader/index.html",
+  "chromium-args" : "--ignore-gpu-blacklist",
   "window" : {
 	"toolbar" : false,
 	"icon" : "favicon.png",
