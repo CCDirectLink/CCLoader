@@ -103,11 +103,17 @@ function ModLoader(){
 	}
 	function _initializeMods(){
 		var modFiles = filemanager.getAllModsFiles();
+		frame.contentWindow.inactiveMods = [];
 		
 		for(var i = 0; i < modFiles.length; i++){
-			filemanager.loadMod(modFiles[i], function(){
+			if(_isModEnabled(modFiles[i])){
+				filemanager.loadMod(modFiles[i], function(){
+					_instance.modsLoaded++;
+				});
+			} else {
+				frame.contentWindow.inactiveMods.push(modFiles[i]);
 				_instance.modsLoaded++;
-			});
+			}
 		}
 		
 		var intervalid = setInterval(function(){
@@ -118,6 +124,10 @@ function ModLoader(){
 				_instance.overlay.outerHTML = "";
 			}
 		}, 1000);
+	}
+	function _isModEnabled(file){
+		var name = filemanager.getModName(file);
+		return frame.contentWindow.sc.options.get('modEnabled-' + name) !== false;
 	}
 }
 

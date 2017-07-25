@@ -31,9 +31,10 @@ function Acorn(){
 	}
 	this.parse = function(jscode){
 		tree = ac.parse(jscode, {onToken: function(){}});
-		/*var i = 0, steps = 8;
-		var pattern = "LOADING MAP: ";
-		var searched = "gsb";
+		/*console.log("searching..")
+		var i = 0, steps = 10;
+		var pattern = "sc.gui.menu.hotkeys.reset-default";
+		var searched = "lbb";
 		var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 				function search(n, layers){
 					if(layers <= 0)
@@ -125,7 +126,7 @@ function Acorn(){
 		return compiled.pattern;
 	}
 	function _getSelectVar(compiled){
-		var node = walker.findNodeAt(tree, null, null, function(nodeType, node){
+		var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 			if(nodeType !== compiled.from.type){
 				return false;
 			}
@@ -138,7 +139,9 @@ function Acorn(){
 			}
 			
 			return true;
-		}).node;
+		});
+		
+		var node = result.node;
 		return _getNodeMember(node, compiled.pattern);
 	}
 	function _resolveValue(pair){

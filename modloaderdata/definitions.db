@@ -485,6 +485,38 @@
 					}]
 				}
 			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "OPTIONS_DEFINITION",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "body.0.consequent.argument.test.object.object.property.name",
+				"from": {
+					"type": "BlockStatement",
+					"values": [{
+						"name": "body.1.expression.arguments.0.left.value",
+						"value": "Can't get option because of invalid key: "
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "OptionsTabBox",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "body.11.expression.right.callee.property.name",
+				"from": {
+					"type": "BlockStatement",
+					"values": [{
+						"name": "body.7.expression.right.arguments.0.right.arguments.0.value",
+						"value": "sc.gui.menu.hotkeys.reset-default"
+					}]
+				}
+			}
 		}]
 	}]
 }

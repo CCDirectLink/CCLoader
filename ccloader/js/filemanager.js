@@ -14,10 +14,10 @@ var filemanager = new function(){
 			
 			_createDirectories();
 		} else {
-			_loadScript('/ccloader/js/2.5.3-crypto-md5.js', function(){
+			_loadScript('js/2.5.3-crypto-md5.js', function(){ //ccloader/js/2.5.3-crypto-md5.js
 				md5Loaded = true;
 			});
-			modList = JSON.parse(this.getResource('/mods.json'));
+			modList = JSON.parse(this.getResource('mods.json'));
 		}
 	}
 	this.loadMod = function(file, onModLoaded){
@@ -124,6 +124,11 @@ var filemanager = new function(){
 				fs.writeFileSync(folder + "/" + tableName, JSON.stringify(modTables[i].data), 'utf-8');
 			}
 		}
+	}
+	this.getModName = function(file){
+		var name = file.match(/\/[^\/]*\/mod.js/g).pop().replace(/\//g, "");
+		name = name.substr(0, name.length - 6);
+		return name;
 	}
 	
 	function _resourceExists(resource){

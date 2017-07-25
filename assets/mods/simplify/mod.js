@@ -20,6 +20,12 @@ var simplify = new function(){
 		cc.ig.gameMain.teleport = cc.ig.gameMain[cc.ig.varNames.gameMainTeleport];
 		cc.ig.gameMain.loadMap = function(data){ cc.ig.gameMain[cc.ig.varNames.gameMainLoadMap].call(data.context, data) };
 		
+		if(!String.prototype.endsWith){
+			String.prototype.endsWith = function(end){
+				return this.substr(this.length - end.length, end.length) === end;
+			}
+		}
+		
 		_initializeGUI();
 		_initializeEvents();
 		_hookUpdate();
@@ -127,6 +133,30 @@ var simplify = new function(){
 	}
 	this.setAnimationTimer = function(entity, value){
 		entity[cc.ig.varNames.animation][cc.ig.varNames.timer] = value;
+	}
+	this.getModName = function(file){
+		var name = file.match(/\/[^\/]*\/mod.js/g).pop().replace(/\//g, "");
+		name = name.substr(0, name.length - 6);
+		console.log(name);
+		return name;
+	}
+	this.getActiveMods = function(){
+		var mods = [];
+		for(var key in document.body.children){
+			var value = document.body.children[key];
+			if(value && value.src && value.src.toString().endsWith("/mod.js")){
+				mods.push(this.getModName(value.src));
+			}
+		}
+		return mods;
+	}
+	initialize();
+}();
+
+simplify.menu = new function(){
+	
+	function initialize(){
+		
 	}
 	
 	initialize();
