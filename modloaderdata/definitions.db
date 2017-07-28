@@ -2,15 +2,6 @@
 	"type": "object",
 	"name": "cc",
 	"members": [{
-		"type": "member",
-		"refType": "var",
-		"name": "error",
-		"parent": "",
-		"compiled": {
-			"type": "fixed",
-			"pattern": "f"
-		}
-	},{
 		"type": "object",
 		"name": "ig",
 		"members": [{
@@ -89,7 +80,7 @@
 					"type": "MemberExpression",
 					"values": [{
 						"name": "property.name",
-						"value": "SELECT_RANDOM"
+						"value": "CHANGE_PLAYER_HP"
 					}]
 				}
 			}
@@ -464,28 +455,32 @@
 				}
 			}
 		},{
-			"type": "member",
-			"refType": "var",
-			"name": "stats.getStat",
-			"parent": "cc.sc.stats",
-			"compiled": {
-				"type": "select",
-				"pattern": "callee.property.name",
-				"from": {
-					"type": "CallExpression",
-					"values": [{
-						"name": "arguments.length",
-						"value": 2
-					},{
-						"name": "arguments.0.value",
-						"value": "combat"
-					},{
-						"name": "arguments.1.value",
-						"value": "totalKilled"
-					}]
+			"type": "object",
+			"name": "stats",
+			"members": [{
+				"type": "member",
+				"refType": "var",
+				"name": "getStat",
+				"parent": "cc.sc.stats",
+				"compiled": {
+					"type": "select",
+					"pattern": "callee.property.name",
+					"from": {
+						"type": "CallExpression",
+						"values": [{
+							"name": "arguments.length",
+							"value": 2
+						},{
+							"name": "arguments.0.value",
+							"value": "combat"
+						},{
+							"name": "arguments.1.value",
+							"value": "totalKilled"
+						}]
+					}
 				}
 			}
-		},{
+		]},{
 			"type": "member",
 			"refType": "var",
 			"name": "OPTIONS_DEFINITION",

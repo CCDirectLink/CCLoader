@@ -5,6 +5,7 @@ function Acorn(){
 	
 	var tree = undefined;
 	var db;
+	var definitions = [];
 	
 	this.initialize = function(cb){
 		if(window.require){
@@ -82,24 +83,54 @@ function Acorn(){
 	}	
 	this.analyse = function(dbDefinition){
 		db = new Db(dbDefinition.name);
-		return _buildDb(db, dbDefinition);
+		db = _buildDb(db, dbDefinition);
+		_finalizeDb();
+		return db;
 	}
 	
-	
+	function _finalizeDb() {
+		while(definitions.length > 0) {
+			var start = definitions.length;
+			
+			walker.findNodeAt(tree, undefined, undefined, function(nodeType, node){
+				for(var i = 0; i < definitions.length; i++){
+					var value = _getSelectVar(definitions[i].member.compiled, nodeType, node);
+					if(value !== undefined) {
+						_buildMember(definitions[i].db, definitions[i].member, value);
+						definitions.splice(i, 1);
+						i--;
+					}
+				}
+			});
+			
+			if(start <= definitions.length) {
+				console.warn(definitions.length + " definitions did not match");
+				return
+			}
+		}
+	}
 	function _buildDb(db, definition){
 		for(var i = 0; i < definition.members.length; i++){
 			var member = definition.members[i];
 			if(member.type === "object"){
 				_buildDb(db.addObject(member.name), member);
 			}else{
-				_buildMember(db, member);
+				_buildMemberLater(db, member);
 			}
 		}
 		
 		return db;
 	}
-	function _buildMember(db, member){
-		var value = _getVar(member.compiled);
+	function _buildMemberLater(db, member){
+		if(member.compiled.type === "fixed") {
+			_buildMember(db, member, _getFixedVar(member.compiled));
+		} else {
+			definitions.push({db:db, member:member});
+		}
+	}
+	
+	function _buildMember(db, member, value){
+		//var value = _getVar(member.compiled);
 		
 		switch(member.refType){
 			case "raw":
@@ -114,34 +145,21 @@ function Acorn(){
 				break;
 		}
 	}
-	function _getVar(compiled){
-		switch(compiled.type){
-			case "fixed":
-				return _getFixedVar(compiled);
-			case "select":
-				return _getSelectVar(compiled);
-		}
-	}
 	function _getFixedVar(compiled){
 		return compiled.pattern;
 	}
-	function _getSelectVar(compiled){
-		var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
-			if(nodeType !== compiled.from.type){
-				return false;
-			}
-			
-			for(var valuePairIndex in compiled.from.values){
-				var valuePair = compiled.from.values[valuePairIndex];
-				var realValue = _getNodeMember(node, valuePair.name);
-				if(realValue === undefined || realValue !== _resolveValue(valuePair))
-					return false;
-			}
-			
-			return true;
-		});
+	function _getSelectVar(compiled, nodeType, node){
+		if(nodeType !== compiled.from.type){
+			return undefined;
+		}
 		
-		var node = result.node;
+		for(var valuePairIndex in compiled.from.values){
+			var valuePair = compiled.from.values[valuePairIndex];
+			var realValue = _getNodeMember(node, valuePair.name);
+			if(realValue === undefined || realValue !== _resolveValue(valuePair))
+				return undefined;
+		}
+		
 		return _getNodeMember(node, compiled.pattern);
 	}
 	function _resolveValue(pair){

@@ -7,13 +7,13 @@ function Db(name){
 		return newDb;
 	}
 	this.addMember = function(name, parent, compiledName){
-		this.data.members.push({type: "member", name: name, parent: parent, compiledName: compiledName});
+		this.data.members.unshift({type: "member", name: name, parent: parent, compiledName: compiledName});
 	}
 	this.addMemberReference = function(name, parent, compiledName){
-		this.data.members.push({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
+		this.data.members.unshift({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
 	}
 	this.addRawMember = function(name, value){
-		this.data.members.push({type: "rawmember", name: name, value: value});
+		this.data.members.unshift({type: "rawmember", name: name, value: value});
 	}
 	this.executeDb = function(parent, root){
 		if(!parent[this.data.name])
