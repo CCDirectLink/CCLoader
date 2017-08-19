@@ -32,53 +32,55 @@ function Acorn(){
 	}
 	this.parse = function(jscode){
 		tree = ac.parse(jscode, {onToken: function(){}});
-		/*console.log("searching..")
-		var i = 0, steps = 10;
-		var pattern = "sc.gui.menu.hotkeys.reset-default";
-		var searched = "lbb";
-		var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
-				function search(n, layers){
-					if(layers <= 0)
-						if(n === pattern){
-							i++;
-							return i > 0;
-						}else
-							return false;
-					
-					for(var key in n){
-						if(search(n[key], layers - 1))
-							return true;
+		/*setTimeout(function(){
+			console.log("searching..")
+			var i = 0, steps = 6, depth = 40;
+			var pattern = "VarOptionEditor";
+			var searched = "CDa";
+			var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
+					function search(n, layers){
+						if(layers <= 0)
+							if(n === pattern){
+								i++;
+								return i > 0;
+							}else
+								return false;
+						
+						for(var key in n){
+							if(search(n[key], layers - 1))
+								return true;
+						}
+						
+						return false;
 					}
 					
-					return false;
+					return search(node, steps);
+				});
+			console.log(result);
+			
+			if(result){
+				var selec, pat;
+				
+				function search(node, i, path){
+					if(!node)
+						return;
+					for(var key in node){
+						if(node[key] === searched){
+							selec = path + key;
+						} else if(node[key] === pattern){
+							pat = path + key;
+						} else if(i <= depth){
+							search(node[key], i + 1, path + key + ".");
+						}
+					}
 				}
 				
-				return search(node, steps);
-			});
-		console.log(result);
-		
-		if(result){
-			var selec, pat;
-			
-			function search(node, i, path){
-				if(!node)
-					return;
-				for(var key in node){
-					if(node[key] === searched){
-						selec = path + key;
-					} else if(node[key] === pattern){
-						pat = path + key;
-					} else if(i <= steps * 2){
-						search(node[key], i + 1, path + key + ".");
-					}
-				}
+				search(result, 0, "");
+				
+				console.log("pattern: " + selec);
+				console.log("value: " + pat);
 			}
-			
-			search(result, 0, "");
-			
-			console.log("pattern: " + selec);
-			console.log("value: " + pat);
-		}*/
+		}, 1000);*/
 			
 	}	
 	this.analyse = function(dbDefinition){
@@ -175,7 +177,7 @@ function Acorn(){
 							result = result.members[i];
 							break;
 						}else{
-							return result.members[i].value;
+							return result.members[i].compiledName;
 						}
 					}
 				}

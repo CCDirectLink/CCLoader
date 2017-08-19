@@ -13,7 +13,7 @@ function Db(name){
 		this.data.members.unshift({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
 	}
 	this.addRawMember = function(name, value){
-		this.data.members.unshift({type: "rawmember", name: name, value: value});
+		this.data.members.unshift({type: "rawmember", name: name, compiledName: value});
 	}
 	this.executeDb = function(parent, root){
 		if(!parent[this.data.name])
@@ -34,7 +34,7 @@ function Db(name){
 					break;
 				case "rawmember":
 					var member = this.data.members[i];
-					child[member.name] = member.value;
+					child[member.name] = member.compiledName;
 					break;
 				case "memberReference":
 					var member = this.data.members[i];

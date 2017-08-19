@@ -102,6 +102,39 @@
 			}
 		},{
 			"type": "member",
+			"refType": "var",
+			"name": "Storage",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "left.property.name",
+				"from" : {
+					"type": "AssignmentExpression",
+					"values": [{
+						"name": "right.arguments.0.properties.14.value.body.body.0.expression.arguments.0.raw",
+						"value": "\"Storage\""
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "ref",
+			"name": "storage",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "left.property.name",
+				"from" : {
+					"type": "AssignmentExpression",
+					"values": [{
+						"name": "right.callee.property.name",
+						"value": "cc.ig.Storage",
+						"type": "dynamic"
+					}]
+				}
+			}
+		},{
+			"type": "member",
 			"refType": "ref",
 			"name": "playerInstance",
 			"parent": "cc.ig.gameMain",
@@ -413,6 +446,21 @@
 						}]
 					}
 				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "storageGlobals",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.2.consequent.body.5.expression.left.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.arguments.0.raw",
+							"value": "\"Storage\""
+						}]
+					}
+				}
 			}]
 		},{
 			"type": "object",
@@ -499,7 +547,23 @@
 		},{
 			"type": "member",
 			"refType": "var",
-			"name": "OptionsTabBox",
+			"name": "OPTION_CATEGORY",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "arguments.2.object.property.name",
+				"from": {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.0.value",
+						"value": "gamepad"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "OptionsMenu",
 			"parent": "sc",
 			"compiled": {
 				"type": "select",
@@ -512,6 +576,116 @@
 					}]
 				}
 			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "OptionsTabBox",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "left.property.name",
+				"from": {
+					"type": "AssignmentExpression",
+					"values": [{
+						"name": "right.arguments.0.properties.13.value.body.body.26.expression.right.arguments.0.raw",
+						"value": "\"controls\""
+					}]
+				}
+			}
+		},{
+			"type": "object",
+			"name": "varNames",
+			"members": [{
+				"type": "member",
+				"refType": "raw",
+				"name": "init",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.32.expression.arguments.1.type.6",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.26.expression.right.arguments.0.raw",
+							"value": "\"controls\""
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "optionsTabBoxTab",
+				"compiled": {
+					"type": "select",
+					"pattern": "left.object.property.name",
+					"from": {
+						"type": "AssignmentExpression",
+						"values": [{
+							"name": "right.arguments.0.raw",
+							"value": "\"controls\""
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "optionsTabBoxTabArray",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.5.argument.left.object.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.0.expression.right.arguments.0.arguments.0.left.value",
+							"value": "sc.gui.menu.option."
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "optionsTabBoxRearrangeTabs",
+				"compiled": {
+					"type": "select",
+					"pattern": "properties.21.key.name",
+					"from": {
+						"type": "ObjectExpression",
+						"values": [{
+							"name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
+							"value": "sc.gui.menu.option."
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "optionsTabBoxCreateTabButton",
+				"compiled": {
+					"type": "select",
+					"pattern": "properties.22.key.name",
+					"from": {
+						"type": "ObjectExpression",
+						"values": [{
+							"name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
+							"value": "sc.gui.menu.option."
+						}]
+					}
+				}
+			},{
+				"type": "member",
+				"refType": "raw",
+				"name": "optionsLoadGlobals",
+				"compiled": {
+					"type": "select",
+					"pattern": "body.3.consequent.body.2.expression.callee.property.name",
+					"from": {
+						"type": "BlockStatement",
+						"values": [{
+							"name": "body.4.expression.arguments.2.value",
+							"value": "VarOptionEditor"
+						}]
+					}
+				}
+			}]
 		}]
 	}]
 }
