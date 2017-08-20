@@ -127,7 +127,7 @@ function ModLoader(){
 	}
 	function _isModEnabled(file){
 		var name = filemanager.getModName(file);
-		var globals = frame.contentWindow.cc.ig.storage()[frame.contentWindow.cc.ig.varNames.storageGlobals];
+		var globals = frame.contentWindow.cc.ig.storage[frame.contentWindow.cc.ig.varNames.storageGlobals];
 		return globals.options['modEnabled-' + name] !== false;
 	}
 }

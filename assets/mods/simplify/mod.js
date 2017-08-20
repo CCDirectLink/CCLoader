@@ -5,6 +5,9 @@ var simplify = new function(){
 	var registeredFuncs = [];
 	var loadEvent, unloadEvent, lastMap;
 	var nextActionVarName = undefined;
+	var ICON_MAPPING = {
+		'mods': [0,0]
+	};
 	
 	function initialize(){
 		cc.ig.gameMain.spawnEntity = cc.ig.gameMain.spawnEntity();
@@ -30,7 +33,7 @@ var simplify = new function(){
 		_initializeEvents();
 		_hookUpdate();
 		
-		document.body.addEventListener('modsLoaded', _initializeOptions);
+		document.body.addEventListener('modsLoaded', _postInitialize);
 	}
 	
 	function findNextAction(action){
@@ -70,6 +73,20 @@ var simplify = new function(){
 				cc.ig.GUI.menues = cc.ig.GUI[obj];
 				return;
 			}
+	}
+	
+	function _postInitialize(){
+		_initializeFont();
+		_initializeOptions();
+	}
+	
+	function _initializeFont() {
+		var icons = new cc.ig.Font('mods/simplify/media/icons.png', 16, 2000);
+		var page = simplify.font.pushIconSet(icons);
+		
+		simplify.font.prepareMapping(ICON_MAPPING, page);
+		
+		simplify.font.setMapping(ICON_MAPPING);
 	}
 	
 	function _initializeOptions(){
@@ -180,6 +197,77 @@ var simplify = new function(){
 	initialize();
 }();
 
+simplify.font = new function(){
+	var iconSet;
+	var mapping;
+	var indexMapping;
+	
+	function initialize(){
+		iconSet = _findIconSet();
+		mapping = _findMapping();
+		indexMapping = _findIndexMapping();
+	}
+	
+	function _findIconSet(){
+		var font = cc.sc.fontsystem.font;
+		
+		for(var key in font){
+			if(typeof font[key] === "object" && font[key].constructor.name === "Array" && font[key].length > 0){
+				if(font[key][0].constructor === cc.ig.Font){
+					return font[key];
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	function _findMapping(){
+		var font = cc.sc.fontsystem.font;
+		
+		for(var key in font){
+			if(typeof font[key] === "object" && font[key]["8"] === 4){
+				return font[key];
+			}
+		}
+		
+		return null;
+	}
+	
+	function _findIndexMapping(){
+		var font = cc.sc.fontsystem.font;
+		
+		for(var key in font){
+			if(typeof font[key] === "object" && font[key][0] === "o"){
+				return font[key];
+			}
+		}
+		
+		return null;
+	}
+	
+	this.pushIconSet = function(set){
+		return iconSet.push(set) - 1;
+	}
+	
+	this.prepareMapping = function(mapping, page){
+		for(var i in mapping){
+			mapping[i][0] = page;
+		}
+	}
+	
+	this.setMapping = function(m){
+		for(var i in m) {
+            mapping[i] = m[i];
+            if(indexMapping.indexOf(i) == -1) {
+                indexMapping.push(i);
+            }
+        }
+	}
+	
+	initialize();
+}();
+
 simplify.options = new function(){
 	
 	var restartName;
@@ -277,7 +365,7 @@ simplify.options = new function(){
 	}
 	
 	this.reload = function(){
-		var globals = cc.ig.storage()[cc.ig.varNames.storageGlobals];
+		var globals = cc.ig.storage[cc.ig.varNames.storageGlobals];
 		sc.options[cc.sc.varNames.optionsLoadGlobals](globals);
 	}
 	

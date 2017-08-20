@@ -87,6 +87,22 @@
 		},{
 			"type": "member",
 			"refType": "var",
+			"name": "Font",
+			"parent": "ig",
+			"compiled": {
+				"type": "select",
+				"pattern": "callee.property.name",
+				"from": {
+					"type": "NewExpression",
+					"values": [{
+						"name": "arguments.0.value",
+						"value": "media/font/icons.png"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
 			"name": "combatActions",
 			"parent": "ig",
 			"compiled": {
@@ -118,7 +134,7 @@
 			}
 		},{
 			"type": "member",
-			"refType": "ref",
+			"refType": "var",
 			"name": "storage",
 			"parent": "ig",
 			"compiled": {
@@ -499,6 +515,22 @@
 					"values": [{
 						"name": "arguments.1.value",
 						"value": "throwHits"
+					}]
+				}
+			}
+		},{
+			"type": "member",
+			"refType": "var",
+			"name": "fontsystem",
+			"parent": "sc",
+			"compiled": {
+				"type": "select",
+				"pattern": "arguments.3.object.property.name",
+				"from": {
+					"type": "CallExpression",
+					"values": [{
+						"name": "arguments.1.arguments.0.value",
+						"value": "sc.gui.landmark-hud.title-new"
 					}]
 				}
 			}
