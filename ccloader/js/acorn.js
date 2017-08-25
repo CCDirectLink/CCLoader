@@ -34,9 +34,9 @@ function Acorn(){
 		tree = ac.parse(jscode, {onToken: function(){}});
 		/*setTimeout(function(){
 			console.log("searching..")
-			var i = 0, steps = 6, depth = 40;
-			var pattern = "VarOptionEditor";
-			var searched = "CDa";
+			var i = 0, steps = 4, depth = 10;
+			var pattern = "media/font/icons.png";
+			var searched = "Eh";
 			var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 					function search(n, layers){
 						if(layers <= 0)

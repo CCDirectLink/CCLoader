@@ -65,8 +65,8 @@ var filemanager = new function(){
 		else {
 			var results = [];
 			for(var i in modList){
-				if(_resourceExists('assets/mods/' + modList[i] + '/mod.js')){
-					results.push('mods/' + modList[i] + '/mod.js');
+				if(_resourceExists('assets/mods/' + modList[i] + '/package.json')){
+					results.push('assets/mods/' + modList[i] + '/package.json');
 				}
 			}
 			return results;
@@ -125,11 +125,6 @@ var filemanager = new function(){
 			}
 		}
 	}
-	this.getModName = function(file){
-		var name = file.match(/\/[^\/]*\/mod.js/g).pop().replace(/\//g, "");
-		name = name.substr(0, name.length - 6);
-		return name;
-	}
 	
 	function _resourceExists(resource){
 		if(isLocal){
@@ -169,8 +164,8 @@ var filemanager = new function(){
 						if (_isDirectory(file)) {
 							var innerResults = _getAllModsFilesFromFolder(file);
 							results = results.concat(innerResults);
-						} else if(file.endsWith('/mod.js')){
-							results.push(file.substring(7));
+						} else if(file.endsWith('/package.json')){
+							results.push(file);
 						}
 					} catch(e) { }
 				});

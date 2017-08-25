@@ -90,15 +90,15 @@ var simplify = new function(){
 	}
 	
 	function _initializeOptions(){
-		var mods = simplify.getAllMods();
+		var mods = window.inactiveMods.concat(window.activeMods);
 		
 		var tab = simplify.options.addTab("mods");
 		ig.lang.labels.sc.gui.menu.option.mods = "Mods";
 		for(var i = 0; i < mods.length; i++){
-			simplify.options.addEntry("modEnabled-" + mods[i], "CHECKBOX", true, tab, undefined, true);
-			var display = mods[i];
-			display = display.charAt(0).toUpperCase() + display.slice(1);
-			ig.lang.labels.sc.gui.options["modEnabled-" + mods[i]] = {name:display, description:"If checked this mods is enabled. \\c[1]Needs a restart!"};
+			simplify.options.addEntry("modEnabled-" + mods[i].getName().toLowerCase(), "CHECKBOX", true, tab, undefined, true);
+			var display = mods[i].getName();
+			var description = mods[i].getDescription() || "If checked this mods is enabled. \\c[1]Needs a restart!";
+			ig.lang.labels.sc.gui.options["modEnabled-" + mods[i].getName().toLowerCase()] = {name:display, description:description};
 		}
 		simplify.options.reload();
 	}
@@ -167,25 +167,20 @@ var simplify = new function(){
 	this.setAnimationTimer = function(entity, value){
 		entity[cc.ig.varNames.animation][cc.ig.varNames.timer] = value;
 	}
-	this.getModName = function(file){
-		var name = file.match(/\/[^\/]*\/mod.js/g).pop().replace(/\//g, "");
-		name = name.substr(0, name.length - 6);
-		return name;
+	this.getModName = function(mod){
+		return mod;
 	}
 	this.getActiveMods = function(){
 		var mods = [];
-		for(var key in document.body.children){
-			var value = document.body.children[key];
-			if(value && value.src && value.src.toString().endsWith("/mod.js")){
-				mods.push(this.getModName(value.src));
-			}
+		for(var key in window.activeMods){
+			mods.push(window.activeMods[key].getName());
 		}
 		return mods;
 	}
 	this.getInactiveMods = function(){
 		var mods = [];
 		for(var key in window.inactiveMods){
-			mods.push(this.getModName(window.inactiveMods[key]));
+			mods.push(window.inactiveMods[key].getName());
 		}
 		return mods;
 	}
