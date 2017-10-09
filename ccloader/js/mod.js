@@ -44,6 +44,10 @@ function Mod(file){
 			return false;
 		
 		var globals = frame.contentWindow.cc.ig.storage[frame.contentWindow.cc.ig.varNames.storageGlobals];
+		
+		if(!globals || !globals.options)
+			return false;
+		
 		return globals.options['modEnabled-' + manifest.name.toLowerCase()] !== false;
 	}
 	
