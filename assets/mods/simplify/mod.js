@@ -361,7 +361,9 @@ simplify.options = new function(){
 	
 	this.reload = function(){
 		var globals = cc.ig.storage[cc.ig.varNames.storageGlobals];
-		sc.options[cc.sc.varNames.optionsLoadGlobals](globals);
+		
+		if(global && sc.options)
+			sc.options[cc.sc.varNames.optionsLoadGlobals](globals);
 	}
 	
 	initialize();
