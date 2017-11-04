@@ -1,6 +1,7 @@
 function Mod(file){
 	var manifest;
 	var loaded = false;
+	var table;
 	
 	this.initialize = function(){
 		var data = filemanager.getResource(file);
@@ -13,8 +14,13 @@ function Mod(file){
 		
 		if(!_isPathAbsolute(manifest.main))
 			manifest.main = _getBaseName(file) + "/" + manifest.main;
-		
 		manifest.main = _normalizePath(manifest.main);
+		
+		if(manifest.table){
+			if(!_isPathAbsolute(manifest.table))
+				manifest.table = _getBaseName(file) + "/" + manifest.table;
+			manifest.table = _normalizePath(manifest.table);
+		}
 		
 		if(!manifest.name)
 			manifest.name = _getModNameFromFile();
@@ -38,6 +44,28 @@ function Mod(file){
 			return;
 		
 		return manifest.description;
+	}
+	this.initializeTable = function(ccloader, cb){
+		if(!loaded || !manifest.table)
+			return cb();
+		
+		filemanager.getModDefintionHash(manifest.table, function(hash){
+			var tablePath = _getBaseName(file) + "/" + hash;
+			
+			table = filemanager.loadTable(tablePath, hash);
+			if(!table){
+				console.log('[' + manifest.name + '] Creating mod definition database..');
+				var dbtext = filemanager.getResource('assets/' + manifest.table);
+				var dbdef = JSON.parse(dbtext);
+				console.log('[' + manifest.name + '] Analysing...');
+				table = ccloader.acorn.analyse(dbdef);
+				console.log('[' + manifest.name + '] Writing...');
+				filemanager.saveTable(tablePath, table, hash);
+				console.log('[' + manifest.name + '] Finished!');
+			}
+			
+			cb();
+		});
 	}
 	this.isEnabled = function(){
 		if(!loaded)

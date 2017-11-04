@@ -34,9 +34,9 @@ function Acorn(){
 		tree = ac.parse(jscode, {onToken: function(){}});
 		/*setTimeout(function(){
 			console.log("searching..")
-			var i = 0, steps = 4, depth = 10;
-			var pattern = "media/font/icons.png";
-			var searched = "Eh";
+			var i = 0, steps = 6, depth = 20;
+			var pattern = "\"Load Game: %O\"";
+			var searched = "fD";
 			var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
 					function search(n, layers){
 						if(layers <= 0)
@@ -106,7 +106,7 @@ function Acorn(){
 			});
 			
 			if(start <= definitions.length) {
-				console.warn(definitions.length + " definitions did not match");
+				console.warn(definitions.length + " definitions did not match", definitions);
 				return
 			}
 		}

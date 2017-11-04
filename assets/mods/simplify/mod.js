@@ -10,7 +10,7 @@ var simplify = new function(){
 	};
 	
 	function initialize(){
-		cc.ig.gameMain.spawnEntity = cc.ig.gameMain.spawnEntity();
+		cc.ig.gameMain.spawnEntity = cc.ig.gameMain[cc.ig.varNames.gameMainSpawnEntity];
 		cc.ig.gameMain.getEntityPosition = function(entity){
 			if(!entity || !entity[cc.ig.varNames.entityData])
 				return {x: -1, y: -1, z: -1};
@@ -22,6 +22,9 @@ var simplify = new function(){
 		}
 		cc.ig.gameMain.teleport = cc.ig.gameMain[cc.ig.varNames.gameMainTeleport];
 		cc.ig.gameMain.loadMap = function(data){ cc.ig.gameMain[cc.ig.varNames.gameMainLoadMap].call(data.context, data) };
+		
+		cc.ig.TeleportPosition = ig[cc.ig.varNames.TeleportPosition];
+		cc.ig.TeleportPosition.createFromJson = cc.ig.TeleportPosition[cc.ig.varNames.TeleportPositionFromJson];
 		
 		if(!String.prototype.endsWith){
 			String.prototype.endsWith = function(end){
@@ -133,8 +136,8 @@ var simplify = new function(){
 		entity[cc.ig.varNames.currentAnimation] = value;
 	}
 	
-	this.runCombatAction = function(cAction) {
-		return cAction[cc.ig.varNames.runCombatAction].apply(cAction, Array.prototype.slice.call(arguments, 1));
+	this.runAction = function(cAction) {
+		return cAction[cc.ig.varNames.run].apply(cAction, Array.prototype.slice.call(arguments, 1));
 	}
 	this.getEntityProxies = function(entity) {
 		return entity[cc.ig.varNames.proxies];
@@ -362,7 +365,7 @@ simplify.options = new function(){
 	this.reload = function(){
 		var globals = cc.ig.storage[cc.ig.varNames.storageGlobals];
 		
-		if(global && sc.options)
+		if(globals && sc.options)
 			sc.options[cc.sc.varNames.optionsLoadGlobals](globals);
 	}
 	

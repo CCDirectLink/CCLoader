@@ -2,6 +2,7 @@ function ModLoader(){
 	var _instance = this;
 	this.tableLoaded = false;
 	this.table = undefined;
+	this.mods = [];
 	this.modTables = {};
 	this.frame = undefined;
 	this.acorn = undefined;
@@ -40,11 +41,11 @@ function ModLoader(){
 	function _initializeTable(cb){
 		filemanager.getTableName(function (tableName){
 			if(filemanager.tableExists(tableName)){
-				_loadTable(tableName);
+				_loadTable(tableName, cb)
 			} else {
 				_createTable(tableName);
+				cb();
 			}
-			cb();
 		});
 	}
 	function _createTable(tableName){
@@ -52,42 +53,57 @@ function ModLoader(){
 		var jscode = filemanager.getResource('assets/js/game.compiled.js');
 		var dbtext = filemanager.getResource('modloaderdata/definitions.db');
 		var dbdef = JSON.parse(dbtext);
-		_createModTables();
 		console.log('Parsing...');
 		_instance.acorn.parse(jscode);
 		console.log('Analysing...');
 		_instance.table = _instance.acorn.analyse(dbdef);
 		console.log('Writing...');
-		filemanager.saveTables(tableName, _instance.table, _instance.modTables);
+		filemanager.saveTable(tableName, _instance.table);
 		console.log('Finished!');
 	}
-	function _createModTables(){
-		var files = filemanager.getAllDbFiles();
-		for(var file in files){
-			var dbtext = filemanager.getResource(files[file]);
-			var dbdef = JSON.parse(dbtext);
-			_instance.modTables[files[file]] = _instance.acorn.analyse(dbdef);
-		}
-	}
-	function _loadTable(tableName){
-		var text = filemanager.getResource('modloaderdata/' + tableName);
-		_instance.table = new Db("");
-		_instance.table.data = JSON.parse(text);
+	function _initializeModTables(cb){
+		_findMods();
 		
-		var files = filemanager.getAllDbFiles('modloaderdata/mods');
-		for(var i in files){
-			text = filemanager.getResource(files[i]);
-			var table = new Db("");
-			table.data = JSON.parse(text);
-			_instance.modTables[i] = table;
+		var total = 1;
+		var actual = 0;
+		
+		for(var i = 0; i < this.mods.length; i++){
+			if(this.mods[i].isEnabled()){
+				total++;
+				this.mods[i].initializeTable(_instance, function(){
+					actual++;
+					if(actual >= total)
+						cb();
+				});
+			}
 		}
+		
+		actual++;
+		if(actual >= total)
+			cb();
+	}
+	function _loadTable(tableName, cb){
+		filemanager.getDefintionHash(function(hash){
+			_instance.table = filemanager.loadTable(tableName, hash);
+			if(!_instance.table)
+			{
+				_createTable(tableName);
+				if(cb)
+					cb();
+				return;
+			}
+			if(cb)
+				cb();
+		});
 	}
 	function _executeDb(){
 		_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
 		for(var i in _instance.modTables){
 			_instance.modTables[i].executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
 		}
-		_initializeMods();
+		_initializeModTables(function(){
+			_initializeMods();
+		});
 		_instance.status.innerHTML = "Initializing Mods..";
 	}	
 	function _onGameInitialized(){
@@ -98,33 +114,37 @@ function ModLoader(){
 		var intervalid = setInterval(function(){
 			if(frame.contentWindow.ig && frame.contentWindow.ig.ready) {
 				clearInterval(intervalid);
+				
 				_executeDb();
 			}}, 1000);//Make sure Game is loaded
 	}
-	function _initializeMods(){
+	
+	function _findMods(){
 		var modFiles = filemanager.getAllModsFiles();
-		var mods = [];
-		for(var i in modFiles){
-			mods.push(new Mod(modFiles[i]));
+		this.mods = [];
+		for(var i = 0; i < modFiles.length; i++){
+			this.mods.push(new Mod(modFiles[i]));
 		}
-		
+	}
+	
+	function _initializeMods(){
 		frame.contentWindow.inactiveMods = [];
 		frame.contentWindow.activeMods = [];
 		
-		for(var i = 0; i < mods.length; i++){
-			if(mods[i].isEnabled()){
-				frame.contentWindow.activeMods.push(mods[i]);
-				mods[i].load(function(){
+		for(var i = 0; i < this.mods.length; i++){
+			if(this.mods[i].isEnabled()){
+				frame.contentWindow.activeMods.push(this.mods[i]);
+				this.mods[i].load(function(){
 					_instance.modsLoaded++;
 				});
 			} else {
-				frame.contentWindow.inactiveMods.push(mods[i]);
+				frame.contentWindow.inactiveMods.push(this.mods[i]);
 				_instance.modsLoaded++;
 			}
 		}
 		
 		var intervalid = setInterval(function(){
-			if(_instance.modsLoaded >= modFiles.length){
+			if(_instance.modsLoaded >= frame.contentWindow.activeMods.length){
 				clearInterval(intervalid);
 				_instance.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
 				_instance.status.outerHTML = "";
