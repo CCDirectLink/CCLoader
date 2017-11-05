@@ -133,7 +133,7 @@ var filemanager = new function(){
 	this.saveTable = function(tableName, table, hash){
 		if(!hash){
 			this.getDefintionHash(function(hash){
-				this.saveTable(tableName, table, hash)
+				filemanager.saveTable(tableName, table, hash)
 			});
 			return;
 		}
