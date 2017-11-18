@@ -142,7 +142,9 @@ var simplify = new function(){
 	this.getEntityProxies = function(entity) {
 		return entity[cc.ig.varNames.proxies];
 	}
-	
+	this.killEntity = function(entity, arg){
+		return entity[cc.ig.varNames.entityKill](arg);
+	}
 	this.getProxyAction = function(action){
 		return action[cc.ig.varNames.proxyActions];
 	}
@@ -170,6 +172,12 @@ var simplify = new function(){
 	this.setAnimationTimer = function(entity, value){
 		entity[cc.ig.varNames.animation][cc.ig.varNames.timer] = value;
 	}
+	this.getCurrentState = function(entity){
+		return entity[cc.ig.varNames.currentState];
+	}
+	this.setCurrentState = function(entity, state){
+		new cc.ig.events.SET_ENEMY_STATE({enemy: entity, enemyState: state}).start();
+	}
 	this.getModName = function(mod){
 		return mod;
 	}
@@ -192,6 +200,7 @@ var simplify = new function(){
 		var inactive = this.getInactiveMods();
 		return active.concat(inactive).sort();
 	}
+	
 	initialize();
 }();
 
