@@ -63,24 +63,25 @@ function ModLoader(){
 	}
 	function _initializeModTables(cb){
 		_findMods();
-		
-		var total = 1;
-		var actual = 0;
-		
-		for(var i = 0; i < this.mods.length; i++){
-			if(this.mods[i].isEnabled()){
-				total++;
-				this.mods[i].initializeTable(_instance, function(){
-					actual++;
-					if(actual >= total)
-						cb();
-				});
+		_loadMods(function(){
+			var total = 1;
+			var actual = 0;
+			
+			for(var i = 0; i < this.mods.length; i++){
+				if(this.mods[i].isEnabled()){
+					total++;
+					this.mods[i].initializeTable(_instance, function(){
+						actual++;
+						if(actual >= total)
+							cb();
+					});
+				}
 			}
-		}
-		
-		actual++;
-		if(actual >= total)
-			cb();
+			
+			actual++;
+			if(actual >= total)
+				cb();
+		});
 	}
 	function _loadTable(tableName, cb){
 		filemanager.getDefintionHash(function(hash){
@@ -124,6 +125,19 @@ function ModLoader(){
 		this.mods = [];
 		for(var i = 0; i < modFiles.length; i++){
 			this.mods.push(new Mod(modFiles[i]));
+		}
+	}
+
+	function _loadMods(cb){
+		var length = this.mods.length;
+		var count = 0;
+
+		for(var i = 0; i < length; i++){
+			this.mods[i].onload(function(){
+				count++;
+				if(count >= length)
+					cb();
+			})
 		}
 	}
 	
