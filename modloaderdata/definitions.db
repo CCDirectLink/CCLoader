@@ -1172,6 +1172,155 @@
                             }
                         }
                     ]
+                },
+                {
+                    "type": "object",
+                    "name": "GuiScreen",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "lines",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.8.value.properties.1.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.key.name",
+                                                    "value": "ideaConcept"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "CreditsObject",
+                                    "parent": "cc.ig.GuiScreen.CreditsScreen.prototype",
+                                    "compiled": {
+                                        "pattern": "key.name",
+                                        "from": {
+                                            "type": "Property",
+                                            "values": [
+                                                {
+                                                    "name": "value.properties.0.key.name",
+                                                    "value": "ideaConcept"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "GuiScreen",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "CreditsScreen"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "Database",
+                    "members": []
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Database",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "callee.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.raw",
+                                    "value": "\"achievements\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "TextCommand",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "evaluate",
+                            "parent": "cc.ig.TextCommand",
+                            "compiled": {
+                                "pattern": "right.right.callee.property.name",
+                                "from": {
+                                    "type": "LogicalExpression",
+                                    "values": [
+                                        {
+                                            "name": "left.right.raw",
+                                            "value": "\"langUid\""
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "TextCommand",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "parse"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Sound",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "body.21.alternate.body.0.expression.right.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.15.expression.right.arguments.0.properties.11.value.body.body.1.block.body.0.expression.left.property.name",
+                                    "value": "volume"
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },
@@ -1509,6 +1658,198 @@
                                         {
                                             "name": "body.4.expression.arguments.2.value",
                                             "value": "VarOptionEditor"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "VoiceActor",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.raw",
+                                    "value": "\"main.shizuka\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "VoiceActor",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Expressions",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.8.properties.1.value.properties.1.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.3.properties.1.value.properties.1.value.elements.0.raw",
+                                                    "value": "\"EXHAUSTED\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Sounds",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.13.properties.0.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.0.properties.0.value.elements.0.properties.0.value.raw",
+                                                    "value": "\"lea/bye.ogg\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Sounds",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.13.properties.0.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.0.properties.0.value.elements.0.properties.0.value.raw",
+                                                    "value": "\"lea/bye.ogg\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "VoiceActing",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "properties.2.value.body.body.0.expression.callee.object.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.1.value.raw",
+                                    "value": "\"sc.gimmick.voiceActingRemove\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "VoiceActing",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Config",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.2.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.4.key.name",
+                                                    "value": "toggle"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "active",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "value.property.name",
+                                        "from": {
+                                            "type": "Property",
+                                            "values": [
+                                                {
+                                                    "name": "key.name",
+                                                    "value": "active"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "SIDE",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "properties.2.value.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.1.value.raw",
+                                    "value": "\"Side to clear\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "Message",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "CLEAR_SIDE",
+                            "parent": "sc.message",
+                            "compiled": {
+                                "pattern": "properties.44.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.42.key.name",
+                                            "value": "setExpression"
                                         }
                                     ]
                                 }
