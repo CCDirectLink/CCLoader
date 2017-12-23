@@ -1,1103 +1,1516 @@
 {
     "type": "object",
     "name": "cc",
-    "members": [{
-        "type": "object",
-        "name": "ig",
-        "members": [{
-            "type": "member",
-            "refType": "var",
-            "name": "bgm",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "key.name",
-                "from": {
-                    "type": "Property",
-                    "values": [{
-                        "name": "value.properties.1.value.raw",
-                        "value": "\"Background Music to play\""
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "BGM_TRACK_LIST",
-            "compiled": {
-                "type": "select",
-                "pattern": "properties.2.value.property.name",
-                "from": {
-                    "type": "ObjectExpression",
-                    "values": [{
-                        "name": "properties.1.value.raw",
-                        "value": "\"Background Music to play\""
-                    }]
-                }
-            },
-            "description": "",
-            "parent": "ig"
-        }, {
-            "type": "member",
-            "refType": "ref",
-            "name": "saveSlotList",
-            "parent": "cc.ig.storage",
-            "compiled": {
-                "type": "select",
-                "pattern": "test.left.object.property.name",
-                "from": {
-                    "type": "ConditionalExpression",
-                    "values": [{
-                        "name": "consequent.arguments.0.arguments.0.raw",
-                        "value": "\"sc.gui.dialogs.slotsOverflow\""
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "interact",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "body.2.expression.arguments.0.properties.2.key.name",
-                "from": {
-                    "type": "BlockStatement",
-                    "values": [{
-                        "name": "body.1.expression.right.right.arguments.1.property.name",
-                        "value": "interact"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "GUI",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "callee.object.property.name",
-                "from": {
-                    "type": "CallExpression",
-                    "values": [{
-                        "name": "arguments.0.value",
-                        "value": "__parallaxGui__"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "gameMain",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "body.10.expression.left.property.name",
-                "from": {
-                    "type": "BlockStatement",
-                    "values": [{
-                        "name": "body.11.expression.left.property.name",
-                        "value": "GAME_ERROR_CALLBACK"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "entityList",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "object.property.name",
-                "from": {
-                    "type": "MemberExpression",
-                    "values": [{
-                        "name": "property.name",
-                        "value": "TeleportStairs"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "baseEntity",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "right.callee.object.property.name",
-                "from": {
-                    "type": "AssignmentExpression",
-                    "values": [{
-                        "name": "left.property.name",
-                        "value": "TeleportStairs"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "events",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "object.property.name",
-                "from": {
-                    "type": "MemberExpression",
-                    "values": [{
-                        "name": "property.name",
-                        "value": "CHANGE_PLAYER_HP"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "Font",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "callee.property.name",
-                "from": {
-                    "type": "NewExpression",
-                    "values": [{
-                        "name": "arguments.0.value",
-                        "value": "media/font/icons.png"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "combatActions",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "object.property.name",
-                "from": {
-                    "type": "MemberExpression",
-                    "values": [{
-                        "name": "property.name",
-                        "value": "FACE_TO_TARGET"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "Storage",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "left.property.name",
-                "from": {
-                    "type": "AssignmentExpression",
-                    "values": [{
-                        "name": "right.arguments.0.properties.14.value.body.body.0.expression.arguments.0.raw",
-                        "value": "\"Storage\""
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "storage",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "left.property.name",
-                "from": {
-                    "type": "AssignmentExpression",
-                    "values": [{
-                        "name": "right.callee.property.name",
-                        "value": "cc.ig.Storage",
-                        "type": "dynamic"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "ref",
-            "name": "playerInstance",
-            "parent": "cc.ig.gameMain",
-            "compiled": {
-                "type": "select",
-                "pattern": "arguments.0.property.name",
-                "from": {
-                    "type": "NewExpression",
-                    "values": [{
-                        "name": "arguments.1.value",
-                        "value": "Elemental Overload"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "ref",
-            "name": "getMapName",
-            "parent": "cc.ig.gameMain",
-            "compiled": {
-                "type": "select",
-                "pattern": "arguments.0.property.name",
-                "from": {
-                    "type": "CallExpression",
-                    "values": [{
-                        "name": "callee.property.name",
-                        "value": "seedrandomSeed"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "BGM_SWITCH_MODE",
-            "parent": "ig",
-            "compiled": {
-                "type": "select",
-                "pattern": "left.property.name",
-                "from": {
-                    "type": "AssignmentExpression",
-                    "values": [{
-                        "name": "right.properties.6.value.properties.0.key.name",
-                        "value": "fadeOut"
-                    }]
-                }
-            }
-        }, {
+    "members": [
+        {
             "type": "object",
-            "name": "gameMain",
-            "members": [{
-                "type": "member",
-                "refType": "ref",
-                "name": "getLoadingState",
-                "parent": "cc.ig.gameMain",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "left.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "right.left.value",
-                            "value": "LOADING MAP: "
-                        }]
-                    }
-                }
-            }]
-        }, {
-            "type": "object",
-            "name": "bgm",
-            "members": [{
-                "type": "object",
-                "name": "varNames",
-                "members": [{
+            "name": "ig",
+            "members": [
+                {
                     "type": "member",
-                    "refType": "raw",
-                    "name": "intro",
+                    "refType": "var",
+                    "name": "bgm",
+                    "parent": "ig",
                     "compiled": {
                         "type": "select",
-                        "pattern": "properties.45.value.properties.3.key.name",
+                        "pattern": "key.name",
                         "from": {
-                            "type": "ObjectExpression",
-                            "values": [{
-                                "name": "properties.0.value.properties.3.value.raw",
-                                "value": "\"media/bgm/cargoship-bgm1-intro.mp3\""
-                            }]
+                            "type": "Property",
+                            "values": [
+                                {
+                                    "name": "value.properties.1.value.raw",
+                                    "value": "\"Background Music to play\""
+                                }
+                            ]
                         }
                     }
-                }, {
+                },
+                {
                     "type": "member",
-                    "refType": "raw",
-                    "name": "loopEnd",
+                    "refType": "var",
+                    "name": "BGM_TRACK_LIST",
                     "compiled": {
                         "type": "select",
-                        "pattern": "properties.45.value.properties.1.key.name",
+                        "pattern": "properties.2.value.property.name",
                         "from": {
                             "type": "ObjectExpression",
-                            "values": [{
-                                "name": "properties.0.value.properties.1.value.raw",
-                                "value": "124.364"
-                            }]
+                            "values": [
+                                {
+                                    "name": "properties.1.value.raw",
+                                    "value": "\"Background Music to play\""
+                                }
+                            ]
                         }
-                    }
-                }, {
+                    },
+                    "description": "",
+                    "parent": "ig"
+                },
+                {
                     "type": "member",
-                    "refType": "raw",
-                    "name": "introEnd",
+                    "refType": "ref",
+                    "name": "saveSlotList",
+                    "parent": "cc.ig.storage",
                     "compiled": {
                         "type": "select",
-                        "pattern": "properties.45.value.properties.4.key.name",
+                        "pattern": "test.left.object.property.name",
                         "from": {
-                            "type": "ObjectExpression",
-                            "values": [{
-                                "name": "properties.0.value.properties.4.value.raw",
-                                "value": "3.272"
-                            }]
+                            "type": "ConditionalExpression",
+                            "values": [
+                                {
+                                    "name": "consequent.arguments.0.arguments.0.raw",
+                                    "value": "\"sc.gui.dialogs.slotsOverflow\""
+                                }
+                            ]
                         }
                     }
-                }]
-            }, {
-                "type": "member",
-                "refType": "var",
-                "name": "mapConfig",
-                "parent": "ig",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.2.value.property.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.1.value.raw",
-                            "value": "\"Default BGM\""
-                        }]
-                    }
-                }
-            }]
-        }, {
-            "type": "object",
-            "name": "interact",
-            "members": [{
-                "type": "member",
-                "refType": "var",
-                "name": "addEntry",
-                "parent": "cc.ig.interact",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.3.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
-                            "value": "\"Interact\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "var",
-                "name": "removeEntry",
-                "parent": "cc.ig.interact",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.4.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
-                            "value": "\"Interact\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "var",
-                "name": "entries",
-                "parent": "cc.ig.interact",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.1.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
-                            "value": "\"Interact\""
-                        }]
-                    }
-                }
-            }]
-        }, {
-            "type": "object",
-            "name": "varNames",
-            "members": [{
-                "type": "member",
-                "refType": "raw",
-                "name": "gameMainLoadStart",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "callee.property.name",
-                    "from": {
-                        "type": "CallExpression",
-                        "values": [{
-                            "name": "arguments.0.property.name",
-                            "value": "IG_LOAD_SLOT"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "param",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "cases.12.consequent.0.argument.left.object.property.name",
-                    "from": {
-                        "type": "SwitchStatement",
-                        "values": [{
-                            "name": "cases.7.test.raw",
-                            "value": "\"param\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "paramGetStat",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "cases.9.consequent.0.argument.left.object.callee.property.name",
-                    "from": {
-                        "type": "SwitchStatement",
-                        "values": [{
-                            "name": "cases.7.test.raw",
-                            "value": "\"param\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "gameMainSpawnEntity",
-                "parent": "cc.ig.gameMain",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "key.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.body.body.2.expression.right.arguments.0.arguments.0.left.value",
-                            "value": "Can't spawn entity of type "
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "TeleportPosition",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.3.declarations.0.init.callee.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.5.expression.arguments.0.raw",
-                            "value": "\"Load Game: %O\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "TeleportPositionFromJson",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.3.declarations.0.init.callee.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.5.expression.arguments.0.raw",
-                            "value": "\"Load Game: %O\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "titleScreenButtons",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.2.body.body.0.expression.callee.object.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.8.expression.arguments.0.raw",
-                            "value": "\"ccFirstTime\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "systemHasFocusLost",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "test.callee.property.name",
-                    "from": {
-                        "type": "IfStatement",
-                        "values": [{
-                            "name": "consequent.body.0.expression.arguments.0.raw",
-                            "value": "\"rgba(0,0,0,0.6)\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "animation",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.0.expression.left.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.1.expression.arguments.0.value",
-                            "value": "symbolAppear"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "currentAnimation",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "left.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "right.property.name",
-                            "value": "currentAnim"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "mapName",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "left.property.name",
-                    "from": {
-                        "type": "LogicalExpression",
-                        "values": [{
-                            "name": "right.value",
-                            "value": "NO MAP"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "entityData",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.3.expression.left.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.right.arguments.0.arguments.0.value",
-                            "value": "Called Entity .onKill() outside of ig.game.kill()"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "entityPosition",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.1.declarations.1.init.left.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.right.arguments.0.arguments.0.value",
-                            "value": "Spawned Particle after effects has been killed!"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "entityKill",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.0.expression.right.callee.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.1.expression.right.arguments.0.arguments.0.right.raw",
-                            "value": "\" was not properly killed\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "run",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "test.left.argument.property.name",
-                    "from": {
-                        "type": "IfStatement",
-                        "values": [{
-                            "name": "alternate.expression.arguments.0.arguments.0.value",
-                            "value": "System.setDelegate: No run() function in object"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "proxies",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "left.object.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "right.callee.property.right.value",
-                            "value": "BALL"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "proxyActions",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.2.expression.left.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.right.right.value",
-                            "value": "[UNNAMED]"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "slowDownModifier",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "key.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.properties.1.value.value",
-                            "value": "How much to slow down the time. 0.5 = half the speed"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "innerGUI",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.1.expression.left.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.arguments.0.value",
-                            "value": "InputForcer"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "jump",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.1.expression.callee.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.2.expression.arguments.0.value",
-                            "value": "jumpTrail"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "AnimationState",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "right.callee.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "left.property.name",
-                            "value": "cc.ig.varNames.animation",
-                            "type": "dynamic"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "gameMainTeleport",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "callee.property.name",
-                    "from": {
-                        "type": "CallExpression",
-                        "values": [{
-                            "name": "arguments.0.value",
-                            "value": "rookie-harbor.west"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "gameMainLoadMap",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "key.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.body.body.0.expression.right.left.value",
-                            "value": "CREATING MAP:  "
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "gameMainBeginLoadMap",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "key.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.body.body.1.expression.right.left.value",
-                            "value": "LOADING MAP: "
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "storageGlobals",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.2.consequent.body.5.expression.left.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.arguments.0.raw",
-                            "value": "\"Storage\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "currentState",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "right.arguments.0.properties.2.value.body.body.0.argument.left.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "left.property.name",
-                            "value": "CURRENT_STATE"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "BGMpath",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.0.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.0.value.raw",
-                            "value": "\"intro\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "BGMpath",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.0.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.0.value.raw",
-                            "value": "\"intro\""
-                        }]
-                    }
-                }
-            }]
-        }, {
-            "type": "object",
-            "name": "GUI",
-            "members": [{
-                "type": "object",
-                "name": "interact",
-                "members": [{
+                },
+                {
                     "type": "member",
-                    "refType": "raw",
-                    "name": "buttonManager",
+                    "refType": "var",
+                    "name": "interact",
+                    "parent": "ig",
                     "compiled": {
                         "type": "select",
-                        "pattern": "body.4.expression.left.property.name",
+                        "pattern": "body.2.expression.arguments.0.properties.2.key.name",
                         "from": {
                             "type": "BlockStatement",
-                            "values": [{
-                                "name": "body.2.expression.left.object.object.property.name",
-                                "value": "elements"
-                            }]
+                            "values": [
+                                {
+                                    "name": "body.1.expression.right.right.arguments.1.property.name",
+                                    "value": "interact"
+                                }
+                            ]
                         }
                     }
-                }, {
+                },
+                {
                     "type": "member",
-                    "refType": "raw",
-                    "name": "button",
+                    "refType": "var",
+                    "name": "GUI",
+                    "parent": "ig",
                     "compiled": {
                         "type": "select",
-                        "pattern": "body.3.expression.left.property.name",
+                        "pattern": "callee.object.property.name",
                         "from": {
-                            "type": "BlockStatement",
-                            "values": [{
-                                "name": "body.4.expression.right.arguments.0.raw",
-                                "value": "\"quests\""
-                            }]
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "__parallaxGui__"
+                                }
+                            ]
                         }
                     }
-                }]
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "setPosition",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.2.expression.callee.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.left.property.name",
-                            "value": "uid"
-                        }]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "gameMain",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "body.10.expression.left.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.11.expression.left.property.name",
+                                    "value": "GAME_ERROR_CALLBACK"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "entityList",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "TeleportStairs"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "baseEntity",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "right.callee.object.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "left.property.name",
+                                    "value": "TeleportStairs"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "events",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "CHANGE_PLAYER_HP"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Font",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "callee.property.name",
+                        "from": {
+                            "type": "NewExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "media/font/icons.png"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "combatActions",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "FACE_TO_TARGET"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Storage",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.arguments.0.properties.14.value.body.body.0.expression.arguments.0.raw",
+                                    "value": "\"Storage\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "storage",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.callee.property.name",
+                                    "value": "cc.ig.Storage",
+                                    "type": "dynamic"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "ref",
+                    "name": "playerInstance",
+                    "parent": "cc.ig.gameMain",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "arguments.0.property.name",
+                        "from": {
+                            "type": "NewExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.1.value",
+                                    "value": "Elemental Overload"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "ref",
+                    "name": "getMapName",
+                    "parent": "cc.ig.gameMain",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "arguments.0.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "callee.property.name",
+                                    "value": "seedrandomSeed"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "BGM_SWITCH_MODE",
+                    "parent": "ig",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.properties.6.value.properties.0.key.name",
+                                    "value": "fadeOut"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "gameMain",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "ref",
+                            "name": "getLoadingState",
+                            "parent": "cc.ig.gameMain",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "left.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.left.value",
+                                            "value": "LOADING MAP: "
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "object",
+                    "name": "bgm",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "intro",
+                                    "compiled": {
+                                        "type": "select",
+                                        "pattern": "properties.45.value.properties.3.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.value.properties.3.value.raw",
+                                                    "value": "\"media/bgm/cargoship-bgm1-intro.mp3\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "loopEnd",
+                                    "compiled": {
+                                        "type": "select",
+                                        "pattern": "properties.45.value.properties.1.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.value.properties.1.value.raw",
+                                                    "value": "124.364"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "introEnd",
+                                    "compiled": {
+                                        "type": "select",
+                                        "pattern": "properties.45.value.properties.4.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.value.properties.4.value.raw",
+                                                    "value": "3.272"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "mapConfig",
+                            "parent": "ig",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.2.value.property.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.1.value.raw",
+                                            "value": "\"Default BGM\""
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "object",
+                    "name": "interact",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "addEntry",
+                            "parent": "cc.ig.interact",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.3.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
+                                            "value": "\"Interact\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "removeEntry",
+                            "parent": "cc.ig.interact",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.4.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
+                                            "value": "\"Interact\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "entries",
+                            "parent": "cc.ig.interact",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.1.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.2.value.body.body.0.expression.arguments.0.raw",
+                                            "value": "\"Interact\""
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "object",
+                    "name": "varNames",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "gameMainLoadStart",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "callee.property.name",
+                                "from": {
+                                    "type": "CallExpression",
+                                    "values": [
+                                        {
+                                            "name": "arguments.0.property.name",
+                                            "value": "IG_LOAD_SLOT"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "param",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "cases.12.consequent.0.argument.left.object.property.name",
+                                "from": {
+                                    "type": "SwitchStatement",
+                                    "values": [
+                                        {
+                                            "name": "cases.7.test.raw",
+                                            "value": "\"param\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "paramGetStat",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "cases.9.consequent.0.argument.left.object.callee.property.name",
+                                "from": {
+                                    "type": "SwitchStatement",
+                                    "values": [
+                                        {
+                                            "name": "cases.7.test.raw",
+                                            "value": "\"param\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "gameMainSpawnEntity",
+                            "parent": "cc.ig.gameMain",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.2.expression.right.arguments.0.arguments.0.left.value",
+                                            "value": "Can't spawn entity of type "
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "TeleportPosition",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.3.declarations.0.init.callee.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.5.expression.arguments.0.raw",
+                                            "value": "\"Load Game: %O\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "TeleportPositionFromJson",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.3.declarations.0.init.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.5.expression.arguments.0.raw",
+                                            "value": "\"Load Game: %O\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "titleScreenButtons",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.2.body.body.0.expression.callee.object.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.8.expression.arguments.0.raw",
+                                            "value": "\"ccFirstTime\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "systemHasFocusLost",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "test.callee.property.name",
+                                "from": {
+                                    "type": "IfStatement",
+                                    "values": [
+                                        {
+                                            "name": "consequent.body.0.expression.arguments.0.raw",
+                                            "value": "\"rgba(0,0,0,0.6)\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "animation",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.0.expression.left.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.1.expression.arguments.0.value",
+                                            "value": "symbolAppear"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "currentAnimation",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "left.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.property.name",
+                                            "value": "currentAnim"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "mapName",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "left.property.name",
+                                "from": {
+                                    "type": "LogicalExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.value",
+                                            "value": "NO MAP"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "entityData",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.3.expression.left.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.right.arguments.0.arguments.0.value",
+                                            "value": "Called Entity .onKill() outside of ig.game.kill()"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "entityPosition",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.1.declarations.1.init.left.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.right.arguments.0.arguments.0.value",
+                                            "value": "Spawned Particle after effects has been killed!"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "entityKill",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.0.expression.right.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.1.expression.right.arguments.0.arguments.0.right.raw",
+                                            "value": "\" was not properly killed\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "run",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "test.left.argument.property.name",
+                                "from": {
+                                    "type": "IfStatement",
+                                    "values": [
+                                        {
+                                            "name": "alternate.expression.arguments.0.arguments.0.value",
+                                            "value": "System.setDelegate: No run() function in object"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "proxies",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "left.object.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.callee.property.right.value",
+                                            "value": "BALL"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "proxyActions",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.2.expression.left.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.right.right.value",
+                                            "value": "[UNNAMED]"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "slowDownModifier",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.properties.1.value.value",
+                                            "value": "How much to slow down the time. 0.5 = half the speed"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "innerGUI",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.1.expression.left.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.arguments.0.value",
+                                            "value": "InputForcer"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "jump",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.1.expression.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.2.expression.arguments.0.value",
+                                            "value": "jumpTrail"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "AnimationState",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "right.callee.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "left.property.name",
+                                            "value": "cc.ig.varNames.animation",
+                                            "type": "dynamic"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "gameMainTeleport",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "callee.property.name",
+                                "from": {
+                                    "type": "CallExpression",
+                                    "values": [
+                                        {
+                                            "name": "arguments.0.value",
+                                            "value": "rookie-harbor.west"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "gameMainLoadMap",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.0.expression.right.left.value",
+                                            "value": "CREATING MAP:  "
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "gameMainBeginLoadMap",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.1.expression.right.left.value",
+                                            "value": "LOADING MAP: "
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "storageGlobals",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.2.consequent.body.5.expression.left.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.arguments.0.raw",
+                                            "value": "\"Storage\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "currentState",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "right.arguments.0.properties.2.value.body.body.0.argument.left.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "left.property.name",
+                                            "value": "CURRENT_STATE"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "BGMpath",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.0.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.0.value.raw",
+                                            "value": "\"intro\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "BGMpath",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.0.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.0.value.raw",
+                                            "value": "\"intro\""
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "object",
+                    "name": "GUI",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "interact",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "buttonManager",
+                                    "compiled": {
+                                        "type": "select",
+                                        "pattern": "body.4.expression.left.property.name",
+                                        "from": {
+                                            "type": "BlockStatement",
+                                            "values": [
+                                                {
+                                                    "name": "body.2.expression.left.object.object.property.name",
+                                                    "value": "elements"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "button",
+                                    "compiled": {
+                                        "type": "select",
+                                        "pattern": "body.3.expression.left.property.name",
+                                        "from": {
+                                            "type": "BlockStatement",
+                                            "values": [
+                                                {
+                                                    "name": "body.4.expression.right.arguments.0.raw",
+                                                    "value": "\"quests\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "setPosition",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.2.expression.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.left.property.name",
+                                            "value": "uid"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "screenPosition",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "value.body.body.7.expression.arguments.0.property.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.6.expression.right.arguments.1.property.name",
+                                            "value": "padding"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "GuiConfig",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "expression.right.arguments.0.properties.3.value.body.body.4.expression.right.left.object.object.property.name",
+                                "from": {
+                                    "type": "ExpressionStatement",
+                                    "values": [
+                                        {
+                                            "name": "expression.right.arguments.0.properties.0.value.raw",
+                                            "value": "\"#00FF00\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "GuiArray",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.25.expression.arguments.0.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.26.expression.arguments.0.callee.object.body.body.0.expression.test.right.right.property.name",
+                                            "value": "save"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "renameTextButton",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.5.expression.right.arguments.0.right.raw",
+                                            "value": "\"\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "addTextButton",
+                            "parent": "_cust",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "callee.property.name",
+                                "from": {
+                                    "type": "CallExpression",
+                                    "values": [
+                                        {
+                                            "name": "arguments.4.raw",
+                                            "value": "\"start\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "callbackFunction",
+                            "parent": "_cust",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.12.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.0.key.name",
+                                            "value": "focus"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "object",
+                    "name": "GuiScreen",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "lines",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.8.value.properties.1.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.key.name",
+                                                    "value": "ideaConcept"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "CreditsObject",
+                                    "parent": "cc.ig.GuiScreen.CreditsScreen.prototype",
+                                    "compiled": {
+                                        "pattern": "key.name",
+                                        "from": {
+                                            "type": "Property",
+                                            "values": [
+                                                {
+                                                    "name": "value.properties.0.key.name",
+                                                    "value": "ideaConcept"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "GuiScreen",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "CreditsScreen"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "Database",
+                    "members": []
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Database",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "callee.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.raw",
+                                    "value": "\"achievements\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "TextCommand",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "evaluate",
+                            "parent": "cc.ig.TextCommand",
+                            "compiled": {
+                                "pattern": "right.right.callee.property.name",
+                                "from": {
+                                    "type": "LogicalExpression",
+                                    "values": [
+                                        {
+                                            "name": "left.right.raw",
+                                            "value": "\"langUid\""
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "TextCommand",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.name",
+                                    "value": "parse"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Sound",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "body.21.alternate.body.0.expression.right.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.15.expression.right.arguments.0.properties.11.value.body.body.1.block.body.0.expression.left.property.name",
+                                    "value": "volume"
+                                }
+                            ]
+                        }
                     }
                 }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "screenPosition",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "value.body.body.7.expression.arguments.0.property.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.body.body.6.expression.right.arguments.1.property.name",
-                            "value": "padding"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "GuiConfig",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "expression.right.arguments.0.properties.3.value.body.body.4.expression.right.left.object.object.property.name",
-                    "from": {
-                        "type": "ExpressionStatement",
-                        "values": [{
-                            "name": "expression.right.arguments.0.properties.0.value.raw",
-                            "value": "\"#00FF00\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "GuiArray",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.25.expression.arguments.0.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.26.expression.arguments.0.callee.object.body.body.0.expression.test.right.right.property.name",
-                            "value": "save"
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "renameTextButton",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "key.name",
-                    "from": {
-                        "type": "Property",
-                        "values": [{
-                            "name": "value.body.body.5.expression.right.arguments.0.right.raw",
-                            "value": "\"\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "addTextButton",
-                "parent": "_cust",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "callee.property.name",
-                    "from": {
-                        "type": "CallExpression",
-                        "values": [{
-                            "name": "arguments.4.raw",
-                            "value": "\"start\""
-                        }]
-                    }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "callbackFunction",
-                "parent": "_cust",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.12.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.0.key.name",
-                            "value": "focus"
-                        }]
-                    }
-                }
-            }]
-        }]
-    }, {
-        "type": "object",
-        "name": "sc",
-        "members": [{
-            "type": "member",
-            "name": "PlayerConfig",
-            "refType": "var",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "left.property.name",
-                "from": {
-                    "type": "AssignmentExpression",
-                    "values": [{
-                        "name": "right.arguments.0.properties.0.value.raw",
-                        "value": "\"PlayerConfig\""
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "name": "EnemyType",
-            "refType": "var",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "body.4.expression.right.right.object.object.property.name",
-                "from": {
-                    "type": "BlockStatement",
-                    "values": [{
-                        "name": "body.8.expression.right.left.property.name",
-                        "value": "enduranceScale"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "party",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "properties.3.value.property.name",
-                "from": {
-                    "type": "ObjectExpression",
-                    "values": [{
-                        "name": "properties.3.key.name",
-                        "value": "party"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "playerModelInstance",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "callee.object.object.property.name",
-                "from": {
-                    "type": "CallExpression",
-                    "values": [{
-                        "name": "arguments.0.value",
-                        "value": "MENU_CIRCUIT"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "stats",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "callee.object.property.name",
-                "from": {
-                    "type": "CallExpression",
-                    "values": [{
-                        "name": "arguments.1.value",
-                        "value": "throwHits"
-                    }]
-                }
-            }
-        }, {
-            "type": "member",
-            "refType": "var",
-            "name": "fontsystem",
-            "parent": "sc",
-            "compiled": {
-                "type": "select",
-                "pattern": "arguments.3.object.property.name",
-                "from": {
-                    "type": "CallExpression",
-                    "values": [{
-                        "name": "arguments.1.arguments.0.value",
-                        "value": "sc.gui.landmark-hud.title-new"
-                    }]
-                }
-            }
-        }, {
+            ]
+        },
+        {
             "type": "object",
-            "name": "stats",
-            "members": [{
-                "type": "member",
-                "refType": "var",
-                "name": "getStat",
-                "parent": "cc.sc.stats",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "callee.property.name",
-                    "from": {
-                        "type": "CallExpression",
-                        "values": [{
-                            "name": "arguments.length",
-                            "value": 2
-                        }, {
-                            "name": "arguments.0.value",
-                            "value": "combat"
-                        }, {
-                            "name": "arguments.1.value",
-                            "value": "totalKilled"
-                        }]
+            "name": "sc",
+            "members": [
+                {
+                    "type": "member",
+                    "name": "PlayerConfig",
+                    "refType": "var",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.arguments.0.properties.0.value.raw",
+                                    "value": "\"PlayerConfig\""
+                                }
+                            ]
+                        }
                     }
+                },
+                {
+                    "type": "member",
+                    "name": "EnemyType",
+                    "refType": "var",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "body.4.expression.right.right.object.object.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.8.expression.right.left.property.name",
+                                    "value": "enduranceScale"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "party",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "properties.3.value.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.3.key.name",
+                                    "value": "party"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "playerModelInstance",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "callee.object.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "MENU_CIRCUIT"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "stats",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "callee.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.1.value",
+                                    "value": "throwHits"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "fontsystem",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "arguments.3.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.1.arguments.0.value",
+                                    "value": "sc.gui.landmark-hud.title-new"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "name": "stats",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "getStat",
+                            "parent": "cc.sc.stats",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "callee.property.name",
+                                "from": {
+                                    "type": "CallExpression",
+                                    "values": [
+                                        {
+                                            "name": "arguments.length",
+                                            "value": 2
+                                        },
+                                        {
+                                            "name": "arguments.0.value",
+                                            "value": "combat"
+                                        },
+                                        {
+                                            "name": "arguments.1.value",
+                                            "value": "totalKilled"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "OPTIONS_DEFINITION",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "properties.21.value.body.body.1.body.consequent.body.0.expression.test.object.object.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.13.value.body.body.0.alternate.expression.arguments.0.left.value",
+                                    "value": "Can't find option because of invalid key: "
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "OPTION_CATEGORY",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "arguments.2.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "gamepad"
+                                }
+                            ]
+                        }
                 }
             }]
         }, {
@@ -1181,83 +1594,352 @@
                             "value": "\"controls\""
                         }]
                     }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "optionsTabBoxTab",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "left.object.property.name",
-                    "from": {
-                        "type": "AssignmentExpression",
-                        "values": [{
-                            "name": "right.arguments.0.raw",
-                            "value": "\"controls\""
-                        }]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "OptionsMenu",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "body.11.expression.right.callee.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.7.expression.right.arguments.0.right.arguments.0.value",
+                                    "value": "sc.gui.menu.hotkeys.reset-default"
+                                }
+                            ]
+                        }
                     }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "optionsTabBoxTabArray",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.5.argument.left.object.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.0.expression.right.arguments.0.arguments.0.left.value",
-                            "value": "sc.gui.menu.option."
-                        }]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "OptionsTabBox",
+                    "parent": "sc",
+                    "compiled": {
+                        "type": "select",
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.arguments.0.properties.13.value.body.body.26.expression.right.arguments.0.raw",
+                                    "value": "\"controls\""
+                                }
+                            ]
+                        }
                     }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "optionsTabBoxRearrangeTabs",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.21.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
-                            "value": "sc.gui.menu.option."
-                        }]
+                },
+                {
+                    "type": "object",
+                    "name": "varNames",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "init",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.32.expression.arguments.1.type.6",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.26.expression.right.arguments.0.raw",
+                                            "value": "\"controls\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "optionsTabBoxTab",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "left.object.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.arguments.0.raw",
+                                            "value": "\"controls\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "optionsTabBoxTabArray",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.5.argument.left.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.right.arguments.0.arguments.0.left.value",
+                                            "value": "sc.gui.menu.option."
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "optionsTabBoxRearrangeTabs",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.21.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
+                                            "value": "sc.gui.menu.option."
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "optionsTabBoxCreateTabButton",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "properties.22.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
+                                            "value": "sc.gui.menu.option."
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "optionsLoadGlobals",
+                            "compiled": {
+                                "type": "select",
+                                "pattern": "body.3.consequent.body.2.expression.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.4.expression.arguments.2.value",
+                                            "value": "VarOptionEditor"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "VoiceActor",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "object.property.name",
+                        "from": {
+                            "type": "MemberExpression",
+                            "values": [
+                                {
+                                    "name": "property.raw",
+                                    "value": "\"main.shizuka\""
+                                }
+                            ]
+                        }
                     }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "optionsTabBoxCreateTabButton",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "properties.22.key.name",
-                    "from": {
-                        "type": "ObjectExpression",
-                        "values": [{
-                            "name": "properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.left.value",
-                            "value": "sc.gui.menu.option."
-                        }]
+                },
+                {
+                    "type": "object",
+                    "name": "VoiceActor",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Expressions",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.8.properties.1.value.properties.1.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.3.properties.1.value.properties.1.value.elements.0.raw",
+                                                    "value": "\"EXHAUSTED\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Sounds",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.13.properties.0.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.0.properties.0.value.elements.0.properties.0.value.raw",
+                                                    "value": "\"lea/bye.ogg\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Sounds",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "elements.13.properties.0.key.name",
+                                        "from": {
+                                            "type": "ArrayExpression",
+                                            "values": [
+                                                {
+                                                    "name": "elements.0.properties.0.value.elements.0.properties.0.value.raw",
+                                                    "value": "\"lea/bye.ogg\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "VoiceActing",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "properties.2.value.body.body.0.expression.callee.object.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.1.value.raw",
+                                    "value": "\"sc.gimmick.voiceActingRemove\""
+                                }
+                            ]
+                        }
                     }
-                }
-            }, {
-                "type": "member",
-                "refType": "raw",
-                "name": "optionsLoadGlobals",
-                "compiled": {
-                    "type": "select",
-                    "pattern": "body.3.consequent.body.2.expression.callee.property.name",
-                    "from": {
-                        "type": "BlockStatement",
-                        "values": [{
-                            "name": "body.4.expression.arguments.2.value",
-                            "value": "VarOptionEditor"
-                        }]
+                },
+                {
+                    "type": "object",
+                    "name": "VoiceActing",
+                    "members": [
+                        {
+                            "type": "object",
+                            "name": "varNames",
+                            "members": [
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "Config",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.2.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.4.key.name",
+                                                    "value": "toggle"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "active",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "value.property.name",
+                                        "from": {
+                                            "type": "Property",
+                                            "values": [
+                                                {
+                                                    "name": "key.name",
+                                                    "value": "active"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "SIDE",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "properties.2.value.property.name",
+                        "from": {
+                            "type": "ObjectExpression",
+                            "values": [
+                                {
+                                    "name": "properties.1.value.raw",
+                                    "value": "\"Side to clear\""
+                                }
+                            ]
+                        }
                     }
+                },
+                {
+                    "type": "object",
+                    "name": "Message",
+                    "members": [
+                        {
+                            "type": "member",
+                            "refType": "var",
+                            "name": "CLEAR_SIDE",
+                            "parent": "sc.message",
+                            "compiled": {
+                                "pattern": "properties.44.key.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.42.key.name",
+                                            "value": "setExpression"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
-            }]
-        }]
-    }]
+            ]
+        }
+    ]
 }
