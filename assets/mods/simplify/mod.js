@@ -3,6 +3,7 @@ if(!cc)
 
 var simplify = new function(){
 	var registeredFuncs = [];
+	var registeredResources = [];
 	var loadEvent, unloadEvent, lastMap;
 	var nextActionVarName = undefined;
 	var ICON_MAPPING = {
@@ -81,6 +82,8 @@ var simplify = new function(){
 	function _postInitialize(){
 		_initializeFont();
 		_initializeOptions();
+		
+		simplify.resources.initialize();
 	}
 	
 	function _initializeFont() {
@@ -201,6 +204,42 @@ var simplify = new function(){
 		return active.concat(inactive).sort();
 	}
 	
+	this.getMod = function(name){
+		for(var i = 0; i < activeMods.length; i++)
+			if(activeMods[i].getName() == name)
+				return activeMods[i];
+	}
+	this.getAssets = function(mod){
+		if(!mod)
+			return;
+
+		if(mod.constructor === String){
+			return this.getAssets(this.getMod(mod));
+		}
+
+		return mod.getAssets();
+	}
+	this.getAsset = function(mod, name){
+		if(!mod)
+			return;
+
+		if(mod.constructor === String){
+			return this.getAsset(this.getMod(mod), name);
+		}
+
+		return mod.getAsset(name);
+	}
+	this.getAllAssets = function(name){
+		var result = [];
+		var asset;
+
+		for(var i = 0; i < activeMods.length; i++)
+			if(asset = activeMods[i].getAsset(name))
+				result.push(asset);
+
+		return result;
+	}
+
 	initialize();
 }();
 
@@ -380,3 +419,165 @@ simplify.options = new function(){
 	
 	initialize();
 }();
+
+simplify.resources = new function(){
+	var ajaxHooked = false;
+
+	this.initialize = function(){
+		if(!ajaxHooked)
+			_hookAjax();
+	}
+
+	this.generatePatches = function(mod){
+		if(mod.constructor === String){
+			return this.generatePatches(simplify.getMod(mod));
+		}
+
+		var baseDir = mod.getBaseDirectory().substr(7);
+
+		var assets = simplify.getAssets(mod);
+		for(var i = 0; i < assets.length; i++){
+			var asset = assets[i];
+			if(asset.endsWith(".patch"))
+				continue;
+
+			var original = asset.substr(baseDir.length + 7);
+			this.generatePatch(original, asset, "File: " + asset + ".patch");
+		}
+	}
+
+	this.generatePatch = function(original, modified, message){
+		if(original.constructor === String)
+			return $.ajax({url: original, success: function(o){this.generatePatch(o, modified, message)}, context: this, dataType: "json", bypassHook: true});
+
+		if(modified.constructor === String)
+			return $.ajax({url: modified, success: function(m){this.generatePatch(original, m, message)}, context: this, dataType: "json", bypassHook: true});
+
+		if(message)
+			console.log(message)
+		console.log(JSON.stringify(_generatePatch(original, modified)));
+	}
+
+	function _generatePatch(original, modified){
+		var result = {};
+
+		for(var key in modified){
+			if(modified[key] == undefined && original[key] == undefined)
+				continue;
+			if(!original.hasOwnProperty(key) || original[key] === undefined || original[key].constructor !== modified[key].constructor)
+				result[key] = modified[key];
+			else if(original[key] !== modified[key]){
+				if(modified[key].constructor === Object || modified[key].constructor === Array){
+					var res = _generatePatch(original[key], modified[key]);
+					if(res !== undefined)
+						result[key] = res;
+				}
+				else
+					result[key] = modified[key];
+			}
+		}
+
+		for(var key in original){
+			if(modified[key] === undefined)
+				result[key] = null;
+		}
+
+		for(var key in result){
+			if(result[key].constructor === Function){
+				result[key] = undefined;
+				delete result[key];
+			}
+		}
+
+		if(Object.keys(result).length == 0)
+			return undefined;
+		else
+			return result;
+	}
+
+
+	function _hookAjax(){
+		var original = $.ajax;
+		$.ajax = function(settings){
+			if(settings.constructor === String || settings.bypassHook)
+				return original.apply($, arguments);
+
+			var result = _handleAjax(settings);
+			if(result)
+				settings = result;
+
+			return original.call($, settings);
+		}
+		ajaxHooked = true;
+	}
+
+	function _handleAjax(settings){
+		var fullreplace = simplify.getAllAssets(settings.url);
+
+		if(fullreplace && fullreplace.length > 0){
+			if(fullreplace.length > 1)
+				console.warn("Conflict between '" + fullreplace.join("', '") + "' found. Taking '" + fullreplace[0] + "'");
+
+			//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
+			settings.url = fullreplace[0];
+		}
+
+		var patches = simplify.getAllAssets(settings.url + ".patch");
+		if(patches && patches.length > 0){
+			var patchData = [];
+			var patches;
+			var success = settings.success;
+			var successArgs;
+			var resourceLoaded = false;
+
+			for(var i = 0; i < patches.length; i++){
+				var data = new XMLHttpRequest();
+				data.onreadystatechange = function() {
+					if (this.readyState == 4 && (this.status === 200 || this.status === 0)) {
+						patchData.push(JSON.parse(this.responseText));
+						if(patchData.length === patches.length && resourceLoaded){
+							_applyPatches(successArgs[0], patchData);
+							success.apply(settings.context, successArgs);
+						}
+					}
+				};
+				data.onerror = function(err){
+					console.error(err);
+					patchData.push({});
+				}
+				data.open("GET", patches[i], true);
+				data.send();
+			}
+
+			settings.success = function(){
+				successArgs = arguments;
+				resourceLoaded = true;
+				if(patchData.length === patches.length){
+					_applyPatches(successArgs[0], patchData);
+					success.apply(settings.context, successArgs);
+				}
+			}
+
+			console.log(patches);
+		}
+	}
+
+	function _applyPatches(data, patches){
+		for(var i = 0; i < patches.length; i++){
+			_applyPatch(data, patches[i]);
+		}
+	}
+
+	function _applyPatch(obj, patch){
+		for(var key in patch){
+			if(obj[key] === undefined)
+				obj[key] = patch[key];
+			else if(patch[key] === undefined)
+				obj[key] = undefined;
+			else if(patch[key].constructor === Object)
+				_applyPatch(obj[key], patch[key]);
+			else
+				obj[key] = patch[key];
+		}
+	}
+}
