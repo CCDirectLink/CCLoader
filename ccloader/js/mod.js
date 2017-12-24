@@ -1,9 +1,9 @@
 if(!fs && require)
-	const fs = require('fs');
+	var fs = require('fs');
 if(!path && require)
-	const path = require('path');
+	var path = require('path');
 if(!process && require)
-	const process = require('process');
+	var process = require('process');
 
 function Mod(file){
 	var manifest;
