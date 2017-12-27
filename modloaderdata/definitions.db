@@ -1034,24 +1034,6 @@
                         {
                             "type": "member",
                             "refType": "raw",
-                            "name": "BGMpath",
-                            "compiled": {
-                                "type": "select",
-                                "pattern": "properties.0.key.name",
-                                "from": {
-                                    "type": "ObjectExpression",
-                                    "values": [
-                                        {
-                                            "name": "properties.0.value.raw",
-                                            "value": "\"intro\""
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "type": "member",
-                            "refType": "raw",
                             "name": "Gui",
                             "parent": "",
                             "compiled": {
@@ -1080,6 +1062,78 @@
                                         {
                                             "name": "expression.arguments.0.property.name",
                                             "value": "back"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "anims",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "properties.11.value.body.body.0.init.declarations.1.init.object.property.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.8.value.body.body.0.expression.right.arguments.0.arguments.0.raw",
+                                            "value": "\"Tried to merge Multi Dir Anims with different number of directions. Not supported.\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "image",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "properties.9.value.body.body.0.expression.callee.object.property.name",
+                                "from": {
+                                    "type": "ObjectExpression",
+                                    "values": [
+                                        {
+                                            "name": "properties.7.value.body.body.0.expression.arguments.1.raw",
+                                            "value": "\"MONOCHROME\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "tint",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.5.body.body.1.alternate.expression.callee.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.6.body.body.1.alternate.expression.arguments.0.consequent.callee.object.property.name",
+                                            "value": "color"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "empty",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.0.body.body.0.declarations.0.init.object.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.7.expression.right.property.name",
+                                            "value": "alpha"
                                         }
                                     ]
                                 }
