@@ -104,6 +104,13 @@ function Mod(file){
 			cb();
 		});
 	}
+	this.executeTable = function(ccloader){
+		if(!loaded || !table)
+			return;
+
+		table.executeDb(ccloader.frame.contentWindow, ccloader.frame.contentWindow);
+	}
+
 	this.isEnabled = function(){
 		if(!loaded)
 			return false;

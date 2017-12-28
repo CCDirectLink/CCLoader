@@ -3,7 +3,6 @@ function ModLoader(){
 	this.tableLoaded = false;
 	this.table = undefined;
 	this.mods = [];
-	this.modTables = {};
 	this.frame = undefined;
 	this.acorn = undefined;
 	this.status = undefined;
@@ -32,8 +31,8 @@ function ModLoader(){
 		filemanager.getTableName(function(tableName){
 			_createTable(tableName);
 			_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
-			for(var i in _instance.modTables){
-				_instance.modTables[i].executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
+			for(var i = 0; i < this.mods.length; i++){
+				_instance.mods[i].executeTable(_instance);
 			}
 		});
 	}
@@ -99,9 +98,6 @@ function ModLoader(){
 	}
 	function _executeDb(){
 		_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
-		for(var i in _instance.modTables){
-			_instance.modTables[i].executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
-		}
 		_initializeModTables(function(){
 			_initializeMods();
 		});
@@ -148,9 +144,13 @@ function ModLoader(){
 		for(var i = 0; i < this.mods.length; i++){
 			if(this.mods[i].isEnabled()){
 				frame.contentWindow.activeMods.push(this.mods[i]);
-				this.mods[i].load(function(){
-					_instance.modsLoaded++;
-				});
+
+				(function(mod){
+					mod.load(function(){
+						_instance.modsLoaded++;
+						mod.executeTable(_instance);
+					});
+				})(this.mods[i]);
 			} else {
 				frame.contentWindow.inactiveMods.push(this.mods[i]);
 				_instance.modsLoaded++;
