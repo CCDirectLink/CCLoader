@@ -262,13 +262,13 @@
                     "parent": "cc.ig.gameMain",
                     "compiled": {
                         "type": "select",
-                        "pattern": "arguments.0.property.name",
+                        "pattern": "body.2.expression.right.arguments.0.property.name",
                         "from": {
-                            "type": "NewExpression",
+                            "type": "BlockStatement",
                             "values": [
                                 {
-                                    "name": "arguments.1.value",
-                                    "value": "Elemental Overload"
+                                    "name": "body.1.expression.right.left.left.arguments.0.raw",
+                                    "value": "\"sc.gui.combat-msg.rank-up\""
                                 }
                             ]
                         }
