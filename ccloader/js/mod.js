@@ -17,12 +17,14 @@ function Mod(file){
 			return;
 		
 		manifest = JSON.parse(data);
-		if(!manifest || !manifest.main)
+		if(!manifest)
 			return;
 		
-		if(!_isPathAbsolute(manifest.main))
-			manifest.main = _getBaseName(file) + "/" + manifest.main;
-		manifest.main = _normalizePath(manifest.main);
+		if(manifest.main){
+			if(!_isPathAbsolute(manifest.main))
+				manifest.main = _getBaseName(file) + "/" + manifest.main;
+			manifest.main = _normalizePath(manifest.main);
+		}
 		
 		if(manifest.table){
 			if(!_isPathAbsolute(manifest.table))
@@ -43,7 +45,10 @@ function Mod(file){
 	this.load = function(cb){
 		if(!loaded)
 			return;
-		
+
+		if(!manifest.main)
+			return cb();
+
 		filemanager.loadMod(manifest.main, cb);
 	}
 	this.onload = function(cb){
