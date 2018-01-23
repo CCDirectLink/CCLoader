@@ -176,7 +176,7 @@ function Mod(file){
 										return cb(result);
 								});
 							} else {
-								if(file.endsWith(".json") || file.endsWith(".json.patch"))
+								if(file.endsWith(".json") || file.endsWith(".json.patch") || file.endsWith(".png"))
 									result.push(path.relative(process.cwd() + "/assets/", file).replace(/\\/g, "/"));
 								count--;
 								if(count == 0)

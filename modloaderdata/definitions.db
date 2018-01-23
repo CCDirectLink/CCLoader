@@ -1536,6 +1536,42 @@
                             ]
                         }
                     }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "cacheList",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "body.3.expression.left.object.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.2.expression.right.arguments.0.arguments.0.raw",
+                                    "value": "\"ig.Cacheable without CacheType!\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Image",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "left.object.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.arguments.0.raw",
+                                    "value": "\"impact/webworker/image-tasks.js\""
+                                }
+                            ]
+                        }
+                    }
                 }
             ]
         },

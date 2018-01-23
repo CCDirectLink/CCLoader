@@ -3,7 +3,6 @@ if(!cc)
 
 var simplify = new function(){
 	var registeredFuncs = [];
-	var registeredResources = [];
 	var loadEvent, unloadEvent, lastMap;
 	var nextActionVarName = undefined;
 	var ICON_MAPPING = {
@@ -422,10 +421,12 @@ simplify.options = new function(){
 
 simplify.resources = new function(){
 	var ajaxHooked = false;
+	var handlers = [];
 
 	this.initialize = function(){
 		if(!ajaxHooked)
 			_hookAjax();
+		_patchCache(); //Doesn't need extra checks because it doesn't hijack anything
 	}
 
 	this.generatePatches = function(mod){
@@ -456,6 +457,36 @@ simplify.resources = new function(){
 		if(message)
 			console.log(message)
 		console.log(JSON.stringify(_generatePatch(original, modified)));
+	}
+
+	this.registerHandler = function(handler, filter, beforeCall){
+		handlers.push({filter: filter, beforeCall: beforeCall, handler: handler});
+	}
+	
+
+	function _patchCache(){
+		var images = _searchForImages(cc.ig.cacheList, 5);
+
+		for(var i = 0; i < images.length; i++){
+			_handleImage(images[i]);
+		}
+	}
+
+	function _searchForImages(obj, layer){
+		if(layer <= 0)
+			return [];
+
+		var result = [];
+		for(var key in obj){
+			if(obj[key]){
+				if(obj[key] instanceof cc.ig.Image)
+					result.push(obj[key]);
+				else if (typeof obj[key] === "object")
+					result = result.concat(_searchForImages(obj[key], layer - 1));
+			}
+		}
+
+		return result;
 	}
 
 	function _generatePatch(original, modified){
@@ -498,16 +529,18 @@ simplify.resources = new function(){
 
 	function _hookAjax(){
 		var original = $.ajax;
-		$.ajax = function(settings){
-			if(settings.constructor === String || settings.bypassHook)
-				return original.apply($, arguments);
 
-			var result = _handleAjax(settings);
-			if(result)
-				settings = result;
+		$.ajaxSetup({
+			beforeSend: function (xhr, settings) {
+				if(settings.url.constructor !== String)
+					return console.log(settings);
+	
+				var result = _handleAjax(settings);
+				if(result)
+					settings = result;
+			}
+		});
 
-			return original.call($, settings);
-		}
 		ajaxHooked = true;
 	}
 
@@ -554,11 +587,38 @@ simplify.resources = new function(){
 				resourceLoaded = true;
 				if(patchData.length === patches.length){
 					_applyPatches(successArgs[0], patchData);
+
+					for(var i = 0; i < handlers.length; i++){
+						var entry = handlers[i];
+			
+						if(!entry.beforeCall && (!entry.filter || settings.url.match(entry.filter)))
+							entry.handler(successArgs[0], settings.url);
+					}
+
 					success.apply(settings.context, successArgs);
 				}
 			}
+		}
 
-			console.log(patches);
+		for(var i = 0; i < handlers.length; i++){
+			var entry = handlers[i];
+
+			if(entry.beforeCall && (!entry.filter || settings.url.match(entry.filter)))
+				entry.handler(settings, settings.url);
+		}
+	}
+	
+	function _handleImage(image){
+		var fullreplace = simplify.getAllAssets(image.path);
+
+		if(fullreplace && fullreplace.length > 0){
+			if(fullreplace.length > 1)
+				console.warn("Conflict between '" + fullreplace.join("', '") + "' found. Taking '" + fullreplace[0] + "'");
+
+			//console.log("Replacing '" + image.path + "' with '" + fullreplace[0]  + "'");
+			image.path = fullreplace[0];
+			image.reload();
+			image.load();
 		}
 	}
 
