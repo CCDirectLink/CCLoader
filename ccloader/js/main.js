@@ -3,4 +3,4 @@ window.onload = function(){
 	modloader.initialize(function(){
 		modloader.startGame();
 	});
-}
+};

@@ -43,14 +43,14 @@ var filemanager = new function(){
 	}
 	this.getDefintionHash = function(callback){
 		if(isLocal)
-			return md5file('modloaderdata/definitions.db', function(err, hash){
+			return md5file('ccloader/data/definitions.db', function(err, hash){
 				callback(hash + '.table');
 			});
 		else {
 			if(!md5Loaded){
 				setTimeout(this.getDefintionHash, 100, callback);
 			} else {
-				callback(Crypto.MD5(filemanager.getResource('modloaderdata/definitions.db')) + '.table');
+				callback(Crypto.MD5(filemanager.getResource('ccloader/data/definitions.db')) + '.table');
 			}
 		}
 	}
@@ -103,7 +103,7 @@ var filemanager = new function(){
 		if(!table)
 			return false;
 		
-		return _resourceExists('modloaderdata/' + table);
+		return _resourceExists('ccloader/data/' + table);
 	}
 	this.modTableExists = function(table){
 		if(!table)
@@ -141,14 +141,14 @@ var filemanager = new function(){
 		
 		if(isLocal) {
 			try {
-				fs.mkdirSync(path.dirname('modloaderdata/' + tableName), function(err){});
+				fs.mkdirSync(path.dirname('ccloader/data/' + tableName), function(err){});
 			} catch(e) {}
-			fs.writeFileSync('modloaderdata/' + tableName, JSON.stringify({hash: hash, db: table}), 'utf-8');
+			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify({hash: hash, db: table}), 'utf-8');
 		}
 	}
 	
 	this.loadTable = function(tableName, hash){
-		var text = filemanager.getResource('modloaderdata/' + tableName);
+		var text = filemanager.getResource('ccloader/data/' + tableName);
 		if(!text)
 			return undefined;
 		
@@ -263,9 +263,9 @@ var filemanager = new function(){
 	}
 	function _createDirectories(){
 		if(isLocal){
-			fs.mkdir('modloaderdata', function(err){
-				fs.mkdir('modloaderdata/assets', function(err){
-					fs.mkdir('modloaderdata/assets/mods', function(err){});
+			fs.mkdir('ccloader/data', function(err){
+				fs.mkdir('ccloader/data/assets', function(err){
+					fs.mkdir('ccloader/dataccloader/data/assets/mods', function(err){});
 				});
 			});
 			fs.mkdir('assets/mods', function(err){});
