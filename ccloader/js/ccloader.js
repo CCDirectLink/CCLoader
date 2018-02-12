@@ -1,6 +1,5 @@
 function ModLoader(){
 	var _instance = this;
-	this.tableLoaded = false;
 	this.table = undefined;
 	this.mods = [];
 	this.frame = undefined;
@@ -21,8 +20,6 @@ function ModLoader(){
 		});
 	}
 	this.startGame = function(){
-		this.frame.style.display = 'block';
-		this.overlay.style.display = 'block';
 		this.frame.onload = _onGameInitialized;
 		this.frame.src = window.require ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 	}
@@ -48,9 +45,10 @@ function ModLoader(){
 		});
 	}
 	function _createTable(tableName){
+        _instance.status.innerHTML = "Initializing Mapping";
 		console.log('Reading files...');
 		var jscode = filemanager.getResource('assets/js/game.compiled.js');
-		var dbtext = filemanager.getResource('modloaderdata/definitions.db');
+		var dbtext = filemanager.getResource('ccloader/data/definitions.db');
 		var dbdef = JSON.parse(dbtext);
 		console.log('Parsing...');
 		_instance.acorn.parse(jscode);
@@ -98,13 +96,14 @@ function ModLoader(){
 	}
 	function _executeDb(){
 		_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
+
+        _instance.status.innerHTML = "Initializing Mods";
 		_initializeModTables(function(){
 			_initializeMods();
 		});
-		_instance.status.innerHTML = "Initializing Mods..";
 	}	
 	function _onGameInitialized(){
-		_instance.status.innerHTML = "Loading..";
+		_instance.status.innerHTML = "Loading Game";
 		_instance.frame.contentWindow.reloadTables = _instance.reloadTables;
 		var modsLoadedEvent = _instance.frame.contentDocument.createEvent('Event');
 		modsLoadedEvent.initEvent('modsLoaded', true, true);

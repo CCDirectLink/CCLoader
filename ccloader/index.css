@@ -1,35 +1,34 @@
 body {
-	background-color: black;
+    background-color: #000;
+    font-family: monospace;
 }
 
 #frame {
-	position: absolute;
-	display: none;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	border: none;
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 .title {
-	position: absolute;
-	text-align: center;
-	line-height: 80vh;
-	font-size: 10vh;
-	top: 0;
-	left: 0;
-	width: 100%;
-	color: white;
+    position: absolute;
+    text-align: center;
+    left: 0;
+    bottom: 4em;
+    font-size: 2em;
+    width: 100%;
+    color: #FFF;
 }
 
-#overlay{
-	display: none;
-	
-	position: absolute;
-	background-color: rgba(0, 0, 0, 0.3);
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+#overlay {
+    display: block;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.3);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
