@@ -17,87 +17,24 @@ var filemanager = new function(){
 		} else {
 			_loadScript('js/2.5.3-crypto-md5.js', function(){ //ccloader/js/2.5.3-crypto-md5.js
 				md5Loaded = true;
-			});
+			}, document);
 			modList = JSON.parse(this.getResource('mods.json'));
 		}
 	}
 	this.loadMod = function(file, onModLoaded){
-		var script = document.createElement("script");
-		script.type = "text/javascript";
-		script.src = file;
-		script.onload = onModLoaded;
-		modloader.frame.contentDocument.body.appendChild(script);
+        _loadScript(file, onModLoaded, modloader.frame.contentDocument);
 	}
 	this.getTableName = function(callback){
-		if(isLocal)
-			return md5file('assets/js/game.compiled.js', function(err, hash){
-				callback(hash + '.table');
-			});
-		else {
-			if(!md5Loaded){
-				setTimeout(this.getTableName, 100, callback);
-			} else {
-				callback(Crypto.MD5(filemanager.getResource('assets/js/game.compiled.js')) + '.table');
-			}
-		}
+		_getHash('assets/js/game.compiled.js', callback);
 	}
 	this.getDefintionHash = function(callback){
-		if(isLocal)
-			return md5file('ccloader/data/definitions.db', function(err, hash){
-				callback(hash + '.table');
-			});
-		else {
-			if(!md5Loaded){
-				setTimeout(this.getDefintionHash, 100, callback);
-			} else {
-				callback(Crypto.MD5(filemanager.getResource('ccloader/data/definitions.db')) + '.table');
-			}
-		}
+		_getHash('ccloader/data/definitions.db', callback);
 	}
 	this.getModDefintionHash = function(def, callback){
-		if(isLocal)
-			return md5file('assets/' + def, function(err, hash){
-				callback(hash + '.table');
-			});
-		else {
-			if(!md5Loaded){
-				setTimeout(this.getDefintionHash, 100, callback);
-			} else {
-				callback(Crypto.MD5(filemanager.getResource('assets/' + def)) + '.table');
-			}
-		}
+		_getHash(def, callback);
 	}
-	this.getAllDbFiles = function(folder){
-		if(!folder)
-			folder = 'assets/mods/';
-		
-		if(isLocal)
-			return _getAllDbFilesFromFolder(folder);
-		else {
-			var results = [];
-			for(var i in modList){
-				if(_resourceExists('assets/mods/' + modList[i] + '/definitions.db')){
-					results.push('mods/' + modList[i] + '/definitions.db');
-				}
-			}
-			return results;
-		}
-	};
 	this.getAllModsFiles = function(folder){
-		if(!folder)
-			folder = 'assets/mods/';
-		
-		if(isLocal)
-			return _getAllModsFilesFromFolder(folder);
-		else {
-			var results = [];
-			for(var i in modList){
-				if(_resourceExists('assets/mods/' + modList[i] + '/package.json')){
-					results.push('assets/mods/' + modList[i] + '/package.json');
-				}
-			}
-			return results;
-		}
+        return _getResources(folder, '/package.json');
 	};
 	this.tableExists = function(table){
 		if(!table)
@@ -109,22 +46,22 @@ var filemanager = new function(){
 		if(!table)
 			return false;
 		
-		return _resourceExists('assets/' + table);
+		return _resourceExists(table);
 	}
 	this.getResource = function(resource){
 		try{
 			if(isLocal)
 				return fs.readFileSync(resource, 'utf-8');
 			else {
-					var req = new XMLHttpRequest();
-					req.open('GET', '/' + resource, false);
-					req.send(null);
+                var req = new XMLHttpRequest();
+                req.open('GET', '/' + resource, false);
+                req.send(null);
 
-					if(req.status === 200) {
-						return req.responseText;
-					} else {
-						return undefined;
-					}
+                if(req.status === 200) {
+                    return req.responseText;
+                } else {
+                    return undefined;
+                }
 			}
 		}catch(e){
 			return undefined;
@@ -146,7 +83,6 @@ var filemanager = new function(){
 			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify({hash: hash, db: table}), 'utf-8');
 		}
 	}
-	
 	this.loadTable = function(tableName, hash){
 		var text = filemanager.getResource('ccloader/data/' + tableName);
 		if(!text)
@@ -164,7 +100,36 @@ var filemanager = new function(){
 		table.data = json.db.data;
 		return table;
 	}
-	
+    
+    function _getResources(folder, ending){
+		if(!folder)
+			folder = 'assets/mods/';
+		
+		if(isLocal)
+			return _getResourcesLocal(folder, ending);
+		else {
+			var results = [];
+			for(var i in modList){
+				if(_resourceExists('assets/mods/' + modList[i] + ending)){
+					results.push('mods/' + modList[i] + ending);
+				}
+			}
+			return results;
+		}
+    }
+    function _getHash(file, callback) {
+		if(isLocal) {
+            return md5file(file, function(err, hash){
+                callback(hash + '.table');
+            });
+        } else {
+            if(!md5Loaded){
+                setTimeout(this.getTableName, 100, callback);
+            } else {
+                callback(Crypto.MD5(filemanager.getResource(file)) + '.table');
+            }
+        }
+    }
 	function _resourceExists(resource){
 		if(isLocal){
 			try{
@@ -184,26 +149,26 @@ var filemanager = new function(){
 			}
 		}
 	}
-	function _loadScript(url, callback){
+	function _loadScript(url, callback, doc){
 		var script = document.createElement("script");
-		document.body.appendChild(script);
 		script.onload = callback;
 		script.type = "text/javascript";
 		script.src = url;
+		doc.body.appendChild(script);
 	}
-	function _getAllModsFilesFromFolder(dir){
+	function _getResourcesLocal(folder, ending){
 		var results = [];
 		
 		if(isLocal) {
 			try{
-				fs.readdirSync(dir).forEach(function(file) {
+				fs.readdirSync(folder).forEach(function(file) {
 					try{
-						file = dir + '/' + file;
+						file = folder + '/' + file;
 						
 						if (_isDirectory(file)) {
-							var innerResults = _getAllModsFilesFromFolder(file);
+							var innerResults = _getResourcesLocal(file, ending);
 							results = results.concat(innerResults);
-						} else if(file.endsWith('/package.json')){
+						} else if(file.endsWith(ending)){
 							results.push(file);
 						}
 					} catch(e) { }
@@ -211,50 +176,6 @@ var filemanager = new function(){
 			} catch(e) { }
 		}
 		
-		return results;
-	}
-	function _getAllDbFilesFromFolder(dir){
-		var results = [];
-
-		if(isLocal) {
-			try{
-				fs.readdirSync(dir).forEach(function(file) {
-					try {
-						file = dir + '/' + file;
-						
-						if (_isDirectory(file)) {
-							var innerResults = _getAllDbFilesFromFolder(file);
-							results = results.concat(innerResults);
-						} else if(file.endsWith('/definitions.db') || file.endsWith('.table')){
-							results.push(file);
-						}
-					} catch(e) { }
-				});
-			} catch(e) { }
-		}
-
-		return results;
-	}
-	function _getAllItemDbFilesFromFolder(dir){
-		var results = [];
-
-		if(isLocal) {
-			try{
-				fs.readdirSync(dir).forEach(function(file) {
-					try {
-						file = dir + '/' + file;
-						
-						if (_isDirectory(file)) {
-							var innerResults = _getAllItemDbFilesFromFolder(file);
-							results = results.concat(innerResults);
-						} else if(file.endsWith('/item-database.json')){
-							results.push(file.substring(7));
-						}
-					} catch(e) { }
-				});
-			} catch(e) { }
-		}
-
 		return results;
 	}
 	function _isDirectory(file){
@@ -263,12 +184,15 @@ var filemanager = new function(){
 	}
 	function _createDirectories(){
 		if(isLocal){
-			fs.mkdir('ccloader/data', function(err){
-				fs.mkdir('ccloader/data/assets', function(err){
-					fs.mkdir('ccloader/dataccloader/data/assets/mods', function(err){});
-				});
-			});
-			fs.mkdir('assets/mods', function(err){});
+            fs.mkdir('ccloader/data/assets', function(err){
+                fs.mkdir('ccloader/dataccloader/data', function(err){
+                    fs.mkdir('ccloader/dataccloader/data/assets', function(err){
+                        fs.mkdir('ccloader/dataccloader/data/assets/mods', function(err){
+                    
+                        });
+                    });
+                });
+            });
 		}
 	}
 };
