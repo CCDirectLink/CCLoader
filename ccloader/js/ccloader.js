@@ -1,6 +1,6 @@
 function ModLoader(){
 	var _instance = this;
-    this.table = undefined;
+	this.table = undefined;
 	this.mods = [];
 	this.frame = undefined;
 	this.acorn = undefined;
