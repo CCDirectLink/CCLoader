@@ -97,8 +97,8 @@ var simplify = new function(){
 	function _initializeOptions(){
 		var mods = window.inactiveMods.concat(window.activeMods);
 		
-		var tab = simplify.options.addTab("mods");
-		ig.lang.labels.sc.gui.menu.option.mods = "Mods";
+		var tab = simplify.options.addTab("mods", "Mods");
+
 		for(var i = 0; i < mods.length; i++){
 			simplify.options.addEntry("modEnabled-" + mods[i].getName().toLowerCase(), "CHECKBOX", true, tab, undefined, true);
 			var display = mods[i].getName();
@@ -379,12 +379,16 @@ simplify.options = new function(){
 		return loaded;
 	}
 	
-	this.addTab = function(name){
+	this.addTab = function(name, displayName){
 		if(!loaded)
 			return;
 		
 		cc.sc.OPTION_CATEGORY[name] = Object.keys(cc.sc.OPTION_CATEGORY).length;
 		cc.sc.OptionsTabBox.prototype[cc.sc.varNames.optionsTabBoxTab][name] = null;
+		
+		if(displayName !== undefined) {
+			ig.lang.labels.sc.gui.menu.option[name] = displayName;
+		}
 		
 		tabs.push({name:name, cat:cc.sc.OPTION_CATEGORY[name]});
 		
