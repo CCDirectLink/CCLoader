@@ -111,7 +111,7 @@ var filemanager = new function(){
 			var results = [];
 			for(var i in modList){
 				if(_resourceExists('assets/mods/' + modList[i] + ending)){
-					results.push('mods/' + modList[i] + ending);
+					results.push('assets/mods/' + modList[i] + ending);
 				}
 			}
 			return results;
