@@ -1,8 +1,8 @@
-if(!fs && require)
+if(!fs && window.require)
 	var fs = require('fs');
-if(!path && require)
+if(!path && window.require)
 	var path = require('path');
-if(!process && require)
+if(!process && window.require)
 	var process = require('process');
 
 function Mod(file){
@@ -97,6 +97,11 @@ function Mod(file){
 			table = filemanager.loadTable(tablePath, hash);
 			if(!table){
 				console.log('[' + manifest.name + '] Creating mod definition database..');
+				if(ccloader.acorn.needsParsing()){
+					console.log('[' + manifest.name + '] Parsing...');
+					var jscode = filemanager.getResource('assets/js/game.compiled.js');
+					ccloader.acorn.parse(jscode);
+				}
 				var dbtext = filemanager.getResource('assets/' + manifest.table);
 				var dbdef = JSON.parse(dbtext);
 				console.log('[' + manifest.name + '] Analysing...');
@@ -187,6 +192,9 @@ function Mod(file){
 				}
 			});
 		} else {
+			if(!manifest.assets)
+				return cb([]);
+
 			var dir = _getBaseName(file) + "/";
 
 			var result = [];

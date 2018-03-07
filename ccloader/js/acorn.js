@@ -158,7 +158,10 @@ function Acorn(){
 			}
 		}, 1000);*/
 			
-	}	
+	}
+	this.needsParsing = function(){
+		return !tree;
+	}
 	this.analyse = function(dbDefinition){
 		db = new Db(dbDefinition.name);
 		db = _buildDb(db, dbDefinition);
