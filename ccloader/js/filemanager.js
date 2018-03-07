@@ -31,7 +31,7 @@ var filemanager = new function(){
 		_getHash('ccloader/data/definitions.db', callback);
 	}
 	this.getModDefintionHash = function(def, callback){
-		_getHash(def, callback);
+		_getHash('assets/' + def, callback);
 	}
 	this.getAllModsFiles = function(folder){
         return _getResources(folder, '/package.json');
@@ -46,7 +46,7 @@ var filemanager = new function(){
 		if(!table)
 			return false;
 		
-		return _resourceExists(table);
+		return _resourceExists('ccloader/data/assets/' + table);
 	}
 	this.getResource = function(resource){
 		try{
@@ -69,7 +69,7 @@ var filemanager = new function(){
 	}
 	this.saveTable = function(tableName, table, hash){
 		if(!hash){
-			this.getDefintionHash(function(hash){
+			_getHash('ccloader/data/' + tableName, function(hash){
 				filemanager.saveTable(tableName, table, hash)
 			});
 			return;
@@ -78,7 +78,7 @@ var filemanager = new function(){
 		
 		if(isLocal) {
 			try {
-				fs.mkdirSync(path.dirname('ccloader/data/' + tableName), function(err){});
+				_createDirectory(path.dirname('ccloader/data/' + tableName));
 			} catch(e) {}
 			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify({hash: hash, db: table}), 'utf-8');
 		}
@@ -184,15 +184,16 @@ var filemanager = new function(){
 	}
 	function _createDirectories(){
 		if(isLocal){
-            fs.mkdir('ccloader/data/assets', function(err){
-                fs.mkdir('ccloader/dataccloader/data', function(err){
-                    fs.mkdir('ccloader/dataccloader/data/assets', function(err){
-                        fs.mkdir('ccloader/dataccloader/data/assets/mods', function(err){
-                    
-                        });
-                    });
-                });
-            });
+			_createDirectory('ccloader/data/assets/mods');
 		}
+	}
+	function _createDirectory(dir){
+		if(fs.existsSync(dir) && fs.statSync(dir).isDirectory())
+			return;
+		
+		var parent = path.join(dir, '..');
+		_createDirectory(parent);
+
+		fs.mkdirSync(dir);
 	}
 };
