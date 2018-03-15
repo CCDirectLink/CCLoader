@@ -1,6 +1,9 @@
 if(!cc)
 	throw "No Modloader Found!";
 
+if(!fs && window.require)
+	var fs = require('fs');
+
 var simplify = new function(){
 	var registeredFuncs = [];
 	var loadEvent, unloadEvent, lastMap;
@@ -97,8 +100,8 @@ var simplify = new function(){
 	function _initializeOptions(){
 		var mods = window.inactiveMods.concat(window.activeMods);
 		
-		var tab = simplify.options.addTab("mods", "Mods");
-
+		var tab = simplify.options.addTab("mods");
+		ig.lang.labels.sc.gui.menu.option.mods = "Mods";
 		for(var i = 0; i < mods.length; i++){
 			simplify.options.addEntry("modEnabled-" + mods[i].getName().toLowerCase(), "CHECKBOX", true, tab, undefined, true);
 			var display = mods[i].getName();
@@ -168,6 +171,65 @@ var simplify = new function(){
 		cc.ig.playerInstance()[cc.ig.varNames.jump](185, 16, 100);
 	}
 	
+	this.getParams = function(entity){
+		return entity[cc.ig.varNames.param];
+	}
+	this.getParamsStat = function(entity, stat){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		return params[cc.ig.varNames.paramGetStat](stat);
+	}
+	this.getBaseParams = function(entity){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		return params[cc.ig.varNames.baseParams];
+	}
+	this.getBaseParam = function(entity, param){
+		return this.getBaseParams(entity)[param];
+	}
+	this.setBaseParams = function(entity, baseParams){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		var thisBaseParams = this.getBaseParams(entity);
+        var hpDiff = this.getParamsStat(entity, 'hp') - this.getCurrentHp(entity);
+
+        for(var i in thisBaseParams)
+			thisBaseParams[i] = baseParams[i] || thisBaseParams[i];
+			
+		this.setCurrentHp(entity, this.getParamsStat(entity, 'hp') - hpDiff);
+			
+		cc.sc.Model.notifyObserver(params, 3); // sc.COMBAT_PARAM_MSG.STATS_CHANGED
+	}
+	
+	this.setBaseParam = function(entity, key, value){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		var thisBaseParams = this.getBaseParams(entity);
+
+		if(key === "hp")
+			this.setCurrentHp(entity, this.getCurrentHp(entity) - thisBaseParams[key] + value);
+
+		thisBaseParams[key] = value || thisBaseParams[key];
+			
+		cc.sc.Model.notifyObserver(params, 3); // sc.COMBAT_PARAM_MSG.STATS_CHANGED
+	}
+	this.getCurrentHp = function(entity){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		return params[cc.ig.varNames.paramCurrentHp];
+	}
+	this.setCurrentHp = function(entity, hp){
+		var params = this.getParams(entity);
+		if(!params)
+			return;
+		params[cc.ig.varNames.paramCurrentHp] = hp;
+	}
+
 	this.getAnimationTimer = function(entity){
 		return entity[cc.ig.varNames.animation][cc.ig.varNames.timer];
 	}
@@ -379,16 +441,12 @@ simplify.options = new function(){
 		return loaded;
 	}
 	
-	this.addTab = function(name, displayName){
+	this.addTab = function(name){
 		if(!loaded)
 			return;
 		
 		cc.sc.OPTION_CATEGORY[name] = Object.keys(cc.sc.OPTION_CATEGORY).length;
 		cc.sc.OptionsTabBox.prototype[cc.sc.varNames.optionsTabBoxTab][name] = null;
-		
-		if(displayName !== undefined) {
-			ig.lang.labels.sc.gui.menu.option[name] = displayName;
-		}
 		
 		tabs.push({name:name, cat:cc.sc.OPTION_CATEGORY[name]});
 		
@@ -467,9 +525,41 @@ simplify.resources = new function(){
 		handlers.push({filter: filter, beforeCall: beforeCall, handler: handler});
 	}
 	
+	this.loadFile = function(path, callback) {
+		path = _stripAssets(path);
+
+		if(window.require) {
+			fs.readFile('assets/' + path, 'utf8', function(err, data) {
+				if(err)
+					throw err;
+				
+				callback(data);
+			});
+		} else {
+			var req = new XMLHttpRequest();
+			req.open('GET', path, true);
+			req.onreadystatechange = function(event){
+				if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
+					callback(req.responseText);
+				}
+			}
+			req.send();
+		}
+	}
+
+	this.loadJSON = function(path, callback) {
+		this.loadFile(path, function(data) {
+			callback(JSON.parse(data));
+		})
+	}
+
+	function _stripAssets(path){
+		return path.indexOf('assets/') == 0 ? path.substr(7) : path;
+	}
 
 	function _patchCache(){
 		var images = _searchForImages(cc.ig.cacheList, 5);
+		images = images.concat(_searchForImages(cc.sc.fontsystem, 4));
 
 		for(var i = 0; i < images.length; i++){
 			_handleImage(images[i]);
