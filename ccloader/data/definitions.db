@@ -1451,7 +1451,7 @@
                 {
                     "type": "member",
                     "refType": "var",
-                    "name": "Sound",
+                    "name": "DefaultSound",
                     "parent": "ig",
                     "compiled": {
                         "pattern": "body.21.alternate.body.0.expression.right.property.name",
@@ -1568,6 +1568,24 @@
                                 {
                                     "name": "right.arguments.0.raw",
                                     "value": "\"impact/webworker/image-tasks.js\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Sound",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "body.0.expression.left.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.3.expression.arguments.0.raw",
+                                    "value": "\"SET DEFAULT TRACK!\""
                                 }
                             ]
                         }
