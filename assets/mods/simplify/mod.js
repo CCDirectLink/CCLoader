@@ -34,6 +34,13 @@ var simplify = new function(){
 				return this.substr(this.length - end.length, end.length) === end;
 			}
 		}
+
+		for (var key in sc) {
+			if(sc[key] instanceof cc.sc.Combat) {
+				cc.sc.combat = sc[key];
+				break;
+			}
+		}
 		
 		_initializeGUI();
 		_initializeEvents();
@@ -228,6 +235,7 @@ var simplify = new function(){
 		if(!params)
 			return;
 		params[cc.ig.varNames.paramCurrentHp] = hp;
+		cc.sc.Model.notifyObserver(params, 1); //sc.COMBAT_PARAM_MSG.HP_CHANGED
 	}
 
 	this.getAnimationTimer = function(entity){

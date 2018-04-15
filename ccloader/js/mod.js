@@ -10,6 +10,7 @@ function Mod(file){
 	var loaded = false;
 	var onload;
 	var table;
+	var runtimeAssets = [];
 	
 	this.initialize = function(){
 		var data = filemanager.getResource(file);
@@ -80,9 +81,15 @@ function Mod(file){
 
 		path = path.replace(/\\/g, "/");
 
+		if(runtimeAssets[path])
+			return runtimeAssets;
+
 		for(var i = 0; i < manifest.assets.length; i++)
 			if(manifest.assets[i].endsWith(path))
 				return manifest.assets[i];
+	}
+	this.setAsset = function(original, newPath){
+		runtimeAssets[origina] = newPath;
 	}
 	this.getBaseDirectory = function(){
 		return _getBaseName(file).replace(/\\/g, "/").replace(/\/\//g, "/") + "/";
@@ -156,7 +163,7 @@ function Mod(file){
 			return path;
 	}
 	function _findAssets(dir, cb){
-		if(fs && path){
+		if(!manifest.assets && fs && path){
 			var result = [];
 			
 			fs.readdir(dir, function(err, files) {

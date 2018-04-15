@@ -37,12 +37,14 @@ function Acorn(){
 		/*setTimeout(function(){
 			console.log("searching..")
 			var perNode = 3, steps = 5, depth = 20;
-			var pattern = "CURRENT_STATE";
-			var searched = "de";
-			var result = null;
-				
+			var pattern = "\"hp\"";
+			var searched = "Rc";
+			var results = [];
+			var single = false;	
+
+
 			walker.fullAncestor(tree, function(node, state, ancestor, type){
-				if(result)
+				if(single && results.length)
 					return;
 				
 				function search(n, layers){
@@ -69,21 +71,22 @@ function Acorn(){
 					
 					for(var i = 0; (ancestor.length - steps + (perNode - res) - i) >= 0; i++)
 						if(ancestor[ancestor.length - steps + (perNode - res) - i].type){
-							result = ancestor[ancestor.length - steps + (perNode - res) - i];
+							results.push(ancestor[ancestor.length - steps + (perNode - res) - i]);
 							return;
 						}
 						
 					console.warn("Could not find fitting node");
 					if(ancestor.length - steps < 0)
-						result = ancestor[0]
+						results.push(ancestor[0]);
 					else
-						result = ancestor[ancestor.length - steps]
+						results.push(ancestor[ancestor.length - steps]);
 				}
 			});
-				
-			console.log(result);
 
-			if(result){
+			console.log(results.length);
+
+			for(var i = 0; i < results.length; i++){
+				var result = results[i];
 				var selec, pat;
 				
 				function search(node, i, path){
@@ -102,8 +105,13 @@ function Acorn(){
 				
 				search(result, 0, "");
 				
-				console.log("pattern: " + selec);
-				console.log("value: " + pat);
+				if(selec){
+					console.log(result);
+					console.log("pattern: " + selec);
+					console.log("value: " + pat);
+				} else {
+					console.log("value not matched: " + pat);
+				}
 			}
 		}, 1000);*/
 		/*
