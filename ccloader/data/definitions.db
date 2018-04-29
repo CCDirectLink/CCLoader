@@ -1949,6 +1949,42 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "isInCombat",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.0.argument.alternate.test.left.left.left.left.argument.arguments.0.property.name",
+                                            "value": "COMBAT_RANK"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "activeCombatants",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "left.left.callee.object.object.property.name",
+                                "from": {
+                                    "type": "LogicalExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.arguments.0.arguments.0.raw",
+                                            "value": "\"Tried to add same combatant as active twice!\""
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     ]
                 },
@@ -2235,6 +2271,24 @@
                                 {
                                     "name": "right.arguments.0.properties.19.value.body.body.0.expression.right.arguments.0.arguments.0.raw",
                                     "value": "\"Tried to add same combatant as active twice!\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "COMBATANT_PARTY",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "left.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "right.properties.0.key.name",
+                                    "value": "PLAYER"
                                 }
                             ]
                         }
