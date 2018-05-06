@@ -156,6 +156,9 @@ var simplify = new function(){
 	this.killEntity = function(entity, arg){
 		return entity[cc.ig.varNames.entityKill](arg);
 	}
+	this.setEntityTarget = function(entity, target, fixed) {
+		entity[cc.ig.varNames.setTarget](target, fixed);
+	}
 	this.getProxyAction = function(action){
 		return action[cc.ig.varNames.proxyActions];
 	}
@@ -661,17 +664,17 @@ simplify.resources = new function(){
 	}
 
 	function _handleAjax(settings){
-		var fullreplace = simplify.getAllAssets(settings.url);
+		var fullreplace = simplify.getAllAssets(settings.url.substr(ig.root.length));
 
 		if(fullreplace && fullreplace.length > 0){
 			if(fullreplace.length > 1)
 				console.warn("Conflict between '" + fullreplace.join("', '") + "' found. Taking '" + fullreplace[0] + "'");
 
 			//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-			settings.url = fullreplace[0];
+			settings.url = ig.root + fullreplace[0];
 		}
 
-		var patches = simplify.getAllAssets(settings.url + ".patch");
+		var patches = simplify.getAllAssets(settings.url.substr(ig.root.length) + ".patch");
 		if(patches && patches.length > 0){
 			var patchData = [];
 			var patches;
@@ -707,8 +710,8 @@ simplify.resources = new function(){
 					for(var i = 0; i < handlers.length; i++){
 						var entry = handlers[i];
 			
-						if(!entry.beforeCall && (!entry.filter || settings.url.match(entry.filter)))
-							entry.handler(successArgs[0], settings.url);
+						if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter)))
+							entry.handler(successArgs[0], settings.url.substr(ig.root.length));
 					}
 
 					success.apply(settings.context, successArgs);
@@ -719,8 +722,8 @@ simplify.resources = new function(){
 		for(var i = 0; i < handlers.length; i++){
 			var entry = handlers[i];
 
-			if(entry.beforeCall && (!entry.filter || settings.url.match(entry.filter)))
-				entry.handler(settings, settings.url);
+			if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter)))
+				entry.handler(settings, settings.url.substr(ig.root.length));
 		}
 	}
 	

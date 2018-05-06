@@ -1156,6 +1156,24 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "setTarget",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.13.expression.right.arguments.0.properties.3.value.body.body.0.body.body.1.expression.right.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.9.expression.left.property.name",
+                                            "value": "SET_ENEMY_TARGET"
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     ]
                 },
