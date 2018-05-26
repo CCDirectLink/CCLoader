@@ -550,13 +550,18 @@ simplify.resources = new function(){
 		handlers.push({filter: filter, beforeCall: beforeCall, handler: handler});
 	}
 	
-	this.loadFile = function(path, callback) {
+	this.loadFile = function(path, callback, errorCb) {
 		path = _stripAssets(path);
 
 		if(window.require) {
 			fs.readFile('assets/' + path, 'utf8', function(err, data) {
-				if(err)
-					throw err;
+				if(err) {
+					if(errorCb) {
+						errorCb(err);
+					} else {
+						throw err;
+					}
+				}
 				
 				callback(data);
 			});
@@ -568,14 +573,21 @@ simplify.resources = new function(){
 					callback(req.responseText);
 				}
 			}
+			req.onerror = function(event){
+				if(errorCb) {
+					errorCb(event);
+				} else {
+					throw event;
+				}
+			}
 			req.send();
 		}
 	}
 
-	this.loadJSON = function(path, callback) {
+	this.loadJSON = function(path, callback, errorCb) {
 		this.loadFile(path, function(data) {
 			callback(JSON.parse(data));
-		})
+		}, errorCb);
 	}
 
 	function _stripAssets(path){

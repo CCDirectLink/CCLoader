@@ -69,7 +69,7 @@ var filemanager = new function(){
 	}
 	this.saveTable = function(tableName, table, hash){
 		if(!hash){
-			_getHash('ccloader/data/' + tableName, function(hash){
+			this.getDefintionHash(function(hash){
 				filemanager.saveTable(tableName, table, hash)
 			});
 			return;
