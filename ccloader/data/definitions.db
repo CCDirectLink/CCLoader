@@ -1174,6 +1174,24 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "activate",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "left.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.arguments.0.arguments.0.raw",
+                                            "value": "\"sc.gui.menu.skill.activate\""
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     ]
                 },
@@ -1346,6 +1364,42 @@
                                         {
                                             "name": "properties.0.key.name",
                                             "value": "focus"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "addButton",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.13.body.body.4.expression.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.12.consequent.body.0.expression.right.arguments.5.arguments.0.raw",
+                                            "value": "\"sc.gui.menu.equip.unequip-des\""
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "buttonGroup",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.16.expression.right.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.19.expression.arguments.0.callee.object.body.body.0.consequent.body.1.expression.alternate.consequent.arguments.0.arguments.0.raw",
+                                            "value": "\"sc.gui.dialogs.loadConfirm\""
                                         }
                                     ]
                                 }
@@ -2003,6 +2057,24 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "autoSlotMiss",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "left.property.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "right.arguments.0.arguments.0.raw",
+                                            "value": "\"sc.gui.menu.save-menu.noAuto\""
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     ]
                 },
@@ -2307,6 +2379,42 @@
                                 {
                                     "name": "right.properties.0.key.name",
                                     "value": "PLAYER"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "ButtonListBox",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "body.12.expression.right.callee.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.19.expression.arguments.0.callee.object.body.body.0.consequent.body.1.expression.alternate.consequent.arguments.0.arguments.0.raw",
+                                    "value": "\"sc.gui.dialogs.loadConfirm\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "SaveSlotButton",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "body.7.consequent.body.5.declarations.0.init.callee.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.19.expression.arguments.0.callee.object.body.body.0.consequent.body.1.expression.alternate.consequent.arguments.0.arguments.0.raw",
+                                    "value": "\"sc.gui.dialogs.loadConfirm\""
                                 }
                             ]
                         }
