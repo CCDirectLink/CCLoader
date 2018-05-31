@@ -434,6 +434,42 @@
                                             ]
                                         }
                                     }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "bufferHandle",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.1.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.value.raw",
+                                                    "value": "\"TrackWebAudio\""
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "member",
+                                    "refType": "raw",
+                                    "name": "endCallback",
+                                    "parent": "",
+                                    "compiled": {
+                                        "pattern": "properties.5.key.name",
+                                        "from": {
+                                            "type": "ObjectExpression",
+                                            "values": [
+                                                {
+                                                    "name": "properties.0.value.raw",
+                                                    "value": "\"TrackWebAudio\""
+                                                }
+                                            ]
+                                        }
+                                    }
                                 }
                             ]
                         },
@@ -1670,6 +1706,24 @@
                     "parent": "ig",
                     "compiled": {
                         "pattern": "body.0.expression.left.property.name",
+                        "from": {
+                            "type": "BlockStatement",
+                            "values": [
+                                {
+                                    "name": "body.3.expression.arguments.0.raw",
+                                    "value": "\"SET DEFAULT TRACK!\""
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "var",
+                    "name": "Track",
+                    "parent": "ig",
+                    "compiled": {
+                        "pattern": "body.2.expression.left.property.name",
                         "from": {
                             "type": "BlockStatement",
                             "values": [
