@@ -93,6 +93,8 @@ var simplify = new function(){
 		_initializeOptions();
 		
 		simplify.resources.initialize();
+		
+		document.body.dispatchEvent(new Event("simplifyInitialized"));
 	}
 	
 	function _initializeFont() {
@@ -508,12 +510,16 @@ simplify.options = new function(){
 
 simplify.resources = new function(){
 	var ajaxHooked = false;
+	var imageHooked = false;
 	var handlers = [];
 
 	this.initialize = function(){
 		if(!ajaxHooked)
 			_hookAjax();
 		_patchCache(); //Doesn't need extra checks because it doesn't hijack anything
+
+		if(!imageHooked)
+			_hookImage();
 	}
 
 	this.generatePatches = function(mod){
@@ -737,6 +743,26 @@ simplify.resources = new function(){
 			if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter)))
 				entry.handler(settings, settings.url.substr(ig.root.length));
 		}
+	}
+
+	
+	function _hookImage(){
+		var original = cc.ig.Image.prototype.load;
+
+		cc.ig.Image.prototype.load = function load(){
+			var fullreplace = simplify.getAllAssets(this.path);
+			if(fullreplace && fullreplace.length > 0){
+				if(fullreplace.length > 1)
+					console.warn("Conflict between '" + fullreplace.join("', '") + "' found. Taking '" + fullreplace[0] + "'");
+
+				console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
+				this.path = fullreplace[0];
+			}
+
+			return original.apply(this, arguments);
+		}
+
+		imageHooked = true;
 	}
 	
 	function _handleImage(image){
