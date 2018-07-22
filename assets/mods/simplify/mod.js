@@ -755,7 +755,7 @@ simplify.resources = new function(){
 				if(fullreplace.length > 1)
 					console.warn("Conflict between '" + fullreplace.join("', '") + "' found. Taking '" + fullreplace[0] + "'");
 
-				console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
+				//console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
 				this.path = fullreplace[0];
 			}
 
