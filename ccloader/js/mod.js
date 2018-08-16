@@ -8,6 +8,7 @@ if(!process && window.require)
 function Mod(file){
 	var manifest;
 	var loaded = false;
+	var loading = false;
 	var onload;
 	var table;
 	var runtimeAssets = [];
@@ -53,6 +54,8 @@ function Mod(file){
 		filemanager.loadMod(manifest.main, cb);
 	}
 	this.onload = function(cb){
+		loading = true;
+
 		if(loaded)
 			cb();
 		else
@@ -69,6 +72,18 @@ function Mod(file){
 			return;
 		
 		return manifest.description;
+	}
+	this.getVersion = function(){
+		if(!loaded)
+			return;
+		
+		return manifest.version;
+	}
+	this.getDependencies = function(){
+		if(!loaded)
+			return;
+		
+		return manifest.dependencies;
 	}
 	this.getAssets = function(){
 		if(!loaded)
@@ -128,6 +143,12 @@ function Mod(file){
 		table.executeDb(ccloader.frame.contentWindow, ccloader.frame.contentWindow);
 	}
 
+	this.isLoading = function(){
+		return loading;
+	}
+	this.isLoaded = function(){
+		return loaded;
+	}
 	this.isEnabled = function(){
 		if(!loaded)
 			return false;

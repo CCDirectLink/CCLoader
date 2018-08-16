@@ -24,6 +24,9 @@ var filemanager = new function(){
 	this.loadMod = function(file, onModLoaded){
         _loadScript(file, onModLoaded, modloader.frame.contentDocument);
 	}
+	this.loadScript = function(file, onScriptLoaded){
+		_loadScript(file, onScriptLoaded, document);
+	}
 	this.getTableName = function(callback){
 		_getHash('assets/js/game.compiled.js', callback);
 	}
