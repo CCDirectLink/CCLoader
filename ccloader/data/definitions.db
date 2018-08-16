@@ -387,12 +387,12 @@
                                     "name": "intro",
                                     "compiled": {
                                         "type": "select",
-                                        "pattern": "properties.45.value.properties.3.key.name",
+                                        "pattern": "key.name",
                                         "from": {
-                                            "type": "ObjectExpression",
+                                            "type": "Property",
                                             "values": [
                                                 {
-                                                    "name": "properties.0.value.properties.3.value.raw",
+                                                    "name": "value.raw",
                                                     "value": "\"media/bgm/cargoship-bgm1-intro.mp3\""
                                                 }
                                             ]
@@ -405,12 +405,12 @@
                                     "name": "loopEnd",
                                     "compiled": {
                                         "type": "select",
-                                        "pattern": "properties.45.value.properties.1.key.name",
+                                        "pattern": "key.name",
                                         "from": {
-                                            "type": "ObjectExpression",
+                                            "type": "Property",
                                             "values": [
                                                 {
-                                                    "name": "properties.0.value.properties.1.value.raw",
+                                                    "name": "value.raw",
                                                     "value": "124.364"
                                                 }
                                             ]
@@ -423,13 +423,13 @@
                                     "name": "introEnd",
                                     "compiled": {
                                         "type": "select",
-                                        "pattern": "properties.45.value.properties.4.key.name",
+                                        "pattern": "key.name",
                                         "from": {
-                                            "type": "ObjectExpression",
+                                            "type": "Property",
                                             "values": [
                                                 {
-                                                    "name": "properties.0.value.properties.4.value.raw",
-                                                    "value": "3.272"
+                                                    "name": "value.raw",
+                                                    "value": "8.823"
                                                 }
                                             ]
                                         }
@@ -1651,12 +1651,12 @@
                     "name": "Gui",
                     "parent": "ig",
                     "compiled": {
-                        "pattern": "body.965.expression.arguments.0.body.body.0.expression.right.callee.object.property.name",
+                        "pattern": "object.property.name",
                         "from": {
-                            "type": "Program",
+                            "type": "MemberExpression",
                             "values": [
                                 {
-                                    "name": "body.493.expression.arguments.0.body.body.0.expression.left.property.name",
+                                    "name": "property.name",
                                     "value": "CreditsScreen"
                                 }
                             ]
