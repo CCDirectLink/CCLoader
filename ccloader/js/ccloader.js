@@ -20,47 +20,48 @@ function ModLoader(){
 		});
 	}
 	this.startGame = function(){
-		this.frame.onload = _onGameInitialized;
+		this.frame.onload = _onGameInitialized.bind(this);
 		this.frame.src = window.require ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 	}
 	this.reloadTables = function(){
 		_instance.modTables = {};
 		filemanager.getTableName(function(tableName){
-			_createTable(tableName);
+			_createTable.bind(_instance)(tableName);
 			_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
-			for(var i = 0; i < this.mods.length; i++){
+			for(var i = 0; i < _instance.mods.length; i++){
 				_instance.mods[i].executeTable(_instance);
 			}
 		});
 	}
 	
 	function _initializeTable(cb){
-		filemanager.getTableName(function (tableName){
+		filemanager.getTableName(function(tableName){
 			if(filemanager.tableExists(tableName)){
 				_loadTable(tableName, cb)
 			} else {
-				_createTable(tableName);
+				_createTable.bind(_instance)(tableName);
 				cb();
 			}
 		});
 	}
+	//Requires bind
 	function _createTable(tableName){
-        _instance.status.innerHTML = "Initializing Mapping";
+        this.status.innerHTML = "Initializing Mapping";
 		console.log('Reading files...');
 		var jscode = filemanager.getResource('assets/js/game.compiled.js');
 		var dbtext = filemanager.getResource('ccloader/data/definitions.db');
 		var dbdef = JSON.parse(dbtext);
 		console.log('Parsing...');
-		_instance.acorn.parse(jscode);
+		this.acorn.parse(jscode);
 		console.log('Analysing...');
-		_instance.table = _instance.acorn.analyse(dbdef);
+		this.table = this.acorn.analyse(dbdef);
 		console.log('Writing...');
-		filemanager.saveTable(tableName, _instance.table);
+		filemanager.saveTable(tableName, this.table);
 		console.log('Finished!');
 	}
 	function _initializeModTables(cb){
-		_findMods();
-		_loadMods(function(){
+		_findMods.bind(_instance)();
+		_loadMods.bind(_instance)((function(){
 			var total = 1;
 			var actual = 0;
 			
@@ -78,43 +79,46 @@ function ModLoader(){
 			actual++;
 			if(actual >= total)
 				cb();
-		});
+		}).bind(_instance));
 	}
 	function _loadTable(tableName, cb){
-		filemanager.getDefintionHash(function(hash){
-			_instance.table = filemanager.loadTable(tableName, hash);
-			if(!_instance.table)
+		filemanager.getDefintionHash((function(hash){
+			this.table = filemanager.loadTable(tableName, hash);
+			if(!this.table)
 			{
-				_createTable(tableName);
+				_createTable.bind(this)(tableName);
 				if(cb)
 					cb();
 				return;
 			}
 			if(cb)
 				cb();
-		});
+		}).bind(_instance));
 	}
+	//Requires bind
 	function _executeDb(){
-		_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
+		this.table.executeDb(this.frame.contentWindow, this.frame.contentWindow);
 
-        _instance.status.innerHTML = "Initializing Mods";
+        this.status.innerHTML = "Initializing Mods";
 		_initializeModTables(function(){
-			_initializeMods();
+			_initializeMods.bind(_instance)();
 		});
 	}	
+	
 	function _onGameInitialized(){
-		_instance.status.innerHTML = "Loading Game";
-		_instance.frame.contentWindow.reloadTables = _instance.reloadTables;
-		var modsLoadedEvent = _instance.frame.contentDocument.createEvent('Event');
+		this.status.innerHTML = "Loading Game";
+		this.frame.contentWindow.reloadTables = this.reloadTables;
+		var modsLoadedEvent = this.frame.contentDocument.createEvent('Event');
 		modsLoadedEvent.initEvent('modsLoaded', true, true);
 		var intervalid = setInterval(function(){
 			if(frame.contentWindow.ig && frame.contentWindow.ig.ready) {
 				clearInterval(intervalid);
 				
-				_executeDb();
+				_executeDb.bind(_instance)();
 			}}, 1000);//Make sure Game is loaded
 	}
 	
+	//Requires bind
 	function _findMods(){
 		var modFiles = filemanager.getAllModsFiles();
 		this.mods = [];
@@ -123,6 +127,7 @@ function ModLoader(){
 		}
 	}
 
+	//Requires bind
 	function _loadMods(cb){
 		var length = this.mods.length;
 		var count = 0;
@@ -136,13 +141,14 @@ function ModLoader(){
 		}
 	}
 	
+	//Requires bind
 	function _initializeMods(){
-		frame.contentWindow.inactiveMods = [];
-		frame.contentWindow.activeMods = [];
+		this.frame.contentWindow.inactiveMods = [];
+		this.frame.contentWindow.activeMods = [];
 		
 		for(var i = 0; i < this.mods.length; i++){
 			if(this.mods[i].isEnabled()){
-				frame.contentWindow.activeMods.push(this.mods[i]);
+				this.frame.contentWindow.activeMods.push(this.mods[i]);
 
 				(function(mod){
 					mod.load(function(){
@@ -151,19 +157,20 @@ function ModLoader(){
 					});
 				})(this.mods[i]);
 			} else {
-				frame.contentWindow.inactiveMods.push(this.mods[i]);
-				_instance.modsLoaded++;
+				this.frame.contentWindow.inactiveMods.push(this.mods[i]);
+				this.modsLoaded++;
 			}
 		}
 		
-		var intervalid = setInterval(function(){
-			if(_instance.modsLoaded >= frame.contentWindow.activeMods.length){
+		var intervalid = setInterval((function(){
+			if(this.modsLoaded >= this.frame.contentWindow.activeMods.length){
 				clearInterval(intervalid);
-				_instance.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
-				_instance.status.outerHTML = "";
-				_instance.overlay.outerHTML = "";
+				this.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
+				this.status.outerHTML = "";
+				this.overlay.outerHTML = "";
 			}
-		}, 1000);
+		}).bind(this), 1000);
+	}
 	}
 }
 
