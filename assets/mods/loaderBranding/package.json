@@ -1,0 +1,6 @@
+{
+	"name": "Loader Branding",
+	"main": "mod.js",
+	"reobf": true,
+	"executionTime": "postExecModules"
+}

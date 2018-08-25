@@ -2,27 +2,24 @@ var filemanager = new function(){
 	var isBrowser = !window.require;
 	var isLocal = !isBrowser;
 	
-	var fs, path, md5file, modloader, modList;
-	var md5Loaded = false;
+	var fs, path, modloader, modList;
 	
 	this.initialize = function(mloader){
 		modloader = mloader;
 		
 		if(isLocal){
 			fs = require('fs');
-			md5file = require('md5-file');
 			path = require('path');
-			
 			_createDirectories();
 		} else {
-			_loadScript('js/2.5.3-crypto-md5.js', function(){ //ccloader/js/2.5.3-crypto-md5.js
-				md5Loaded = true;
-			}, document);
 			modList = JSON.parse(this.getResource('mods.json'));
 		}
 	}
 	this.loadMod = function(file, onModLoaded){
-        _loadScript(file, onModLoaded, modloader.frame.contentDocument);
+		_loadScript(file, onModLoaded, modloader.frame.contentDocument);
+	}
+	this.loadModTransformed = function(file, transform, onModLoaded){
+		_loadScriptCode(transform(this.getResource('assets/' + file)), onModLoaded, modloader.frame.contentDocument);
 	}
 	this.loadScript = function(file, onScriptLoaded){
 		_loadScript(file, onScriptLoaded, document);
@@ -121,17 +118,7 @@ var filemanager = new function(){
 		}
     }
     function _getHash(file, callback) {
-		if(isLocal) {
-            return md5file(file, function(err, hash){
-                callback(hash + '.table');
-            });
-        } else {
-            if(!md5Loaded){
-                setTimeout(this.getTableName, 100, callback);
-            } else {
-                callback(Crypto.MD5(filemanager.getResource(file)) + '.table');
-            }
-        }
+		callback(Crypto.MD5(filemanager.getResource(file)) + '.table');
     }
 	function _resourceExists(resource){
 		if(isLocal){
@@ -158,6 +145,14 @@ var filemanager = new function(){
 		script.type = "text/javascript";
 		script.src = url;
 		doc.body.appendChild(script);
+	}
+	function _loadScriptCode(code, callback, doc){
+		var script = document.createElement("script");
+		// script.onload = callback; // This doesn't get called anyway, for some reason.
+		script.type = "text/javascript";
+		script.textContent = code;
+		doc.body.appendChild(script); // Actually performs the call
+		callback();
 	}
 	function _getResourcesLocal(folder, ending){
 		var results = [];

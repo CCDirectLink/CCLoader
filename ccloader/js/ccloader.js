@@ -2,6 +2,9 @@ function ModLoader(){
 	var _instance = this;
 	var CCLOADER_VERSION = '1.0.0';
 
+	// Kept in holding to stop CrossCode from starting up properly
+	var windowProcessOnce;
+
 	this.table = undefined;
 	this.mods = [];
 	this.frame = undefined;
@@ -20,12 +23,24 @@ function ModLoader(){
 		this.acorn = new Acorn();
 		this.acorn.initialize(function(){
 			_loadSemver(function(){
-				_initializeTable(cb);
+				_initializeTable(function(){
+					// Also finds mods
+					this.status.innerHTML = "initializeModTables";
+					_initializeModTables(cb);
+				});
 			});
 		});
 	}
 	this.startGame = function(){
-		this.frame.onload = _onGameInitialized.bind(this);
+		// Pull the handbrake.
+		// To explain what's going on here:
+		// We need to stop the game getting too far along if we want to, say, hook the DoThing function of all instances of class ABC from game start.
+		// This means we need to stop the game loading, and thankfully their use of window["process"].once aids this.
+		windowProcessOnce = window.process.once;
+		window.process.once = null;
+		this.status.innerHTML = "Initializing Game";
+		this.frame.onload = _onGameWindowReady.bind(this);
+		console.log("NOTE! The window.process.once-related exception in node-webkit.html you are about to see was filmed in a studio environment. Do not try at home.");
 		this.frame.src = window.require ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 	}
 	this.reloadTables = function(){
@@ -100,27 +115,50 @@ function ModLoader(){
 				cb();
 		}).bind(_instance));
 	}
-	//Requires bind
-	function _executeDb(){
-		this.table.executeDb(this.frame.contentWindow, this.frame.contentWindow);
-
-        this.status.innerHTML = "Initializing Mods";
-		_initializeModTables(function(){
-			_initializeMods.bind(_instance)();
-		});
-	}	
 	
-	function _onGameInitialized(){
+	//Requires bind
+	function _onGameWindowReady(){
+		// Undo the handbrake
+		window.process.once = windowProcessOnce;
+
+		// Ok, now actually start the game on our own terms
+		this.frame.contentWindow.inactiveMods = [];
+		this.frame.contentWindow.activeMods = [];
+		
+		// This is before the game has loaded, so here's our only chance to get _execModules,
+		//  and for reobf mods to work we need map access anyway.
+		var modloadermap = new Map();
+		this.frame.contentWindow.modloadermap = modloadermap;
+		this.table.createMapping(modloadermap);
+
+		_initializeMods.bind(_instance)("postExecModules", _onReadyToContinueGameLoad.bind(_instance));
+	}
+
+	//Requires bind
+	function _onReadyToContinueGameLoad(){
 		this.status.innerHTML = "Loading Game";
 		this.frame.contentWindow.reloadTables = this.reloadTables;
-		var modsLoadedEvent = this.frame.contentDocument.createEvent('Event');
-		modsLoadedEvent.initEvent('modsLoaded', true, true);
 		var intervalid = setInterval(function(){
 			if(frame.contentWindow.ig && frame.contentWindow.ig.ready) {
 				clearInterval(intervalid);
-				
-				_executeDb.bind(_instance)();
-			}}, 1000);//Make sure Game is loaded
+				_onGameLoaded.bind(_instance)();
+			}
+		}, 1000); // Wait for game to load.
+		// Let the game begin loading
+		this.frame.contentWindow.doStartCrossCodePlz();
+	}
+
+	//Requires bind
+	function _onGameLoaded(){
+		this.table.executeDb(this.frame.contentWindow, this.frame.contentWindow);
+
+		var modsLoadedEvent = this.frame.contentDocument.createEvent('Event');
+		modsLoadedEvent.initEvent('modsLoaded', true, true);
+		_initializeMods.bind(_instance)("gameLoaded", function(){
+			_instance.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
+			_instance.status.outerHTML = "";
+			_instance.overlay.outerHTML = "";
+		});
 	}
 	
 	//Requires bind
@@ -149,23 +187,21 @@ function ModLoader(){
 	}
 	
 	//Requires bind
-	function _initializeMods(){
-		this.frame.contentWindow.inactiveMods = [];
-		this.frame.contentWindow.activeMods = [];
-		
+	function _initializeMods(executionTime, cb){
+		this.status.innerHTML = "Initializing " + executionTime + " Mods";
 		for(var i = 0; i < this.mods.length; i++){
+			if(this.mods[i].getExecutionTime() != executionTime)
+				continue;
 			if(this.mods[i].isEnabled() && _canLoad.bind(this)(this.mods[i])){
 				this.frame.contentWindow.activeMods.push(this.mods[i]);
 
 				(function(mod){
-					mod.load(function(){
+					mod.execute(_instance, function(){
 						_instance.modsLoaded++;
-						mod.executeTable(_instance);
 					});
 				})(this.mods[i]);
 			} else {
 				this.frame.contentWindow.inactiveMods.push(this.mods[i]);
-				this.modsLoaded++;
 
 				if(this.mods[i].isEnabled()){
 					console.warn('Could not load "' + this.mods[i].getName() + '" because it is missing dependencies!')
@@ -174,11 +210,9 @@ function ModLoader(){
 		}
 		
 		var intervalid = setInterval((function(){
-			if(this.modsLoaded >= this.frame.contentWindow.activeMods.length){
+			if(this.modsLoaded >= this.frame.contentWindow.activeMods.length) {
 				clearInterval(intervalid);
-				this.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
-				this.status.outerHTML = "";
-				this.overlay.outerHTML = "";
+				cb();
 			}
 		}).bind(this), 1000);
 	}
