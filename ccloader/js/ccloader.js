@@ -32,11 +32,15 @@ function ModLoader(){
 		});
 	}
 	this.startGame = function(){
-		// Pull the handbrake
+		// Pull the handbrake.
+		// To explain what's going on here:
+		// We need to stop the game getting too far along if we want to, say, hook the DoThing function of all instances of class ABC from game start.
+		// This means we need to stop the game loading, and thankfully their use of window["process"].once aids this.
 		windowProcessOnce = window.process.once;
 		window.process.once = null;
 		this.status.innerHTML = "Initializing Game";
 		this.frame.onload = _onGameWindowReady.bind(this);
+		console.log("NOTE! The window.process.once-related exception in node-webkit.html you are about to see was filmed in a studio environment. Do not try at home.");
 		this.frame.src = window.require ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 	}
 	this.reloadTables = function(){
