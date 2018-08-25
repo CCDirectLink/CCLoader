@@ -1743,6 +1743,32 @@
             "members": [
                 {
                     "type": "member",
+                    "refType": "var",
+                    "name": "CrossCode",
+                    "parent": "sc",
+                    "compiled": {
+                        "pattern": "arguments.2.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "#canvas"
+                                },
+                                {
+                                    "name": "arguments.1.value",
+                                    "value": "#game"
+                                },
+                                {
+                                    "name": "arguments.2.object.name",
+                                    "value": "sc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "member",
                     "name": "PlayerConfig",
                     "refType": "var",
                     "parent": "sc",
