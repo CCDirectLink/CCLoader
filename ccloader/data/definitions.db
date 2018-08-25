@@ -1290,6 +1290,106 @@
                                 },
                                 "type": "select"
                             }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "onStorageSave",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.4.body.expression.right.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.1.expression.left.property.name",
+                                            "value": "map"
+                                        },
+                                        {
+                                            "name": "body.2.expression.left.property.name",
+                                            "value": "vars"
+                                        },
+                                        {
+                                            "name": "body.3.expression.left.property.name",
+                                            "value": "position"
+                                        },
+                                        {
+                                            "name": "body.4.body.expression.right.callee.object.object.object.type",
+                                            "value": "ThisExpression"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "onStoragePreLoad",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.0.expression.right.property.name",
+                                            "value": "bgm"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "onStoragePostLoad",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "key.name",
+                                "from": {
+                                    "type": "Property",
+                                    "values": [
+                                        {
+                                            "name": "value.body.body.0.test.right.property.name",
+                                            "value": "bgm"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "register",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.1.expression.callee.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.0.expression.callee.property.name",
+                                            "value": "parent"
+                                        },
+                                        {
+                                            "name": "body.0.expression.arguments.0.value",
+                                            "value": "BGM"
+                                        },
+                                        {
+                                            "name": "body.1.expression.callee.object.object.name",
+                                            "value": "ig"
+                                        },
+                                        {
+                                            "name": "body.1.expression.arguments.0.type",
+                                            "value": "ThisExpression"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
+                            }
                         }
                     ]
                 },
@@ -2317,10 +2417,6 @@
                                     "type": "BlockStatement",
                                     "values": [
                                         {
-                                            "name": "body.length",
-                                            "value": "2"
-                                        },
-                                        {
                                             "name": "body.0.expression.callee.property.name",
                                             "value": "cc.ig.varNames.jump",
                                             "type": "dynamic"
@@ -2699,6 +2795,37 @@
                                 {
                                     "name": "arguments.0.value",
                                     "value": "MAP_ENTERED"
+                                }
+                            ]
+                        },
+                        "type": "select"
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "raw",
+                    "name": "version",
+                    "parent": "",
+                    "compiled": {
+                        "pattern": "arguments.0.body.body.1.expression.left.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "callee.object.callee.object.arguments.0.value",
+                                    "value": "game.feature.version.version"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.1.expression.left.object.name",
+                                    "value": "sc"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.1.expression.right.callee.object.name",
+                                    "value": "sc"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.1.expression.right.arguments.length",
+                                    "value": 0
                                 }
                             ]
                         },
