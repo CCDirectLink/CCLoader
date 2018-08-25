@@ -209,17 +209,19 @@ function Acorn(){
 	
 	function _buildMember(db, member, value){
 		//var value = _getVar(member.compiled);
-		
+		// REGARDING REOBF NAMES! These absolutely should not be messed with.
+		// Setting them to "getMapName" when the actual true name is "mapName" but this happens to be structured as an accessor,
+		//  is the kind of thing NOT to do if you don't want to completely ruin the point of the reobf mode.
 		switch(member.refType){
 			case "raw":
-				db.addRawMember(member.name, value);
+				db.addRawMember(member.name, member.reobfName || member.name, value);
 				break;
 			case "ref":
-				db.addMemberReference(member.name, member.parent, value);
+				db.addMemberReference(member.name, member.reobfName || member.name, member.parent, value);
 				break;
 			case "var":
 			default:
-				db.addMember(member.name, member.parent, value);
+				db.addMember(member.name, member.reobfName || member.name, member.parent, value);
 				break;
 		}
 	}
@@ -253,6 +255,8 @@ function Acorn(){
 							result = result.members[i];
 							break;
 						}else{
+							if (!result.members[i].compiledName)
+								console.warn("Couldn't lookup dynamic '" + pair.value + "'");
 							return result.members[i].compiledName;
 						}
 					}

@@ -6,14 +6,14 @@ function Db(name){
 		this.data.members.push(newDb.data);
 		return newDb;
 	}
-	this.addMember = function(name, parent, compiledName){
-		this.data.members.unshift({type: "member", name: name, parent: parent, compiledName: compiledName});
+	this.addMember = function(name, reobfName, parent, compiledName){
+		this.data.members.unshift({type: "member", name: name, reobfName: reobfName, parent: parent, compiledName: compiledName});
 	}
-	this.addMemberReference = function(name, parent, compiledName){
-		this.data.members.unshift({type: "memberReference", name: name, parent: parent, compiledName: compiledName});
+	this.addMemberReference = function(name, reobfName, parent, compiledName){
+		this.data.members.unshift({type: "memberReference", name: name, reobfName: reobfName, parent: parent, compiledName: compiledName});
 	}
-	this.addRawMember = function(name, value){
-		this.data.members.unshift({type: "rawmember", name: name, compiledName: value});
+	this.addRawMember = function(name, reobfName, value){
+		this.data.members.unshift({type: "rawmember", name: name, reobfName: reobfName, compiledName: value});
 	}
 
 	// 'parent' is where this DB is being injected. parent[name] is created.
@@ -29,11 +29,7 @@ function Db(name){
 		root.modloadermap = root.modloadermap || new Map();
 		
 		for(var i = 0; i < this.data.members.length; i++){
-			// Anything with a compiledName is fine for root.modloadermap
 			var member = this.data.members[i];
-			if (member.compiledName)
-				root.modloadermap.set(member.name, member.compiledName);
-			// While this walks & builds the tree
 			switch(member.type){
 				case "object":
 					var ndb = new Db(member.name);
@@ -59,6 +55,29 @@ function Db(name){
 		return result;
 	}
 	
+	// 'modloadermap' is a Map that maps deobf IDs to obf IDs.
+	this.createMapping = function(modloadermap){
+		for(var i = 0; i < this.data.members.length; i++){
+			// Anything with a compiledName is fine for root.modloadermap,
+			//  unless it's a memberReference which are function-styled ("playerInstance" is actually a way to access the property "playerEntity")
+			// The plan for incorrect definitions right now is I hope to get them aliased,
+			//  and as for memberReference... something similar
+			var member = this.data.members[i];
+			if (member.compiledName) {
+				var effectiveName = member.name;
+				if (member.reobfName)
+					effectiveName = member.reobfName;
+				modloadermap.set(effectiveName, member.compiledName);
+			}
+			// While this walks the tree
+			if (member.type == "object") {
+				var ndb = new Db(member.name);
+				ndb.data = member;
+				ndb.createMapping(modloadermap);
+			}
+		}
+	}
+
 	this._getParent = function(parentString, root){
 		if(parentString === undefined || parentString === ""){
 			return root;

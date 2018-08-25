@@ -45,6 +45,11 @@ function Mod(file){
 		});
 	}
 
+	// postExecModules / gameLoaded
+	this.getExecutionTime = function(){
+		return manifest.executionTime || "gameLoaded";
+	}
+
 	// Add definitions, run the script, after that's run call the callback function.
 	this.execute = function(ccloader, cb){
 		if(!loaded)
@@ -161,12 +166,12 @@ function Mod(file){
 		if(!loaded)
 			return false;
 		
-		var globals = frame.contentWindow.cc.ig.storage[frame.contentWindow.cc.ig.varNames.storageGlobals];
+		var globals = frame.contentWindow.localStorage;
 		
-		if(!globals || !globals.options)
+		if(!globals)
 			return true;
 		
-		return globals.options['modEnabled-' + manifest.name.toLowerCase()] !== false;
+		return globals['options.modEnabled-' + manifest.name.toLowerCase()] !== false;
 	}
 	
 	function _getModNameFromFile(){

@@ -49,6 +49,7 @@
                     "type": "member",
                     "refType": "ref",
                     "name": "saveSlotList",
+                    "reobfName": "slots",
                     "parent": "cc.ig.storage",
                     "compiled": {
                         "type": "select",
@@ -87,6 +88,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "GUI",
+                    "reobfName": "gui",
                     "parent": "ig",
                     "compiled": {
                         "type": "select",
@@ -106,6 +108,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "gameMain",
+                    "reobfName": "game",
                     "parent": "ig",
                     "compiled": {
                         "type": "select",
@@ -144,6 +147,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "baseEntity",
+                    "reobfName": "Entity",
                     "parent": "ig",
                     "compiled": {
                         "type": "select",
@@ -163,6 +167,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "events",
+                    "reobfName": "EVENT_STEP",
                     "parent": "ig",
                     "compiled": {
                         "type": "select",
@@ -201,6 +206,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "combatActions",
+                    "reobfName": "ACTION_STEP",
                     "parent": "ig",
                     "compiled": {
                         "type": "select",
@@ -259,6 +265,7 @@
                     "type": "member",
                     "refType": "ref",
                     "name": "playerInstance",
+                    "reobfName": "playerEntity",
                     "parent": "cc.ig.gameMain",
                     "compiled": {
                         "type": "select",
@@ -278,6 +285,7 @@
                     "type": "member",
                     "refType": "ref",
                     "name": "getMapName",
+                    "reobfName": "mapName",
                     "parent": "cc.ig.gameMain",
                     "compiled": {
                         "type": "select",
@@ -320,6 +328,7 @@
                             "type": "member",
                             "refType": "ref",
                             "name": "getLoadingState",
+                            "reobfName": "currentLoadingResource",
                             "parent": "cc.ig.gameMain",
                             "compiled": {
                                 "type": "select",
@@ -339,6 +348,7 @@
                             "type": "member",
                             "refType": "var",
                             "name": "LoadMap",
+                            "reobfName": "preloadLevel",
                             "parent": "cc.ig.gameMain",
                             "compiled": {
                                 "pattern": "key.name",
@@ -357,7 +367,8 @@
                             "type": "member",
                             "refType": "raw",
                             "name": "CreateMap",
-                            "parent": "",
+                            "reobfName": "loadLevel",
+                            "parent": "cc.ig.gameMain",
                             "compiled": {
                                 "pattern": "key.name",
                                 "from": {
@@ -782,6 +793,7 @@
                             "type": "member",
                             "refType": "raw",
                             "name": "entityData",
+                            "reobfName": "coll",
                             "compiled": {
                                 "type": "select",
                                 "pattern": "body.3.expression.left.object.property.name",
@@ -800,6 +812,7 @@
                             "type": "member",
                             "refType": "raw",
                             "name": "entityPosition",
+                            "reobfName": "pos",
                             "compiled": {
                                 "type": "select",
                                 "pattern": "body.1.declarations.1.init.left.object.property.name",
@@ -818,6 +831,7 @@
                             "type": "member",
                             "refType": "raw",
                             "name": "entityKill",
+                            "reobfName": "kill",
                             "compiled": {
                                 "type": "select",
                                 "pattern": "body.0.expression.right.callee.property.name",
@@ -926,6 +940,7 @@
                             "type": "member",
                             "refType": "raw",
                             "name": "jump",
+                            "reobfName": "doJump",
                             "compiled": {
                                 "type": "select",
                                 "pattern": "body.1.expression.callee.property.name",
@@ -1227,6 +1242,53 @@
                                         }
                                     ]
                                 }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "onPreUpdate",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "right.arguments.0.properties.2.key.name",
+                                "from": {
+                                    "type": "AssignmentExpression",
+                                    "values": [
+                                        {
+                                            "name": "left.object.name",
+                                            "value": "sc"
+                                        },
+                                        {
+                                            "name": "right.callee.object.object.name",
+                                            "value": "ig"
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.0.value.body.body.0.expression.callee.object.type",
+                                            "value": "ThisExpression"
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.0.value.body.body.0.expression.callee.property.name",
+                                            "value": "parent"
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.0.value.body.body.0.expression.arguments.length",
+                                            "value": 1
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.0.value.body.body.0.expression.arguments.0.value",
+                                            "value": "GlobalInput"
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.1.value.raw",
+                                            "value": "5"
+                                        },
+                                        {
+                                            "name": "right.arguments.0.properties.2.value.type",
+                                            "value": "FunctionExpression"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
                             }
                         }
                     ]
@@ -1734,6 +1796,93 @@
                             ]
                         }
                     }
+                },
+                {
+                    "type": "member",
+                    "refType": "raw",
+                    "name": "addGameAddon",
+                    "parent": "",
+                    "compiled": {
+                        "pattern": "callee.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "callee.object.name",
+                                    "value": "ig"
+                                },
+                                {
+                                    "name": "arguments.length",
+                                    "value": 1
+                                },
+                                {
+                                    "name": "arguments.0.type",
+                                    "value": "FunctionExpression"
+                                },
+                                {
+                                    "name": "arguments.0.body.type",
+                                    "value": "BlockStatement"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.length",
+                                    "value": 1
+                                },
+                                {
+                                    "name": "arguments.0.body.body.0.type",
+                                    "value": "ReturnStatement"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.0.argument.type",
+                                    "value": "MemberExpression"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.0.argument.object.name",
+                                    "value": "sc"
+                                },
+                                {
+                                    "name": "arguments.0.body.body.0.argument.property.name",
+                                    "value": "sc.fontsystem",
+                                    "type": "dynamic"
+                                }
+                            ]
+                        },
+                        "type": "select"
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "raw",
+                    "name": "GameAddon",
+                    "parent": "",
+                    "compiled": {
+                        "pattern": "right.callee.object.property.name",
+                        "from": {
+                            "type": "AssignmentExpression",
+                            "values": [
+                                {
+                                    "name": "left.object.name",
+                                    "value": "sc"
+                                },
+                                {
+                                    "name": "right.callee.object.object.name",
+                                    "value": "ig"
+                                },
+                                {
+                                    "name": "right.arguments.length",
+                                    "value": 1
+                                },
+                                {
+                                    "name": "right.arguments.0.properties.0.value.body.body.0.expression.arguments.length",
+                                    "value": 1
+                                },
+                                {
+                                    "name": "right.arguments.0.properties.0.value.body.body.0.expression.arguments.0.value",
+                                    "value": "GlobalInput"
+                                }
+                            ]
+                        },
+                        "type": "select"
+                    }
                 }
             ]
         },
@@ -1828,6 +1977,7 @@
                     "type": "member",
                     "refType": "var",
                     "name": "playerModelInstance",
+                    "reobfName": "player",
                     "parent": "sc",
                     "compiled": {
                         "type": "select",
@@ -2154,6 +2304,38 @@
                                         }
                                     ]
                                 }
+                            }
+                        },
+                        {
+                            "type": "member",
+                            "refType": "raw",
+                            "name": "jumping",
+                            "parent": "",
+                            "compiled": {
+                                "pattern": "body.1.consequent.expression.left.property.name",
+                                "from": {
+                                    "type": "BlockStatement",
+                                    "values": [
+                                        {
+                                            "name": "body.length",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "name": "body.0.expression.callee.property.name",
+                                            "value": "cc.ig.varNames.jump",
+                                            "type": "dynamic"
+                                        },
+                                        {
+                                            "name": "body.1.test.argument.object.type",
+                                            "value": "ThisExpression"
+                                        },
+                                        {
+                                            "name": "body.1.consequent.expression.type",
+                                            "value": "AssignmentExpression"
+                                        }
+                                    ]
+                                },
+                                "type": "select"
                             }
                         }
                     ]
@@ -2498,6 +2680,29 @@
                                 }
                             ]
                         }
+                    }
+                },
+                {
+                    "type": "member",
+                    "refType": "raw",
+                    "name": "commonEvents",
+                    "parent": "",
+                    "compiled": {
+                        "pattern": "callee.object.property.name",
+                        "from": {
+                            "type": "CallExpression",
+                            "values": [
+                                {
+                                    "name": "callee.object.object.name",
+                                    "value": "sc"
+                                },
+                                {
+                                    "name": "arguments.0.value",
+                                    "value": "MAP_ENTERED"
+                                }
+                            ]
+                        },
+                        "type": "select"
                     }
                 }
             ]
