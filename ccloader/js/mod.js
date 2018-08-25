@@ -44,14 +44,28 @@ function Mod(file){
 				onload();
 		});
 	}
-	this.load = function(cb){
+
+	// Add definitions, run the script, after that's run call the callback function.
+	this.execute = function(ccloader, cb){
 		if(!loaded)
 			return;
+
+		if(table)
+			table.executeDb(ccloader.frame.contentWindow, ccloader.frame.contentWindow);
 
 		if(!manifest.main)
 			return cb();
 
-		filemanager.loadMod(manifest.main, cb);
+		if (manifest.reobf) {
+			filemanager.loadModTransformed(manifest.main, (function (code) {
+				return kireobf(code, (function (id) {
+					// I'm unsure if modloaderdbs get merged correctly. Also, inefficient to walk the tree for no reason
+					return ccloader.frame.contentWindow.modloadermap.get(id);
+				}).bind(this));
+			}).bind(this), cb);
+		} else {
+			filemanager.loadMod(manifest.main, cb);
+		}
 	}
 	this.onload = function(cb){
 		loading = true;
@@ -135,12 +149,6 @@ function Mod(file){
 			
 			cb();
 		});
-	}
-	this.executeTable = function(ccloader){
-		if(!loaded || !table)
-			return;
-
-		table.executeDb(ccloader.frame.contentWindow, ccloader.frame.contentWindow);
 	}
 
 	this.isLoading = function(){

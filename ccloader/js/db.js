@@ -15,6 +15,9 @@ function Db(name){
 	this.addRawMember = function(name, value){
 		this.data.members.unshift({type: "rawmember", name: name, compiledName: value});
 	}
+
+	// 'parent' is where this DB is being injected. parent[name] is created.
+	// 'root' is the target window.
 	this.executeDb = function(parent, root){
 		if(!parent[this.data.name])
 			parent[this.data.name] = {};
@@ -22,26 +25,30 @@ function Db(name){
 		var result = true;
 		
 		root.modloaderdb = {instance: this, root: root};
+		// varNames but for any symbol at all.
+		root.modloadermap = root.modloadermap || new Map();
 		
 		for(var i = 0; i < this.data.members.length; i++){
-			switch(this.data.members[i].type){
+			// Anything with a compiledName is fine for root.modloadermap
+			var member = this.data.members[i];
+			if (member.compiledName)
+				root.modloadermap.set(member.name, member.compiledName);
+			// While this walks & builds the tree
+			switch(member.type){
 				case "object":
-					var ndb = new Db(this.data.members[i].name);
-					ndb.data = this.data.members[i];
+					var ndb = new Db(member.name);
+					ndb.data = member;
 					var res = ndb.executeDb(child, root);
 					if(!res)
 						result = false;
 					break;
 				case "rawmember":
-					var member = this.data.members[i];
 					child[member.name] = member.compiledName;
 					break;
 				case "memberReference":
-					var member = this.data.members[i];
 					_resolve(member.name, child)[_last(member.name)] = new Function('window', 'return function(){ return window.modloaderdb.instance._getParent(\'' + member.parent + '\', window.modloaderdb.root)[\'' + member.compiledName + '\']}')(root);
 					break;
 				default:
-					var member = this.data.members[i];
 					_resolve(member.name, child)[_last(member.name)] = this._getParent(member.parent, root)[member.compiledName];
 					if(_resolve(member.name, child)[_last(member.name)] === undefined)
 						result = false;

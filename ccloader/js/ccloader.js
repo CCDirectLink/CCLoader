@@ -158,9 +158,8 @@ function ModLoader(){
 				this.frame.contentWindow.activeMods.push(this.mods[i]);
 
 				(function(mod){
-					mod.load(function(){
+					mod.execute(_instance, function(){
 						_instance.modsLoaded++;
-						mod.executeTable(_instance);
 					});
 				})(this.mods[i]);
 			} else {

@@ -1,6 +1,5 @@
 function Acorn(){
-	var ac, walker,
-	    acornLoaded = false, 
+	var acornLoaded = false, 
 	    walkerLoaded = false;
 	
 	var tree = undefined;
@@ -8,30 +7,20 @@ function Acorn(){
 	var definitions = [];
 	
 	this.initialize = function(cb){
-		if(window.require){
-		ac = require("acorn");
-		walker = require("acorn/dist/walk");
-		acornLoaded = true;
-		walkerLoaded = true;
-		cb();
-	}else{
-		_loadScript("/node_modules/acorn/dist/acorn.js", function(){
-			ac = window.acorn;
+		nodemodules.on("acorn", function () {
 			acornLoaded = true;
 			if(walkerLoaded)
 				cb();
-		})
-		_loadScript("/node_modules/acorn/dist/walk.js", function(){
-			walker = window.acorn.walk;
+		});
+		nodemodules.on("acorn/dist/walk", function () {
 			walkerLoaded = true;
 			if(acornLoaded)
 				cb();
-		})
+		});
 	}
-	
-	}
+
 	this.parse = function(jscode){
-		tree = ac.parse(jscode, {onToken: function(){}});
+		tree = acorn.parse(jscode, {onToken: function(){}});
 		
 		//Fancy new and fast searching algorithm
 		/*setTimeout(function(){
@@ -43,7 +32,7 @@ function Acorn(){
 			var single = false;	
 
 
-			walker.fullAncestor(tree, function(node, state, ancestor, type){
+			acorn.walk.fullAncestor(tree, function(node, state, ancestor, type){
 				if(single && results.length)
 					return;
 				
@@ -121,7 +110,7 @@ function Acorn(){
 			var i = 0, steps = 14, depth = 20;
 			var pattern = "CURRENT_STATE";
 			var searched = "de";
-			var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
+			var result = acorn.walk.findNodeAt(tree, null, null, function(nodeType, node){
 					function search(n, layers){
 						if(layers <= 0)
 							if(n === pattern){
@@ -181,7 +170,7 @@ function Acorn(){
 		while(definitions.length > 0) {
 			var start = definitions.length;
 			
-			walker.findNodeAt(tree, undefined, undefined, function(nodeType, node){
+			acorn.walk.findNodeAt(tree, undefined, undefined, function(nodeType, node){
 				for(var i = 0; i < definitions.length; i++){
 					var value = _getSelectVar(definitions[i].member.compiled, nodeType, node);
 					if(value !== undefined) {
@@ -284,12 +273,5 @@ function Acorn(){
 		}
 		
 		return result;
-	}
-	function _loadScript(url, callback){
-		var script = document.createElement("script");
-		document.body.appendChild(script);
-		script.onload = callback;
-		script.type = "text/javascript";
-		script.src = url;
 	}
 }
