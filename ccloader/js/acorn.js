@@ -1,37 +1,19 @@
-function Acorn(){
-	var ac, walker,
-	    acornLoaded = false, 
-	    walkerLoaded = false;
-	
-	var tree = undefined;
-	var db;
-	var definitions = [];
-	
-	this.initialize = function(cb){
-		if(window.require){
-		ac = require("acorn");
-		walker = require("acorn/dist/walk");
-		acornLoaded = true;
-		walkerLoaded = true;
-		cb();
-	}else{
-		_loadScript("/node_modules/acorn/dist/acorn.js", function(){
-			ac = window.acorn;
-			acornLoaded = true;
-			if(walkerLoaded)
-				cb();
-		})
-		_loadScript("/node_modules/acorn/dist/walk.js", function(){
-			walker = window.acorn.walk;
-			walkerLoaded = true;
-			if(acornLoaded)
-				cb();
-		})
+import * as acorn from '../../node_modules/acorn/dist/acorn.es.js';
+import * as walker from '../../node_modules/acorn/dist/walk.es.js';
+
+import { Db, DbTree } from './db.js';
+
+export class Acorn {
+	get needsParsing(){
+		return !this.tree;
 	}
-	
-	}
-	this.parse = function(jscode){
-		tree = ac.parse(jscode, {onToken: function(){}});
+
+	/**
+	 * 
+	 * @param {string} jscode 
+	 */
+	parse(jscode){
+		this.tree = acorn.parse(jscode, {onToken: () => {}});
 		
 		//Fancy new and fast searching algorithm
 		/*setTimeout(function(){
@@ -167,129 +149,123 @@ function Acorn(){
 		}, 1000);*/
 			
 	}
-	this.needsParsing = function(){
-		return !tree;
-	}
-	this.analyse = function(dbDefinition){
-		db = new Db(dbDefinition.name);
-		db = _buildDb(db, dbDefinition);
-		_finalizeDb();
-		return db;
-	}
-	
-	function _finalizeDb() {
-		while(definitions.length > 0) {
-			var start = definitions.length;
+
+	/**
+	 * 
+	 * @param {{entries: {type: 'select', name: string, pattern: string, from: {type: string, values: {name: string, value: string, type?: 'dynamic'}[]}}[], tree: any[]}} dbDefinition 
+	 */
+	analyse(dbDefinition){
+		const defs = dbDefinition.entries;
+		/** @type {{[name: string]: string}} */
+		const entries = {};
+		
+		while (defs.length > 0) {
+			const start = defs.length;
 			
-			walker.findNodeAt(tree, undefined, undefined, function(nodeType, node){
-				for(var i = 0; i < definitions.length; i++){
-					var value = _getSelectVar(definitions[i].member.compiled, nodeType, node);
+			walker.findNodeAt(this.tree, undefined, undefined, (nodeType, node) => {
+				for (const i in defs) {
+					if (!defs.hasOwnProperty(i)) {
+						continue;
+					}
+
+					const def = defs[i];
+					const value = this._getSelectNode(def.from, nodeType, node, def.pattern, entries);
 					if(value !== undefined) {
-						_buildMember(definitions[i].db, definitions[i].member, value);
-						definitions.splice(i, 1);
-						i--;
+						entries[def.name] = value;
+						defs.splice(i, 1);
 					}
 				}
-			});
+			}, walker.base);
 			
-			if(start <= definitions.length) {
-				console.warn(definitions.length + " definitions did not match", definitions);
-				return
+			if(start <= defs.length) {
+				console.warn(defs.length + ' definitions did not match', defs);
+				break;
 			}
 		}
+
+		const root = new DbTree(dbDefinition.tree.name, []);
+		for (const child of dbDefinition.tree.children) {
+			root.addChild(this._buildTree(child, root, entries));
+		}
+
+		return new Db(entries, null, root);
 	}
-	function _buildDb(db, definition){
-		for(var i = 0; i < definition.members.length; i++){
-			var member = definition.members[i];
-			if(member.type === "object"){
-				_buildDb(db.addObject(member.name), member);
-			}else{
-				_buildMemberLater(db, member);
+
+	/**
+	 * 
+	 * @param {{type: 'object'|'static'|'dynamic'|'raw', name: string, parent: string, children: any[]}} node
+	 * @param {DbTree} parent
+	 * @param {{[name: string]: string}} entries
+	 * @returns {DbTree|DbNode} 
+	 */
+	_buildTree(node, parent, entries) {
+		switch (node.type) {
+		case 'object': {
+			const result = new DbTree(node.name, []);
+			for (const child of node.children) {
+				result.addNode(this._buildTree(child, result, entries));
 			}
+			return result;
 		}
-		
-		return db;
-	}
-	function _buildMemberLater(db, member){
-		if(member.compiled.type === "fixed") {
-			_buildMember(db, member, _getFixedVar(member.compiled));
-		} else {
-			definitions.push({db:db, member:member});
+		case 'static': 
+			return parent.addStatic(node.name, entries[node.name], node.parent);
+		case 'dynamic':
+			return parent.addDynamic(node.name, entries[node.name], node.parent);
+		case 'raw':
+			return parent.addRaw(node.name, entries[node.name]);
 		}
 	}
+
 	
-	function _buildMember(db, member, value){
-		//var value = _getVar(member.compiled);
-		
-		switch(member.refType){
-			case "raw":
-				db.addRawMember(member.name, value);
-				break;
-			case "ref":
-				db.addMemberReference(member.name, member.parent, value);
-				break;
-			case "var":
-			default:
-				db.addMember(member.name, member.parent, value);
-				break;
-		}
-	}
-	function _getFixedVar(compiled){
-		return compiled.pattern;
-	}
-	function _getSelectVar(compiled, nodeType, node){
-		if(nodeType !== compiled.from.type){
+	/**
+	 * 
+	 * @param {{type: string, values: {name: string, value: string, type?: 'dynamic'}[]}} compiled 
+	 * @param {string} nodeType 
+	 * @param {string} node 
+	 * @param {string} pattern 
+	 * @param {{[name: string]: string}} entries
+	 */
+	_getSelectNode(compiled, nodeType, node, pattern, entries) {
+		if(nodeType !== compiled.type) {
 			return undefined;
 		}
 		
-		for(var valuePairIndex in compiled.from.values){
-			var valuePair = compiled.from.values[valuePairIndex];
-			var realValue = _getNodeMember(node, valuePair.name);
-			if(realValue === undefined || realValue !== _resolveValue(valuePair))
+		for(const condition of compiled.values){
+			const realValue = this._resolve(node, condition.name);
+			if(realValue === undefined || realValue !== this._resolveValue(condition, entries))
 				return undefined;
 		}
 		
-		return _getNodeMember(node, compiled.pattern);
+		return this._resolve(node, pattern);
 	}
-	function _resolveValue(pair){
-		if(pair.type === "dynamic"){
-			var split = pair.value.split(".");
-			var result = db.data;
-			
-			for(var step in split){
-				var name = split[step];
-				for(var i in result.members){
-					if(name === result.members[i].name){
-						if(result.members[i].type === "object"){
-							result = result.members[i];
-							break;
-						}else{
-							return result.members[i].compiledName;
-						}
-					}
-				}
-			}
-		}else{
+
+	/**
+	 * 
+	 * @param {{name: string, value: string, type?: 'dynamic'}} pair 
+	 * @param {{[name: string]: string}} entries
+	 * @returns {string}
+	 */
+	_resolveValue(pair, entries){
+		if(pair.type === 'dynamic'){
+			return entries[pair.value];
+		} else {
 			return pair.value;
 		}
 	}
-	function _getNodeMember(node, path){
-		var split = path.split(".");
-		var result = node;
+
+	/**
+	 * @param {string} path
+	 */
+	_resolve(node, path) {
+		const split = path.split('.');
+		let result = node;
 		
-		for(var step in split){
-			result = result[split[step]];
+		for(const step of split){
+			result = result[step];
 			if(result === undefined || result === null)
 				return undefined;
 		}
 		
 		return result;
-	}
-	function _loadScript(url, callback){
-		var script = document.createElement("script");
-		document.body.appendChild(script);
-		script.onload = callback;
-		script.type = "text/javascript";
-		script.src = url;
 	}
 }

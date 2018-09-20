@@ -1,235 +1,287 @@
-function ModLoader(){
-	var _instance = this;
-	var CCLOADER_VERSION = '1.0.0';
+import { Filemanager } from './filemanager.js';
+import { Acorn } from './acorn.js';
+import { Mod } from './mod.js';
 
-	this.table = undefined;
-	this.mods = [];
-	this.frame = undefined;
-	this.acorn = undefined;
-	this.status = undefined;
-	this.crosscodeVersion = undefined;
-	this.modsLoaded = 0;
-	
-	this.initialize = function(cb){
-		filemanager.initialize(this);
+const CCLOADER_VERSION = '2.0.0';
+
+export class ModLoader {
+	constructor() {
+		this.filemanager = new Filemanager(this);
+		this.acorn = new Acorn();
 		
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
 		
-		this.acorn = new Acorn();
-		this.acorn.initialize(function(){
-			_loadSemver(function(){
-				_initializeTable(cb);
-			});
-		});
+		this.modsLoaded = 0;
+		/** @type {Mod[]} */
+		this.mods = [];
+		
+		this._initializeTable();
 	}
-	this.startGame = function(){
-		this.frame.onload = _onGameInitialized.bind(this);
-		this.frame.src = window.require ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
+
+	/**
+	 * Loads and starts the game. It then loads the definitions and mods
+	 */
+	startGame() {
+		this._initializeGame()
+			.then(() => {
+				this._setStatus('Loading Game');
+
+				this._getGameWindow().reloadTables = () => this.reloadTables();
+				this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
+	
+				this._waitForGame()
+					.then(() => this._executeDb());
+			})
+			.catch(err => console.error('Something went wrong while loading the game', err));
 	}
-	this.reloadTables = function(){
-		_instance.modTables = {};
-		filemanager.getTableName(function(tableName){
-			_createTable.bind(_instance)(tableName);
-			_instance.table.executeDb(_instance.frame.contentWindow, _instance.frame.contentWindow);
-			for(var i = 0; i < _instance.mods.length; i++){
-				_instance.mods[i].executeTable(_instance);
-			}
-		});
+
+	/**
+	 * Reloads all definitions
+	 */
+	reloadTables() {
+		this.modTables = {};
+		this._createTable(this.filemanager.getTableName());
+		this.table.execute(this._getGameWindow(), this._getGameWindow());
+		for (const mod of this.mods) {
+			mod.executeTable(this);
+		}
+	}
+
+	/**
+	 * 
+	 * @param {string} text 
+	 */
+	_setStatus(text) {
+		if (this.status) {
+			this.status.innerHTML = text;
+		}
+	}
+
+	_getGameWindow() {
+		return this.frame.contentWindow;
 	}
 	
-	function _initializeTable(cb){
-		filemanager.getTableName(function(tableName){
-			if(filemanager.tableExists(tableName)){
-				_loadTable(tableName, cb)
-			} else {
-				_createTable.bind(_instance)(tableName);
-				cb();
-			}
-		});
+	/**
+	 * Loads a cached table if available and creates a new one otherwise
+	 */
+	_initializeTable() {
+		const tableName = this.filemanager.getTableName();
+		if (this.filemanager.tableExists(tableName)) {
+			this._loadTable(tableName);
+		} else {
+			this._createTable(tableName);
+		}
 	}
-	//Requires bind
-	function _createTable(tableName){
-        this.status.innerHTML = "Initializing Mapping";
+
+	/**
+	 * Creates the table from the definitions.db. It will also generate a cached table if possible.
+	 * @param {string} tableName 
+	 */
+	_createTable(tableName) {
+		this._setStatus('Initializing Mapping');
 		console.log('Reading files...');
-		var jscode = filemanager.getResource('assets/js/game.compiled.js');
-		var dbtext = filemanager.getResource('ccloader/data/definitions.db');
-		var dbdef = JSON.parse(dbtext);
+		const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
+		const dbtext = this.filemanager.getResource('ccloader/data/definitions.db');
+		const dbdef = JSON.parse(dbtext);
 		console.log('Parsing...');
 		this.acorn.parse(jscode);
 		console.log('Analysing...');
 		this.table = this.acorn.analyse(dbdef);
 		console.log('Writing...');
-		filemanager.saveTable(tableName, this.table);
+		this.filemanager.saveTable(tableName, this.table);
 		console.log('Finished!');
 	}
-	function _initializeModTables(cb){
-		_findMods.bind(_instance)();
-		_loadMods.bind(_instance)((function(){
-			var total = 1;
-			var actual = 0;
-			
-			for(var i = 0; i < this.mods.length; i++){
-				if(this.mods[i].isEnabled() && _canLoad.bind(this)(this.mods[i])){
-					total++;
-					this.mods[i].initializeTable(_instance, function(){
-						actual++;
-						if(actual >= total)
-							cb();
-					});
-				}
-			}
-			
-			actual++;
-			if(actual >= total)
-				cb();
-		}).bind(_instance));
-	}
-	function _loadTable(tableName, cb){
-		filemanager.getDefintionHash((function(hash){
-			this.table = filemanager.loadTable(tableName, hash);
-			if(!this.table)
-			{
-				_createTable.bind(this)(tableName);
-				if(cb)
-					cb();
-				return;
-			}
-			if(cb)
-				cb();
-		}).bind(_instance));
-	}
-	//Requires bind
-	function _executeDb(){
-		this.table.executeDb(this.frame.contentWindow, this.frame.contentWindow);
 
-        this.status.innerHTML = "Initializing Mods";
-		_initializeModTables(function(){
-			_initializeMods.bind(_instance)();
-		});
-	}	
-	
-	function _onGameInitialized(){
-		this.status.innerHTML = "Loading Game";
-		this.frame.contentWindow.reloadTables = this.reloadTables;
-		var modsLoadedEvent = this.frame.contentDocument.createEvent('Event');
-		modsLoadedEvent.initEvent('modsLoaded', true, true);
-		var intervalid = setInterval(function(){
-			if(frame.contentWindow.ig && frame.contentWindow.ig.ready) {
-				clearInterval(intervalid);
-				
-				_executeDb.bind(_instance)();
-			}}, 1000);//Make sure Game is loaded
+	/**
+	 * Loads the cached table
+	 * @param {string} tableName 
+	 */
+	_loadTable(tableName) {
+		const hash = this.filemanager.getDefintionHash();
+		this.table = this.filemanager.loadTable(tableName, hash);
+		if(!this.table) {
+			this._createTable(tableName);
+		}
+	}
+
+	/**
+	 * Loads the mods package.json and mod tables
+	 */
+	_initializeModTables() {
+		this._getModList();
+		return this._loadMods()
+			.then(() => {
+				for (const mod of this.mods) {
+					if (mod.isEnabled) {
+						mod.initializeTable(this);
+					}
+				}
+			});
+	}
+
+	/**
+	 * Applies all definitions and loads the mods
+	 */
+	_executeDb() {
+		this.table.execute(this._getGameWindow(), this._getGameWindow());
+
+		this._getGameWindow().getEntry = name => this.table.entries[name];
+
+		this._setStatus('Initializing Mods');
+		this._initializeModTables()
+			.then(() => this._initializeMods())
+			.then(() => this._waitForMods())
+			.then(() => {
+				this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
+				this._removeOverlay();
+			})
+			.catch(err => console.error('An error occured while loading mods', err));
 	}
 	
-	//Requires bind
-	function _findMods(){
-		var modFiles = filemanager.getAllModsFiles();
+	/**
+	 * Searches for mods and stores them in this.mods
+	 */
+	_getModList() {
+		const modFiles = this.filemanager.getAllModsFiles();
 		this.mods = [];
-		for(var i = 0; i < modFiles.length; i++){
-			this.mods.push(new Mod(modFiles[i]));
+		for (const modFile of modFiles) {
+			this.mods.push(new Mod(this, modFile));
 		}
 	}
 
-	//Requires bind
-	function _loadMods(cb){
-		var length = this.mods.length;
-		var count = 0;
+	/**
+	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available
+	 */
+	_loadMods() {
+		return new Promise(resolve => {
+			const length = this.mods.length;
+			let count = 0;
+	
+			for (const mod of this.mods) {
+				mod.onload()
+					.then(() => {
+						count++;
+						if(count >= length)
+							resolve();
+					});
+			}
 
-		for(var i = 0; i < length; i++){
-			if(_canLoad.bind(this)(this.mods[i])){
-				this.mods[i].onload(function(){
-					count++;
-					if(count >= length)
-						cb();
-				});
+			if(count >= length) //Needed if 0 mods are loaded
+				resolve();
+		});
+	}
+	
+	_initializeMods() {
+		this._buildCrosscodeVersion();
+
+		this._getGameWindow().inactiveMods = [];
+		this._getGameWindow().activeMods = [];
+		
+		for (const mod of this.mods) {
+			if (mod.isEnabled && this._canLoad(mod)) {
+				this._getGameWindow().activeMods.push(mod);
+
+				mod.executeTable(this);
+				(mod => {
+					mod.load()
+						.then(() => {
+							this.modsLoaded++;
+						})
+						.catch(() => {
+							console.warn(`Could not load "${mod.name}"`);
+							this.modsLoaded++;
+						});
+				})(mod);
+			} else {
+				this._getGameWindow().inactiveMods.push(mod);
+				this.modsLoaded++;
 			}
 		}
 	}
 	
-	//Requires bind
-	function _initializeMods(){
-		this.frame.contentWindow.inactiveMods = [];
-		this.frame.contentWindow.activeMods = [];
-		
-		for(var i = 0; i < this.mods.length; i++){
-			if(this.mods[i].isEnabled() && _canLoad.bind(this)(this.mods[i])){
-				this.frame.contentWindow.activeMods.push(this.mods[i]);
 
-				(function(mod){
-					mod.load(function(){
-						_instance.modsLoaded++;
-						mod.executeTable(_instance);
-					});
-				})(this.mods[i]);
-			} else {
-				this.frame.contentWindow.inactiveMods.push(this.mods[i]);
-				this.modsLoaded++;
+	/**
+	 * @returns {Promise<void>}
+	 */
+	_initializeGame() {
+		return new Promise((resolve, reject) => {
+			this.frame.onload = () => resolve();
+			this.frame.onerror = event => reject(event);
+			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
+		});
+	}
 
-				if(this.mods[i].isEnabled()){
-					console.warn('Could not load "' + this.mods[i].getName() + '" because it is missing dependencies!')
+	/**
+	 * Waits for all mods to be completely loaded
+	 * @returns {Promise<void>}
+	 */
+	_waitForMods() {
+		return new Promise(resolve => {
+			const intervalid = setInterval(() => {
+				if(this.modsLoaded >= this._getGameWindow().activeMods.length){
+					clearInterval(intervalid);
+					resolve();
 				}
-			}
+			}, 1000);
+		});
+	}
+
+	/**
+	 * Waits for the game to be completely loaded
+	 * @returns {Promise<void>}
+	 */
+	_waitForGame() {
+		return new Promise(resolve => {
+			const intervalid = setInterval(() => {
+				if (this._getGameWindow().ig && this._getGameWindow().ig.ready) {
+					clearInterval(intervalid);
+					resolve();
+				}}, 1000);
+		});
+	}
+
+	_removeOverlay() {
+		if (this.status && this.overlay) {
+			this.status.outerHTML = '';
+			this.overlay.outerHTML = '';
 		}
-		
-		var intervalid = setInterval((function(){
-			if(this.modsLoaded >= this.frame.contentWindow.activeMods.length){
-				clearInterval(intervalid);
-				this.frame.contentDocument.body.dispatchEvent(new Event("modsLoaded"));
-				this.status.outerHTML = "";
-				this.overlay.outerHTML = "";
-			}
-		}).bind(this), 1000);
 	}
 
-	function _loadSemver(cb) {
-		_buildCrosscodeVersion.bind(_instance)();
-
-		if(window.semver)
-			return cb();
-
-		if(window.require){
-			window.semver = require('./js/semver.browser.js');
-			return cb();
-		}
-
-		filemanager.loadScript('js/semver.browser.js', cb);
+	_buildCrosscodeVersion(){
+		const json = JSON.parse(localStorage.getItem('cc.version'));
+		this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
 	}
-
+	
 	//Requires bind
-	function _buildCrosscodeVersion(){
-		var json = JSON.parse(localStorage.getItem('cc.version'));
-		this.crosscodeVersion = json.major + '.' + json.minor + '.' + json.patch;
-	}
-
-	//Requires bind
-	function _canLoad(mod) {
-		var deps = mod.getDependencies();
-		if(!deps)
+	_canLoad(mod) {
+		const deps = mod.dependencies;
+		if(!deps) {
 			return true;
+		}
 
-		for(var depName in deps){
+		for (const depName in deps){
 			if(!deps.hasOwnProperty(depName))
 				continue;
 
-			var depRange = semver.validRange(deps[depName]);
+			const depRange = semver.validRange(deps[depName]);
 			if(!depRange){
-				console.warn('Invalid dependency version "' + deps[depName] + '" of "' + depName + '" of "' + mod.getName() + '"')
+				console.warn('Invalid dependency version "' + deps[depName] + '" of "' + depName + '" of "' + mod.name + '"');
 			}
 
-			var satisfied = false;
+			let satisfied = false;
 
 			if(depName == 'ccloader' && semver.satisfies(CCLOADER_VERSION, depRange)) {
 				satisfied = true;
 			}
-			if(depName == 'crosscode' && semver.satisfies(this.crosscodeVersion, depRange)) {
+			if(depName == 'crosscode' && semver.satisfies(this.ccVersion, depRange)) {
 				satisfied = true;
 			}
 
-			for(var i = 0; i < this.mods.length && !satisfied; i++){
-				if(this.mods[i].getName() == depName){
-					if(semver.satisfies(semver.valid(this.mods[i].getVersion()), depRange)){
+			for(let i = 0; i < this.mods.length && !satisfied; i++){
+				if(this.mods[i].name === depName){
+					if(semver.satisfies(semver.valid(this.mods[i].version), depRange)){
 						satisfied = true;
 					}
 				}

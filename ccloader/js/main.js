@@ -1,6 +1,6 @@
-window.onload = function(){
-	var modloader = new ModLoader();
-	modloader.initialize(function(){
-		modloader.startGame();
-	});
+import { ModLoader } from './ccloader.js';
+
+window.onload = () => {
+	const modloader = new ModLoader();
+	modloader.startGame();
 };
