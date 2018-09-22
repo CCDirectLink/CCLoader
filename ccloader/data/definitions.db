@@ -2,6 +2,20 @@
     "entries": [
         {
             "type": "select",
+            "name": "buttons",
+            "pattern": "callee.object.object.property.name",
+            "from": {
+                "type": "CallExpression",
+                "values": [
+                    {
+                        "name": "arguments.0.arguments.0.raw",
+                        "value": "\"sc.gui.menu.menu-titles.synopsis\""
+                    }
+                ]
+            }
+        },
+        {
+            "type": "select",
             "name": "bgm",
             "pattern": "key.name",
             "from": {
@@ -276,7 +290,7 @@
                 "values": [
                     {
                         "name": "value.raw",
-                        "value": "\"media/bgm/muCargohold-i.mp3\""
+                        "value": "\"media/bgm/muRookie.mp3\""
                     }
                 ]
             }
@@ -487,20 +501,6 @@
                     {
                         "name": "body.5.expression.arguments.0.raw",
                         "value": "\"Load Game: %O\""
-                    }
-                ]
-            }
-        },
-        {
-            "type": "select",
-            "name": "titleScreenButtons",
-            "pattern": "body.2.body.body.0.expression.callee.object.object.property.name",
-            "from": {
-                "type": "BlockStatement",
-                "values": [
-                    {
-                        "name": "body.8.expression.arguments.0.raw",
-                        "value": "\"ccFirstTime\""
                     }
                 ]
             }
@@ -1987,10 +1987,6 @@
                             {
                                 "type": "raw",
                                 "name": "TeleportPositionFromJson"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "titleScreenButtons"
                             },
                             {
                                 "type": "raw",
