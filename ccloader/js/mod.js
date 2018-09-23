@@ -153,7 +153,7 @@ export class Mod {
 		this.table = this.filemanager.loadTable(tablePath, hash);
 		if(!this.table){
 			console.log('[' + this.manifest.name + '] Creating mod definition database..');
-			if(ccloader.acorn.needsParsing()){
+			if(ccloader.acorn.needsParsing) {
 				console.log('[' + this.manifest.name + '] Parsing...');
 				const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
 				ccloader.acorn.parse(jscode);
