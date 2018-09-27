@@ -1,3 +1,5 @@
+/** @typedef Modloader import ccloader.js */
+
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
@@ -61,7 +63,7 @@ export class Mod {
 			if(!this.manifest.main)
 				return resolve();
 	
-			this.filemanager.loadMod(this.manifest.main)
+			this.filemanager.loadMod(this.manifest.main, this.module)
 				.then(() => resolve())
 				.catch(() => reject());
 		});
@@ -106,6 +108,11 @@ export class Mod {
 		if(!this.loaded)
 			return undefined;
 		return this.manifest.version;
+	}
+	get module() {
+		if(!this.loaded)
+			return false;
+		return !!this.manifest.module;
 	}
 
 	/**

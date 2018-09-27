@@ -22,9 +22,10 @@ export class Filemanager {
 	/**
 	 * 
 	 * @param {string} file 
+	 * @param {boolean} isModule 
 	 */
-	loadMod(file){
-		return this._loadScript(file, this.modloader.frame.contentDocument);
+	loadMod(file, isModule){
+		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
 	getTableName(){
 		return this._getHash('assets/js/game.compiled.js');
@@ -191,14 +192,19 @@ export class Filemanager {
 	 * 
 	 * @param {string} url 
 	 * @param {document} doc
+	 * @param {string} type 
 	 * @returns {Promise<void>}
 	 */
-	_loadScript(url, doc){
+	_loadScript(url, doc, type){
+		if (!type) {
+			type = 'text/javascript';
+		}
+
 		return new Promise((resolve, reject) => {
 			const script = document.createElement('script');
 			script.onload = () => resolve();
 			script.onerror = () => reject();
-			script.type = 'text/javascript';
+			script.type = type;
 			script.src = url;
 			doc.body.appendChild(script);
 		});
