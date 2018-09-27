@@ -182,7 +182,7 @@ class Simplify {
 	 * @returns {string} 
 	 */
 	getAnimation(entity) {
-		return entity[getEntry('currentAnimation')];
+		return entity[entries.currentAnimation];
 	}
 	/**
 	 * 
@@ -190,16 +190,16 @@ class Simplify {
 	 * @param {string} value 
 	 */
 	setAnimation(entity, value) {
-		entity[getEntry('currentAnimation')] = value;
+		entity[entries.currentAnimation] = value;
 	}
 	runAction(cAction) {
-		return cAction[getEntry('run')].apply(cAction, Array.prototype.slice.call(arguments, 1));
+		return cAction[entries.run].apply(cAction, Array.prototype.slice.call(arguments, 1));
 	}
 	getEntityProxies(entity) {
-		return entity[getEntry('proxies')];
+		return entity[entries.proxies];
 	}
 	killEntity(entity, arg){
-		return entity[getEntry('entityKill')](arg);
+		return entity[entries.entityKill](arg);
 	}
 	/**
 	 * 
@@ -208,10 +208,10 @@ class Simplify {
 	 * @param {boolean=} fixed 
 	 */
 	setEntityTarget(entity, target, fixed) {
-		entity[getEntry('setTarget')](target, fixed);
+		entity[entries.setTarget](target, fixed);
 	}
 	getProxyAction(action){
-		return action[getEntry('proxyActions')];
+		return action[entries.proxyActions];
 	}
 	getNextProxyAction(action){
 		if(this.nextActionVarName === undefined) {
@@ -228,33 +228,33 @@ class Simplify {
 	 * @returns {string}
 	 */
 	getActiveMapName() {
-		return cc.ig.gameMain[getEntry('mapName')];
+		return cc.ig.gameMain[entries.mapName];
 	}
 	
 	getInnerGui(gui) {
-		return gui[getEntry('innerGUI')];
+		return gui[entries.innerGUI];
 	}
 	
 	jumpHigh(){
-		cc.ig.playerInstance()[getEntry('jump')](185, 16, 100);
+		cc.ig.playerInstance()[entries.jump](185, 16, 100);
 	}
 	
 	getParams(entity) {
-		return entity[getEntry('param')];
+		return entity[entries.param];
 	}
 	getParamsStat(entity, stat) {
 		const params = this.getParams(entity);
 		if(!params) {
 			return;
 		}
-		return params[getEntry('paramGetStat')](stat);
+		return params[entries.paramGetStat](stat);
 	}
 	getBaseParams(entity) {
 		const params = this.getParams(entity);
 		if(!params) {
 			return;
 		}
-		return params[getEntry('baseParams')];
+		return params[entries.baseParams];
 	}
 	/**
 	 * @returns {number}
@@ -312,7 +312,7 @@ class Simplify {
 		if(!params) {
 			return;
 		}
-		return params[getEntry('paramCurrentHp')];
+		return params[entries.paramCurrentHp];
 	}
 	/**
 	 * 
@@ -324,7 +324,7 @@ class Simplify {
 		if(!params) {
 			return;
 		}
-		params[getEntry('paramCurrentHp')] = hp;
+		params[entries.paramCurrentHp] = hp;
 		cc.sc.Model.notifyObserver(params, 1); //sc.COMBAT_PARAM_MSG.HP_CHANGED
 	}
 
@@ -332,7 +332,7 @@ class Simplify {
 	 * @returns {number}
 	 */
 	getAnimationTimer(entity) {
-		return entity[getEntry('animation')][getEntry('timer')];
+		return entity[entries.animation][entries.timer];
 	}
 	/**
 	 * 
@@ -340,7 +340,7 @@ class Simplify {
 	 * @param {number} value 
 	 */
 	setAnimationTimer(entity, value) {
-		entity[getEntry('animation')][getEntry('timer')] = value;
+		entity[entries.animation][entries.timer] = value;
 	}
 	/**
 	 * 
@@ -348,7 +348,7 @@ class Simplify {
 	 * @returns {string} 
 	 */
 	getCurrentState(entity) {
-		return entity[getEntry('currentState')];
+		return entity[entries.currentState];
 	}
 	/**
 	 * 
@@ -362,11 +362,11 @@ class Simplify {
 	 * @returns {boolean}
 	 */
 	isPlayerInCombat(){
-		if (!cc.sc.playerModelInstance || !cc.sc.playerModelInstance[getEntry('isInCombat')]) {
+		if (!cc.sc.playerModelInstance || !cc.sc.playerModelInstance[entries.isInCombat]) {
 			return false;
 		}
 
-		return cc.sc.playerModelInstance[getEntry('isInCombat')]();
+		return cc.sc.playerModelInstance[entries.isInCombat]();
 	}
 	/**
 	 * 
@@ -377,21 +377,21 @@ class Simplify {
 	}
 
 	_initializeGameMain() {
-		cc.ig.gameMain.spawnEntity = cc.ig.gameMain[getEntry('gameMainSpawnEntity')];
+		cc.ig.gameMain.spawnEntity = cc.ig.gameMain[entries.gameMainSpawnEntity];
 		cc.ig.gameMain.getEntityPosition = entity => {
-			if(!entity || !entity[getEntry('entityData')])
+			if(!entity || !entity[entries.entityData])
 				return {x: -1, y: -1, z: -1};
-			return entity[getEntry('entityData')][getEntry('entityPosition')];
+			return entity[entries.entityData][entries.entityPosition];
 		};
 		cc.ig.gameMain.setEntityPosition = function(entity, pos){
-			if(entity && entity[getEntry('entityData')])
-				entity[getEntry('entityData')][getEntry('entityPosition')] = pos;
+			if(entity && entity[entries.entityData])
+				entity[entries.entityData][entries.entityPosition] = pos;
 		};
-		cc.ig.gameMain.teleport = cc.ig.gameMain[getEntry('gameMainTeleport')];
-		cc.ig.gameMain.loadMap = function(data){ cc.ig.gameMain[getEntry('gameMainLoadMap')].call(data.context, data); };
+		cc.ig.gameMain.teleport = cc.ig.gameMain[entries.gameMainTeleport];
+		cc.ig.gameMain.loadMap = function(data){ cc.ig.gameMain[entries.gameMainLoadMap].call(data.context, data); };
 		
-		cc.ig.TeleportPosition = ig[getEntry('TeleportPosition')];
-		cc.ig.TeleportPosition.createFromJson = cc.ig.TeleportPosition[getEntry('TeleportPositionFromJson')];
+		cc.ig.TeleportPosition = ig[entries.TeleportPosition];
+		cc.ig.TeleportPosition.createFromJson = cc.ig.TeleportPosition[entries.TeleportPositionFromJson];
 	}
 	_initializeCombat() {
 		for (const key in sc) {
@@ -569,7 +569,7 @@ class SimplifyOptions {
 		}
 		
 		cc.sc.OPTION_CATEGORY[name] = Object.keys(cc.sc.OPTION_CATEGORY).length;
-		cc.sc.OptionsTabBox.prototype[getEntry('optionsTabBoxTab')][name] = null;
+		cc.sc.OptionsTabBox.prototype[entries.optionsTabBoxTab][name] = null;
 
 		if (displayName !== undefined) {	
 			ig.lang.labels.sc.gui.menu.option[name] = displayName;	
@@ -608,10 +608,10 @@ class SimplifyOptions {
 	}
 
 	reload() {
-		const globals = cc.ig.storage[getEntry('storageGlobals')];
+		const globals = cc.ig.storage[entries.storageGlobals];
 		
 		if(globals && sc.options) {
-			sc.options[getEntry('optionsLoadGlobals')](globals);
+			sc.options[entries.optionsLoadGlobals](globals);
 		}
 	}
 
@@ -660,8 +660,8 @@ class SimplifyOptions {
 	}
 
 	_hookTabBox() {
-		const original = cc.sc.OptionsTabBox.prototype[getEntry('init')];
-		cc.sc.OptionsTabBox.prototype[getEntry('init')] = function(){
+		const original = cc.sc.OptionsTabBox.prototype[entries.init];
+		cc.sc.OptionsTabBox.prototype[entries.init] = function(){
 			original.apply(this, arguments);
 			window.simplify.options._loadTabs(this);
 		};
@@ -669,9 +669,9 @@ class SimplifyOptions {
 
 	_loadTabs(tabBox) {
 		for(const tabData of this.tabs){
-			tabBox[getEntry('optionsTabBoxTab')][tabData.name] = tabBox[getEntry('optionsTabBoxCreateTabButton')].call(tabBox, tabData.name, tabBox[getEntry('optionsTabBoxTabArray')].length, tabData.cat);
+			tabBox[entries.optionsTabBoxTab][tabData.name] = tabBox[entries.optionsTabBoxCreateTabButton].call(tabBox, tabData.name, tabBox[entries.optionsTabBoxTabArray].length, tabData.cat);
 		}
-		tabBox[getEntry('optionsTabBoxRearrangeTabs')].call(tabBox);
+		tabBox[entries.optionsTabBoxRearrangeTabs].call(tabBox);
 	}
 }
 
@@ -864,7 +864,12 @@ class SimplifyResources {
 				console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
 
 			//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-			settings.url = ig.root + fullreplace[0];
+
+			if (window.require) {
+				settings.url = ig.root + fullreplace[0];
+			} else {
+				settings.url = ig.root + fullreplace[0].substr(7);
+			}
 		}
 
 		const patches = window.simplify.getAllAssets(settings.url.substr(ig.root.length) + '.patch');

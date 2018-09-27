@@ -2,7 +2,7 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 
-const CCLOADER_VERSION = '2.1.0';
+const CCLOADER_VERSION = '2.2.0';
 
 export class ModLoader {
 	constructor() {
@@ -128,12 +128,21 @@ export class ModLoader {
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
 		this._getGameWindow().getEntry = name => this.table.entries[name];
+		const entries = this._getGameWindow().entries = {};
+		for (const name in this.table.entries) {
+			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
+		}
 
 		this._setStatus('Initializing Mods');
 		this._initializeModTables()
 			.then(() => this._initializeMods())
 			.then(() => this._waitForMods())
 			.then(() => {
+				for (const name in this.table.entries) {
+					if (!entries[name]) {
+						Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
+					}
+				}
 				this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
 				this._removeOverlay();
 			})

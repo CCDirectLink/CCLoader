@@ -3,7 +3,7 @@
 	"main": "mod.js",
 	"version": "2.0.0",
 	"dependencies": {
-		"ccloader": "^2.0.0",
+		"ccloader": "^2.2.0",
 		"crosscode": "^1.0.0"
 	}
 }
