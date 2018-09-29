@@ -2,7 +2,7 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 
-const CCLOADER_VERSION = '2.2.0';
+const CCLOADER_VERSION = '2.2.1';
 
 export class ModLoader {
 	constructor() {
@@ -127,22 +127,17 @@ export class ModLoader {
 	_executeDb() {
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
-		this._getGameWindow().getEntry = name => this.table.entries[name];
 		const entries = this._getGameWindow().entries = {};
+		this._getGameWindow().getEntry = name => entries[name];
 		for (const name in this.table.entries) {
 			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
 		}
 
 		this._setStatus('Initializing Mods');
 		this._initializeModTables()
-			.then(() => this._initializeMods())
+			.then(() => this._initializeMods(entries))
 			.then(() => this._waitForMods())
 			.then(() => {
-				for (const name in this.table.entries) {
-					if (!entries[name]) {
-						Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
-					}
-				}
 				this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
 				this._removeOverlay();
 			})
@@ -182,7 +177,10 @@ export class ModLoader {
 		});
 	}
 	
-	_initializeMods() {
+	/**
+	 * @param {{[key: string]: string}} entries
+	 */
+	_initializeMods(entries) {
 		this._buildCrosscodeVersion();
 
 		this._getGameWindow().inactiveMods = [];
@@ -193,6 +191,14 @@ export class ModLoader {
 				this._getGameWindow().activeMods.push(mod);
 
 				mod.executeTable(this);
+				if (mod.table) {
+					for (const name in mod.table.entries) {
+						if (!entries[name]) {
+							Object.defineProperty(entries, name, {value: mod.table.entries[name], writable: false});
+						}
+					}
+				}
+
 				(mod => {
 					mod.load()
 						.then(() => {
