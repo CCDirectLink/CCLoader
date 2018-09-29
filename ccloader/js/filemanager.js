@@ -1,95 +1,129 @@
-var filemanager = new function(){
-	var isBrowser = !window.require;
-	var isLocal = !isBrowser;
-	
-	var fs, path, md5file, modloader, modList;
-	var md5Loaded = false;
-	
-	this.initialize = function(mloader){
-		modloader = mloader;
-		
-		if(isLocal){
-			fs = require('fs');
-			md5file = require('md5-file');
-			path = require('path');
-			
-			_createDirectories();
-		} else {
-			_loadScript('js/2.5.3-crypto-md5.js', function(){ //ccloader/js/2.5.3-crypto-md5.js
-				md5Loaded = true;
-			}, document);
-			modList = JSON.parse(this.getResource('mods.json'));
+import { Db } from './db.js';
+
+const fs = require('fs');
+const path = require('path');
+
+const isBrowser = window.isBrowser;
+const isLocal = !isBrowser;
+
+export class Filemanager {
+	/**
+	 * 
+	 * @param {ModLoader} modloader 
+	 */
+	constructor(modloader) {
+		this.modloader = modloader;
+
+		if (isBrowser) {
+			this.modList = JSON.parse(this.getResource('mods.json'));
 		}
 	}
-	this.loadMod = function(file, onModLoaded){
-        _loadScript(file, onModLoaded, modloader.frame.contentDocument);
+
+	/**
+	 * 
+	 * @param {string} file 
+	 * @param {boolean} isModule 
+	 */
+	loadMod(file, isModule){
+		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
-	this.getTableName = function(callback){
-		_getHash('assets/js/game.compiled.js', callback);
+	getTableName(){
+		return this._getHash('assets/js/game.compiled.js');
 	}
-	this.getDefintionHash = function(callback){
-		_getHash('ccloader/data/definitions.db', callback);
+	getDefintionHash(){
+		return this._getHash('ccloader/data/definitions.db');
 	}
-	this.getModDefintionHash = function(def, callback){
-		_getHash('assets/' + def, callback);
+	/**
+	 * 
+	 * @param {string} def 
+	 */
+	getModDefintionHash(def){
+		return this._getHash('assets/' + def);
 	}
-	this.getAllModsFiles = function(folder){
-        return _getResources(folder, '/package.json');
-	};
-	this.tableExists = function(table){
+	/**
+	 * 
+	 * @param {string} folder 
+	 */
+	getAllModsFiles(folder){
+		return this._getResources(folder, path.sep + 'package.json');
+	}
+
+	/**
+	 * 
+	 * @param {string} table 
+	 */
+	tableExists(table){
 		if(!table)
 			return false;
 		
-		return _resourceExists('ccloader/data/' + table);
+		return this._resourceExists('ccloader/data/' + table);
 	}
-	this.modTableExists = function(table){
+	/**
+	 * 
+	 * @param {string} table 
+	 */
+	modTableExists(table){
 		if(!table)
 			return false;
 		
-		return _resourceExists('ccloader/data/assets/' + table);
+		return this._resourceExists('ccloader/data/assets/' + table);
 	}
-	this.getResource = function(resource){
-		try{
+	/**
+	 * 
+	 * @param {string} resource 
+	 */
+	getResource(resource){
+		try {
 			if(isLocal)
 				return fs.readFileSync(resource, 'utf-8');
 			else {
-                var req = new XMLHttpRequest();
-                req.open('GET', '/' + resource, false);
-                req.send(null);
+				const req = new XMLHttpRequest();
+				req.open('GET', '/' + resource, false);
+				req.send(null);
 
-                if(req.status === 200) {
-                    return req.responseText;
-                } else {
-                    return undefined;
-                }
+				if(req.status === 200) {
+					return req.responseText;
+				} else {
+					return undefined;
+				}
 			}
-		}catch(e){
+		} catch(e){
 			return undefined;
 		}
 	}
-	this.saveTable = function(tableName, table, hash){
+	/**
+	 * 
+	 * @param {string} tableName 
+	 * @param {Db} table 
+	 * @param {string?} hash
+	 * @returns {void}
+	 */
+	saveTable(tableName, table, hash){
 		if(!hash){
-			this.getDefintionHash(function(hash){
-				filemanager.saveTable(tableName, table, hash)
-			});
-			return;
+			return this.saveTable(tableName, table, this.getDefintionHash());
 		}
-		
 		
 		if(isLocal) {
 			try {
-				_createDirectory(path.dirname('ccloader/data/' + tableName));
+				this._createDirectory(path.dirname('ccloader/data/' + tableName));
 			} catch(e) {}
-			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify({hash: hash, db: table}), 'utf-8');
+			table.hash = hash;
+			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify(table), 'utf-8');
 		}
 	}
-	this.loadTable = function(tableName, hash){
-		var text = filemanager.getResource('ccloader/data/' + tableName);
+	/**
+	 * 
+	 * @param {string} tableName 
+	 * @param {string} hash
+	 * @returns {Db | undefined}
+	 */
+	loadTable(tableName, hash){
+		const text = this.getResource('ccloader/data/' + tableName);
 		if(!text)
 			return undefined;
 		
-		var json = JSON.parse(text);
-		var table = new Db("");
+		const json = JSON.parse(text);
+		const table = new Db();
 		
 		if(!json || !json.hash)
 			return undefined;
@@ -97,40 +131,45 @@ var filemanager = new function(){
 		if(hash && hash != json.hash)
 			return undefined;
 		
-		table.data = json.db.data;
+		table.load(json);
 		return table;
 	}
-    
-    function _getResources(folder, ending){
+	
+
+	/**
+	 * Returns all files with the given ending in the folder
+	 * @param {string?} folder 
+	 * @param {string?} ending 
+	 */
+	_getResources(folder, ending){
 		if(!folder)
 			folder = 'assets/mods/';
 		
 		if(isLocal)
-			return _getResourcesLocal(folder, ending);
+			return this._getResourcesLocal(folder, ending);
 		else {
 			var results = [];
-			for(var i in modList){
-				if(_resourceExists('assets/mods/' + modList[i] + ending)){
-					results.push('assets/mods/' + modList[i] + ending);
+			for(var i in this.modList){
+				if(this._resourceExists('assets/mods/' + this.modList[i] + ending)){
+					results.push('assets/mods/' + this.modList[i] + ending);
 				}
 			}
 			return results;
 		}
-    }
-    function _getHash(file, callback) {
-		if(isLocal) {
-            return md5file(file, function(err, hash){
-                callback(hash + '.table');
-            });
-        } else {
-            if(!md5Loaded){
-                setTimeout(this.getTableName, 100, callback);
-            } else {
-                callback(Crypto.MD5(filemanager.getResource(file)) + '.table');
-            }
-        }
-    }
-	function _resourceExists(resource){
+	}
+	/**
+	 * 
+	 * @param {string} file 
+	 * @returns {string}
+	 */
+	_getHash(file) {
+		return Crypto.MD5(this.getResource(file)) + '.table';
+	}
+	/**
+	 * 
+	 * @param {string} resource 
+	 */
+	_resourceExists(resource){
 		if(isLocal){
 			try{
 				fs.statSync(resource);
@@ -140,7 +179,7 @@ var filemanager = new function(){
 			}
 		} else {
 			try{
-				var req = new XMLHttpRequest();
+				const req = new XMLHttpRequest();
 				req.open('HEAD', '/' + resource, false);
 				req.send();
 				return req.status != 404;
@@ -149,24 +188,44 @@ var filemanager = new function(){
 			}
 		}
 	}
-	function _loadScript(url, callback, doc){
-		var script = document.createElement("script");
-		script.onload = callback;
-		script.type = "text/javascript";
-		script.src = url;
-		doc.body.appendChild(script);
+	/**
+	 * 
+	 * @param {string} url 
+	 * @param {document} doc
+	 * @param {string} type 
+	 * @returns {Promise<void>}
+	 */
+	_loadScript(url, doc, type){
+		if (!type) {
+			type = 'text/javascript';
+		}
+
+		return new Promise((resolve, reject) => {
+			const script = document.createElement('script');
+			script.onload = () => resolve();
+			script.onerror = () => reject();
+			script.type = type;
+			script.src = url;
+			doc.body.appendChild(script);
+		});
 	}
-	function _getResourcesLocal(folder, ending){
-		var results = [];
+	/**
+	 * Returns all files with the given ending in the folder
+	 * @param {string} folder 
+	 * @param {string?} ending 
+	 */
+	_getResourcesLocal(folder, ending){
+		/** @type {string[]} */
+		let results = [];
 		
 		if(isLocal) {
 			try{
-				fs.readdirSync(folder).forEach(function(file) {
-					try{
-						file = folder + '/' + file;
+				fs.readdirSync(folder).forEach(file => {
+					try {
+						file = path.join(folder, file);
 						
-						if (_isDirectory(file)) {
-							var innerResults = _getResourcesLocal(file, ending);
+						if (this._isDirectory(file)) {
+							const innerResults = this._getResourcesLocal(file, ending);
 							results = results.concat(innerResults);
 						} else if(file.endsWith(ending)){
 							results.push(file);
@@ -178,22 +237,37 @@ var filemanager = new function(){
 		
 		return results;
 	}
-	function _isDirectory(file){
-		var stat = fs.statSync(file);
+
+	/**
+	 * 
+	 * @param {string} file
+	 * @returns {boolean}
+	 */
+	_isDirectory(file){
+		const stat = fs.statSync(file);
 		return stat && stat.isDirectory();
 	}
-	function _createDirectories(){
+	_createDirectories(){
 		if(isLocal){
-			_createDirectory('ccloader/data/assets/mods');
+			this._createDirectory('ccloader/data/assets/mods');
 		}
 	}
-	function _createDirectory(dir){
-		if(fs.existsSync(dir) && fs.statSync(dir).isDirectory())
+	/**
+	 * 
+	 * @param {string} dir 
+	 */
+	_createDirectory(dir){
+		if (isBrowser) {
 			return;
+		}
 		
-		var parent = path.join(dir, '..');
-		_createDirectory(parent);
+		if(fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+			return;
+		}
+		
+		const parent = path.join(dir, '..');
+		this._createDirectory(parent);
 
 		fs.mkdirSync(dir);
 	}
-};
+}
