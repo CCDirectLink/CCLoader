@@ -54,7 +54,7 @@ export class ModLoader {
 	 * @param {string} text 
 	 */
 	_setStatus(text) {
-		if (this.status) {
+		if (this.status && this.status.isConnected) {
 			this.status.innerHTML = text;
 		}
 	}
@@ -231,7 +231,10 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
-			this.frame.onload = () => resolve();
+			this.frame.onload = () => {
+				this.frame.contentWindow.onbeforeunload = () => this.startGame();
+				resolve();
+			};
 			this.frame.onerror = event => reject(event);
 			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 		});
@@ -267,7 +270,7 @@ export class ModLoader {
 	}
 
 	_removeOverlay() {
-		if (this.status && this.overlay) {
+		if (this.status && this.overlay && this.status.isConnected && this.overlay.isConnected) {
 			this.status.outerHTML = '';
 			this.overlay.outerHTML = '';
 		}
