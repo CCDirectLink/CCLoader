@@ -15,7 +15,12 @@ export class Filemanager {
 		this.modloader = modloader;
 
 		if (isBrowser) {
-			this.modList = JSON.parse(this.getResource('mods.json'));
+			try {
+				this.modList = JSON.parse(this.getResource('mods.json'));
+			} catch (e) {
+				console.error('Could not load mod list. Proceeding to load without any mods. ', e);
+				this.modList = [];
+			}
 		}
 	}
 
@@ -119,20 +124,25 @@ export class Filemanager {
 	 */
 	loadTable(tableName, hash){
 		const text = this.getResource('ccloader/data/' + tableName);
-		if(!text)
+		if(!text) {
 			return undefined;
+		}
 		
-		const json = JSON.parse(text);
-		const table = new Db();
-		
-		if(!json || !json.hash)
-			return undefined;
-		
-		if(hash && hash != json.hash)
-			return undefined;
-		
-		table.load(json);
-		return table;
+		try {
+			const json = JSON.parse(text);
+			const table = new Db();
+			
+			if(!json || !json.hash)
+				return undefined;
+			
+			if(hash && hash != json.hash)
+				return undefined;
+			
+			table.load(json);
+			return table;
+		} catch (e) {
+			console.error('Could not load definitions: ' + tableName, e);
+		}
 	}
 	
 

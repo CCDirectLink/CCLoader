@@ -17,13 +17,19 @@ export class Mod {
 		this.ccVersion = ccVersion;
 
 		const data = this.filemanager.getResource(file);
-		if(!data)
+		if(!data) {
 			return;
+		}
 		
-		/** @type {{name: string, version?: string, description?: string, main?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
-		this.manifest = JSON.parse(data);
-		if(!this.manifest)
+		try {
+			/** @type {{name: string, version?: string, description?: string, main?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
+			this.manifest = JSON.parse(data);
+			if(!this.manifest)
+				return;
+		} catch (e) {
+			console.error('Could not load mod: ' + file, e);
 			return;
+		}
 		
 		if(this.manifest.main){
 			if(!this._isPathAbsolute(this.manifest.main)) {
@@ -165,13 +171,19 @@ export class Mod {
 				const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
 				ccloader.acorn.parse(jscode);
 			}
-			const dbtext = this.filemanager.getResource('assets/' + this.manifest.table);
-			const dbdef = JSON.parse(dbtext);
-			console.log('[' + this.manifest.name + '] Analysing...');
-			this.table = ccloader.acorn.analyse(dbdef);
-			console.log('[' + this.manifest.name + '] Writing...');
-			this.filemanager.saveTable(tablePath, this.table, hash);
-			console.log('[' + this.manifest.name + '] Finished!');
+
+			try {
+				const dbtext = this.filemanager.getResource('assets/' + this.manifest.table);
+				const dbdef = JSON.parse(dbtext);
+				console.log('[' + this.manifest.name + '] Analysing...');
+				this.table = ccloader.acorn.analyse(dbdef);
+				console.log('[' + this.manifest.name + '] Writing...');
+				this.filemanager.saveTable(tablePath, this.table, hash);
+				console.log('[' + this.manifest.name + '] Finished!');
+			} catch (e) {
+				console.error(`Could not load definitions of mod ${this.manifest.name}. Disabling.`, e);
+				this.disabled = true;
+			}
 		}
 	}
 
@@ -186,7 +198,7 @@ export class Mod {
 	}
 
 	get isEnabled(){
-		if(!this.loaded)
+		if(!this.loaded || this.disabled)
 			return false;
 		
 		try {

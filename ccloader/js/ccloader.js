@@ -84,14 +84,19 @@ export class ModLoader {
 		console.log('Reading files...');
 		const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
 		const dbtext = this.filemanager.getResource('ccloader/data/definitions.db');
-		const dbdef = JSON.parse(dbtext);
-		console.log('Parsing...');
-		this.acorn.parse(jscode);
-		console.log('Analysing...');
-		this.table = this.acorn.analyse(dbdef);
-		console.log('Writing...');
-		this.filemanager.saveTable(tableName, this.table);
-		console.log('Finished!');
+		
+		try {
+			const dbdef = JSON.parse(dbtext);
+			console.log('Parsing...');
+			this.acorn.parse(jscode);
+			console.log('Analysing...');
+			this.table = this.acorn.analyse(dbdef);
+			console.log('Writing...');
+			this.filemanager.saveTable(tableName, this.table);
+			console.log('Finished!');
+		} catch (e) {
+			console.error('Could not load definitions.', e);
+		}
 	}
 
 	/**
@@ -125,6 +130,10 @@ export class ModLoader {
 	 * Applies all definitions and loads the mods
 	 */
 	_executeDb() {
+		if (!this.table) {
+			return this._removeOverlay();
+		}
+
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
 		const entries = this._getGameWindow().entries = {};
@@ -265,8 +274,13 @@ export class ModLoader {
 	}
 
 	_buildCrosscodeVersion(){
-		const json = JSON.parse(localStorage.getItem('cc.version'));
-		this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+		try {
+			const json = JSON.parse(localStorage.getItem('cc.version'));
+			this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+		} catch (e) {
+			console.error('Could not find crosscode version. Assuming "0.0.0".', e);
+			this.ccVersion = '0.0.0';
+		}
 	}
 	
 	//Requires bind
