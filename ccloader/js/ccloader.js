@@ -2,7 +2,7 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 
-const CCLOADER_VERSION = '2.2.1';
+const CCLOADER_VERSION = '2.3.0';
 
 export class ModLoader {
 	constructor() {
@@ -136,13 +136,9 @@ export class ModLoader {
 
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
-		const entries = this._getGameWindow().entries = {};
-		this._getGameWindow().getEntry = name => entries[name];
-		for (const name in this.table.entries) {
-			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
-		}
-
+		const entries = this._setupGamewindow();
 		this._setStatus('Initializing Mods');
+
 		this._initializeModTables()
 			.then(() => this._initializeMods(entries))
 			.then(() => this._waitForMods())
@@ -151,6 +147,26 @@ export class ModLoader {
 				this._removeOverlay();
 			})
 			.catch(err => console.error('An error occured while loading mods', err));
+	}
+
+	/**
+	 * Sets up all global objects from ccloader in the game window
+	 * @returns {{[key: string]: string}} entries
+	 */
+	_setupGamewindow() {
+		const entries = this._getGameWindow().entries = {};
+		this._getGameWindow().getEntry = name => entries[name];
+		for (const name in this.table.entries) {
+			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
+		}
+		
+		this._buildCrosscodeVersion();
+		this.versions = this._getGameWindow().versions = {
+			ccloader: CCLOADER_VERSION,
+			crosscode: this.ccVersion
+		};
+
+		return entries;
 	}
 	
 	/**
@@ -190,14 +206,13 @@ export class ModLoader {
 	 * @param {{[key: string]: string}} entries
 	 */
 	_initializeMods(entries) {
-		this._buildCrosscodeVersion();
-
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
 		
 		for (const mod of this.mods) {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
+				this.versions[mod.name] = mod.version;
 
 				mod.executeTable(this);
 				if (mod.table) {
