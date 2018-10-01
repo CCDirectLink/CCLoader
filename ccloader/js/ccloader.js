@@ -2,7 +2,7 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 
-const CCLOADER_VERSION = '2.3.0';
+const CCLOADER_VERSION = '2.4.0';
 
 export class ModLoader {
 	constructor() {
