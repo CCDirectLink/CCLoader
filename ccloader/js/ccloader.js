@@ -1,12 +1,14 @@
 import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
+import { UI } from './ui.js';
 
-const CCLOADER_VERSION = '2.4.0';
+const CCLOADER_VERSION = '2.4.1';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
+		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		
 		this.frame = document.getElementById('frame');
@@ -28,6 +30,7 @@ export class ModLoader {
 			.then(() => {
 				this._setStatus('Loading Game');
 
+				this.ui.applyBindings(this._getGameWindow().console);
 				this._getGameWindow().reloadTables = () => this.reloadTables();
 				this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	

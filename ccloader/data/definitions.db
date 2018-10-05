@@ -287,6 +287,19 @@
                 ]
             }
         },
+        "header": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.raw",
+                        "value": "\"cutscenes\""
+                    }
+                ]
+            }
+        },
         "Image": {
             "type": "select",
             "pattern": "left.object.property.name",

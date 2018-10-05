@@ -9,7 +9,7 @@ const isLocal = !isBrowser;
 export class Filemanager {
 	/**
 	 * 
-	 * @param {ModLoader} modloader 
+	 * @param {import('./ccloader').ModLoader} modloader 
 	 */
 	constructor(modloader) {
 		this.modloader = modloader;
@@ -143,6 +143,20 @@ export class Filemanager {
 		} catch (e) {
 			console.error('Could not load definitions: ' + tableName, e);
 		}
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 * @returns {Promise<Image>}
+	 */
+	loadImage(path) {
+		return new Promise((resolve, reject) => {
+			const result = new Image();
+			result.onload = () => resolve(result);
+			result.onerror = err => reject(err);
+			result.src = path;
+		});
 	}
 	
 
