@@ -1,9 +1,6 @@
-if (!String.prototype.endsWith) {
-	String.prototype.endsWith = end => {
-		return this.substr(this.length - end.length, end.length) === end;
-	};
+String.prototype.endsWith = String.prototype.endsWith || function(end){
+	return this.substr(this.length - end.length, end.length) === end;
 }
-
 if (!window.require) {
 	window.isBrowser = true;
 	window.require = name => {
