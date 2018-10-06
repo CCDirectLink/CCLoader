@@ -159,10 +159,8 @@ export class ModLoader {
 	_setupGamewindow() {
 		const entries = this._getGameWindow().entries = {};
 		this._getGameWindow().getEntry = name => entries[name];
-		for (const name in this.table.entries) {
-			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
-		}
 		
+
 		this._buildCrosscodeVersion();
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
@@ -211,7 +209,8 @@ export class ModLoader {
 	_initializeMods(entries) {
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
-		
+		const tempEntries = {};
+		Object.assign(tempEntries, this.table.entries);
 		for (const mod of this.mods) {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
@@ -219,11 +218,7 @@ export class ModLoader {
 
 				mod.executeTable(this);
 				if (mod.table) {
-					for (const name in mod.table.entries) {
-						if (!entries[name]) {
-							Object.defineProperty(entries, name, {value: mod.table.entries[name], writable: false});
-						}
-					}
+					Object.assign(tempEntries, mod.table.entries);
 				}
 
 				(mod => {
@@ -241,6 +236,10 @@ export class ModLoader {
 				this.modsLoaded++;
 			}
 		}
+		Object.defineProperty(this._getGameWindow(), 'entries', {
+			value : Object.freeze(tempEntries),
+			writable : false
+		});
 	}
 	
 
