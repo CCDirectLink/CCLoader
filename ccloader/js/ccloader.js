@@ -159,10 +159,12 @@ export class ModLoader {
 	_setupGamewindow() {
 		const entries = this._getGameWindow().entries = {};
 		this._getGameWindow().getEntry = name => entries[name];
-		for (const name in this.table.entries) {
-			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
-		}
 		
+		Object.defineProperty(this._getGameWindow(), 'entries', {
+			value : Object.freeze(this.table.entries),
+			writable : false
+		});
+
 		this._buildCrosscodeVersion();
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
