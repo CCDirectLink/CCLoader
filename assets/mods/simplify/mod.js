@@ -1016,24 +1016,22 @@ class SimplifyResources {
 	_hookImage(){
 		const original = cc.ig.Image.prototype.load;
 
-		cc.ig.Image.prototype.load = function() {
+		cc.ig.Image.prototype.load = function(cb) {
 			const fullreplace = window.simplify.getAllAssets(this.path);
+
 			if(fullreplace && fullreplace.length > 0){
 				if(fullreplace.length > 1)
 					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
-
-				//console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
-				const oldPath = this.path;
+				let oldPath = this.path;
+				// console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
 				this.path = fullreplace[0];
-				if (arguments[0]) {
-					const originalCb = arguments[0];
-					arguments[0] = function(type, _, loaded) {
-						originalCb(type, oldPath, loaded);
-					};
-				}
-			}
+				// We can assume it's an image
+				this.onload = cb.bind(null, "Image", oldPath, true);
+				this.reload();		
 
-			return original.apply(this, arguments);
+			} else {
+				return original.apply(this, arguments);
+			}
 		};
 	}
 	
