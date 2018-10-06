@@ -152,10 +152,15 @@ export class Acorn {
 
 	/**
 	 * 
-	 * @param {{entries: {type: 'select', name: string, pattern: string, from: {type: string, values: {name: string, value: string, type?: 'dynamic'}[]}}[], tree: any[]}} dbDefinition 
+	 * @param {{entries: {[key: string]: {type: 'select', name: string, pattern: string, from: {type: string, values: {name: string, value: string, type?: 'dynamic'}[]}}}, tree: any[]}} dbDefinition 
 	 */
 	analyse(dbDefinition){
-		const defs = dbDefinition.entries;
+		const defs = [];
+		for (const key in dbDefinition.entries) {
+			dbDefinition.entries[key].name = dbDefinition.entries[key].name || key;
+			defs.push(dbDefinition.entries[key]);
+		}
+
 		/** @type {{[name: string]: string}} */
 		const entries = {};
 		

@@ -550,10 +550,10 @@ class SimplifyOptions {
 			.then(() => {
 				this._hookTabBox();
 				this.loaded = true;
-
+				this._initializeLogLevel(0);
 			})
-			.catch(() => {
-				console.error('Could not load simplify.options');
+			.catch(err => {
+				console.error('Could not load simplify.options', err);
 				this.loaded = false;
 			});
 	}
@@ -588,8 +588,9 @@ class SimplifyOptions {
 	 * @param {number} cat 
 	 * @param {*=} data 
 	 * @param {boolean=} restart 
+	 * @param {string=} header
 	 */
-	addEntry(name, type, init, cat, data, restart) {
+	addEntry(name, type, init, cat, data, restart, header) {
 		if(!this.loaded)
 			return;
 		
@@ -602,6 +603,11 @@ class SimplifyOptions {
 		
 		if(restart !== undefined)
 			obj[this.restartName] = restart;
+
+		if(header !== undefined) {
+			obj[this.dividerName] = true;
+			obj[entries.header] = header;
+		}
 		
 		cc.sc.OPTIONS_DEFINITION[name] = obj;
 		sc.options[this.valuesName][name] = init;
@@ -613,6 +619,43 @@ class SimplifyOptions {
 		if(globals && sc.options) {
 			sc.options[entries.optionsLoadGlobals](globals);
 		}
+	}
+
+	/**
+	 * 
+	 * @param {number} cat
+	 */
+	_initializeLogLevel(cat) {
+		const lang = ig.lang.labels.sc.gui.options;
+		lang['logLevel-log'] = {name: 'Log level: Default', description: 'Enables default message popups. \\c[1]Needs a restart!'};
+		lang['logLevel-warn'] = {name: 'Log level: Wanings', description: 'Enables warning popups. \\c[1]Needs a restart!'};
+		lang['logLevel-error'] = {name: 'Log level: Errors', description: 'Enables error popups. \\c[1]Needs a restart!'};
+		lang.headers['logLevel'] = 'Log levels';
+
+		this.addEntry('logLevel-log', 'CHECKBOX', false, cat, undefined, true, 'logLevel');
+		this.addEntry('logLevel-warn', 'CHECKBOX', true, cat, undefined, true);
+		this.addEntry('logLevel-error', 'CHECKBOX', true, cat, undefined, true);
+
+		Object.defineProperties(sc.options[this.valuesName], {
+			'logLevel-log': {
+				get: () => ((localStorage.getItem('logFlags') & 4) == 4) || false,
+				set: value => value 
+					? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 4)
+					: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 3)
+			},
+			'logLevel-warn': {
+				get: () => ((localStorage.getItem('logFlags') & 2) == 2) || true,
+				set: value => value 
+					? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 2)
+					: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 5)
+			},
+			'logLevel-error': {
+				get: () => ((localStorage.getItem('logFlags') & 1) == 1) || true,
+				set: value => value 
+					? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 1)
+					: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 6)
+			}
+		});
 	}
 
 	_getVarNames() {
@@ -634,6 +677,11 @@ class SimplifyOptions {
 			
 			this.valuesName = this._getVarNameByChildren(sc.options, 'language');
 			if(!this.valuesName){
+				reject();
+			}
+
+			this.dividerName = this._getVarNameByType(cc.sc.OPTIONS_DEFINITION['circuit-text-size'], 'boolean');
+			if(!this.dividerName){
 				reject();
 			}
 
@@ -975,7 +1023,14 @@ class SimplifyResources {
 					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
 
 				//console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
+				const oldPath = this.path;
 				this.path = fullreplace[0];
+				if (arguments[0]) {
+					const originalCb = arguments[0];
+					arguments[0] = function(type, _, loaded) {
+						originalCb(type, oldPath, loaded);
+					};
+				}
 			}
 
 			return original.apply(this, arguments);

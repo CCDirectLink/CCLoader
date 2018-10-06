@@ -1,12 +1,14 @@
 import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
+import { UI } from './ui.js';
 
-const CCLOADER_VERSION = '2.2.1';
+const CCLOADER_VERSION = '2.4.1';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
+		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		
 		this.frame = document.getElementById('frame');
@@ -28,6 +30,7 @@ export class ModLoader {
 			.then(() => {
 				this._setStatus('Loading Game');
 
+				this.ui.applyBindings(this._getGameWindow().console);
 				this._getGameWindow().reloadTables = () => this.reloadTables();
 				this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	
@@ -54,7 +57,7 @@ export class ModLoader {
 	 * @param {string} text 
 	 */
 	_setStatus(text) {
-		if (this.status) {
+		if (this.status && this.status.isConnected) {
 			this.status.innerHTML = text;
 		}
 	}
@@ -84,14 +87,19 @@ export class ModLoader {
 		console.log('Reading files...');
 		const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
 		const dbtext = this.filemanager.getResource('ccloader/data/definitions.db');
-		const dbdef = JSON.parse(dbtext);
-		console.log('Parsing...');
-		this.acorn.parse(jscode);
-		console.log('Analysing...');
-		this.table = this.acorn.analyse(dbdef);
-		console.log('Writing...');
-		this.filemanager.saveTable(tableName, this.table);
-		console.log('Finished!');
+		
+		try {
+			const dbdef = JSON.parse(dbtext);
+			console.log('Parsing...');
+			this.acorn.parse(jscode);
+			console.log('Analysing...');
+			this.table = this.acorn.analyse(dbdef);
+			console.log('Writing...');
+			this.filemanager.saveTable(tableName, this.table);
+			console.log('Finished!');
+		} catch (e) {
+			console.error('Could not load definitions.', e);
+		}
 	}
 
 	/**
@@ -125,15 +133,15 @@ export class ModLoader {
 	 * Applies all definitions and loads the mods
 	 */
 	_executeDb() {
-		this.table.execute(this._getGameWindow(), this._getGameWindow());
-
-		const entries = this._getGameWindow().entries = {};
-		this._getGameWindow().getEntry = name => entries[name];
-		for (const name in this.table.entries) {
-			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
+		if (!this.table) {
+			return this._removeOverlay();
 		}
 
+		this.table.execute(this._getGameWindow(), this._getGameWindow());
+
+		const entries = this._setupGamewindow();
 		this._setStatus('Initializing Mods');
+
 		this._initializeModTables()
 			.then(() => this._initializeMods(entries))
 			.then(() => this._waitForMods())
@@ -142,6 +150,26 @@ export class ModLoader {
 				this._removeOverlay();
 			})
 			.catch(err => console.error('An error occured while loading mods', err));
+	}
+
+	/**
+	 * Sets up all global objects from ccloader in the game window
+	 * @returns {{[key: string]: string}} entries
+	 */
+	_setupGamewindow() {
+		const entries = this._getGameWindow().entries = {};
+		this._getGameWindow().getEntry = name => entries[name];
+		for (const name in this.table.entries) {
+			Object.defineProperty(entries, name, {value: this.table.entries[name], writable: false});
+		}
+		
+		this._buildCrosscodeVersion();
+		this.versions = this._getGameWindow().versions = {
+			ccloader: CCLOADER_VERSION,
+			crosscode: this.ccVersion
+		};
+
+		return entries;
 	}
 	
 	/**
@@ -181,14 +209,13 @@ export class ModLoader {
 	 * @param {{[key: string]: string}} entries
 	 */
 	_initializeMods(entries) {
-		this._buildCrosscodeVersion();
-
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
 		
 		for (const mod of this.mods) {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
+				this.versions[mod.name] = mod.version;
 
 				mod.executeTable(this);
 				if (mod.table) {
@@ -222,7 +249,10 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
-			this.frame.onload = () => resolve();
+			this.frame.onload = () => {
+				this.frame.contentWindow.onbeforeunload = () => this.startGame();
+				resolve();
+			};
 			this.frame.onerror = event => reject(event);
 			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
 		});
@@ -258,15 +288,20 @@ export class ModLoader {
 	}
 
 	_removeOverlay() {
-		if (this.status && this.overlay) {
+		if (this.status && this.overlay && this.status.isConnected && this.overlay.isConnected) {
 			this.status.outerHTML = '';
 			this.overlay.outerHTML = '';
 		}
 	}
 
 	_buildCrosscodeVersion(){
-		const json = JSON.parse(localStorage.getItem('cc.version'));
-		this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+		try {
+			const json = JSON.parse(localStorage.getItem('cc.version'));
+			this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+		} catch (e) {
+			console.error('Could not find crosscode version. Assuming "0.0.0".', e);
+			this.ccVersion = '0.0.0';
+		}
 	}
 	
 	//Requires bind
