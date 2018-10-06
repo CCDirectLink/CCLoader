@@ -1023,7 +1023,14 @@ class SimplifyResources {
 					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
 
 				//console.log("Replacing '" + this.path + "' with '" + fullreplace[0]  + "'");
+				const oldPath = this.path;
 				this.path = fullreplace[0];
+				if (arguments[0]) {
+					const originalCb = arguments[0];
+					arguments[0] = function(type, _, loaded) {
+						originalCb(type, oldPath, loaded);
+					};
+				}
 			}
 
 			return original.apply(this, arguments);
