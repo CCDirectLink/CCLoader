@@ -139,11 +139,12 @@ export class ModLoader {
 
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
-		const entries = this._setupGamewindow();
+		this._setupGamewindow();
 		this._setStatus('Initializing Mods');
 
 		this._initializeModTables()
-			.then(() => this._initializeMods(entries))
+			.then(() => this._initializeMods())
+			.then(() => this._setupGameEntries())
 			.then(() => this._waitForMods())
 			.then(() => {
 				this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
@@ -154,20 +155,37 @@ export class ModLoader {
 
 	/**
 	 * Sets up all global objects from ccloader in the game window
-	 * @returns {{[key: string]: string}} entries
+	 * 
 	 */
 	_setupGamewindow() {
-		const entries = this._getGameWindow().entries = {};
-		this._getGameWindow().getEntry = name => entries[name];
 		
-
 		this._buildCrosscodeVersion();
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
 		};
-
-		return entries;
+	}
+	/**
+	 * Makes read only definition available in game 
+	 * window.
+	 * Also provides helper functions to interface 
+	 * with the entries array
+	 */
+	_setupGameEntries() {
+		const entries = this.table.entries;
+		Object.defineProperty(this._getGameWindow(), 'entries', {
+			value : Object.freeze(entries),
+			writable : false
+		});
+		this._getGameWindow().getValue = val => {
+			for(let valueKey of Object.keys(entries)) {
+				if(entries[valueKey] === val) { 
+					 return valueKey;
+				}
+		   }
+		   return null;
+		};
+		this._getGameWindow().getEntry = name => entries[name];
 	}
 	
 	/**
@@ -204,23 +222,19 @@ export class ModLoader {
 	}
 	
 	/**
-	 * @param {{[key: string]: string}} entries
+	 * 
 	 */
-	_initializeMods(entries) {
+	_initializeMods() {
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
-		const tempEntries = {};
-		Object.assign(tempEntries, this.table.entries);
+
 		for (const mod of this.mods) {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
 				this.versions[mod.name] = mod.version;
 
 				mod.executeTable(this);
-				if (mod.table) {
-					Object.assign(tempEntries, mod.table.entries);
-				}
-
+				
 				(mod => {
 					mod.load()
 						.then(() => {
@@ -236,10 +250,7 @@ export class ModLoader {
 				this.modsLoaded++;
 			}
 		}
-		Object.defineProperty(this._getGameWindow(), 'entries', {
-			value : Object.freeze(tempEntries),
-			writable : false
-		});
+
 	}
 	
 
