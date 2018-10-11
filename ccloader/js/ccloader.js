@@ -185,24 +185,8 @@ export class ModLoader {
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available
 	 */
 	_loadMods() {
-		return new Promise(resolve => {
-			const length = this.mods.length;
-			let count = 0;
-	
-			for (const mod of this.mods) {
-				mod.onload()
-					.then(() => {
-						count++;
-						if(count >= length)
-							resolve();
-					});
-			}
-
-			if(count >= length) //Needed if 0 mods are loaded
-				resolve();
-		});
+		return Promise.all(this.mods.map((mod) => mod.onload()));
 	}
-	
 	/**
 	 * @param {{[key: string]: string}} entries
 	 */
