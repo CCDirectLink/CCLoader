@@ -187,6 +187,7 @@ export class ModLoader {
 	_loadMods() {
 		return Promise.all(this.mods.map((mod) => mod.onload()));
 	}
+
 	/**
 	 * @param {{[key: string]: string}} entries
 	 */
