@@ -434,7 +434,7 @@ class Simplify {
 			this.options.addEntry('modEnabled-' + mod.name.toLowerCase(), 'CHECKBOX', true, tab, undefined, true);
 
 			const name = mod.name;
-			const description = mod.description || 'If checked this mods is enabled. \\c[1]Needs a restart!';
+			const description = mod.description || 'If checked this mod is enabled. \\c[1]Needs a restart!';
 
 			ig.lang.labels.sc.gui.options['modEnabled-' + mod.name.toLowerCase()] = {name, description};
 		}
@@ -628,7 +628,7 @@ class SimplifyOptions {
 	_initializeLogLevel(cat) {
 		const lang = ig.lang.labels.sc.gui.options;
 		lang['logLevel-log'] = {name: 'Log level: Default', description: 'Enables default message popups. \\c[1]Needs a restart!'};
-		lang['logLevel-warn'] = {name: 'Log level: Wanings', description: 'Enables warning popups. \\c[1]Needs a restart!'};
+		lang['logLevel-warn'] = {name: 'Log level: Warnings', description: 'Enables warning popups. \\c[1]Needs a restart!'};
 		lang['logLevel-error'] = {name: 'Log level: Errors', description: 'Enables error popups. \\c[1]Needs a restart!'};
 		lang.headers['logLevel'] = 'Log levels';
 
