@@ -1,7 +1,7 @@
 {
 	"name": "Simplify",
 	"main": "mod.js",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"dependencies": {
 		"ccloader": "^2.2.0",
 		"crosscode": "^1.0.0"

@@ -1647,6 +1647,19 @@
                     }
                 ]
             }
+        },
+        "values": {
+            "type": "select",
+            "pattern": "body.1.body.body.1.expression.right.left.object.property.name",
+            "from": {
+                "type": "BlockStatement",
+                "values": [
+                    {
+                        "name": "body.0.expression.arguments.0.raw",
+                        "value": "\"KEY BINDING FAILURE. RESET TO DEFAULT CONFIG\""
+                    }
+                ]
+            }
         }
     },
     "tree": {

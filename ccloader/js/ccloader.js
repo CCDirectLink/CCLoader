@@ -3,7 +3,7 @@ import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
 
-const CCLOADER_VERSION = '2.5.0';
+const CCLOADER_VERSION = '2.5.1';
 
 export class ModLoader {
 	constructor() {
