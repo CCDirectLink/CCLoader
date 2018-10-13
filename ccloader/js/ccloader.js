@@ -3,7 +3,7 @@ import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
 
-const CCLOADER_VERSION = '2.4.1';
+const CCLOADER_VERSION = '2.4.2';
 
 export class ModLoader {
 	constructor() {
@@ -25,19 +25,21 @@ export class ModLoader {
 	/**
 	 * Loads and starts the game. It then loads the definitions and mods
 	 */
-	startGame() {
-		this._initializeGame()
-			.then(() => {
-				this._setStatus('Loading Game');
+	async startGame() {
+		await this._initializeGame();
+		
+		this._setStatus('Loading Game');
+		this._setupGamewindow();
 
-				this.ui.applyBindings(this._getGameWindow().console);
-				this._getGameWindow().reloadTables = () => this.reloadTables();
-				this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
-	
-				this._waitForGame()
-					.then(() => this._executeDb());
-			})
-			.catch(err => console.error('Something went wrong while loading the game', err));
+		await this._waitForGame();
+		
+		await this._loadModPackages();
+		this._executeDb();
+		
+		await this._initializeMods();
+
+		this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
+		this._removeOverlay();
 	}
 
 	/**
@@ -115,18 +117,29 @@ export class ModLoader {
 	}
 
 	/**
-	 * Loads the mods package.json and mod tables
+	 * Loads the mod tables
+	 * @param {{[key: string]: string}} entries
 	 */
-	_initializeModTables() {
-		this._getModList();
-		return this._loadMods()
-			.then(() => {
-				for (const mod of this.mods) {
-					if (mod.isEnabled) {
-						mod.initializeTable(this);
-					}
+	_executeModTables(entries) {
+		for (const mod of this.mods) {
+			if (mod.isEnabled && this._canLoad(mod)) {
+				const table = mod.initializeTable(this);
+				if (table) {
+					Object.assign(entries, table.entries);
+					mod.executeTable(this);
 				}
-			});
+			}
+		}
+	}
+
+	/**
+	 * @param {{[key: string]: string}} entries
+	 */
+	_finalizeEntries(entries) {
+		Object.defineProperty(this._getGameWindow(), 'entries', {
+			value : Object.freeze(entries),
+			writable : false
+		});
 	}
 
 	/**
@@ -139,17 +152,16 @@ export class ModLoader {
 
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 
-		const entries = this._setupGamewindow();
 		this._setStatus('Initializing Mods');
 
-		this._initializeModTables()
-			.then(() => this._initializeMods(entries))
-			.then(() => this._waitForMods())
-			.then(() => {
-				this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
-				this._removeOverlay();
-			})
-			.catch(err => console.error('An error occured while loading mods', err));
+		const entries = Object.assign({}, this.table.entries);
+
+		try {
+			this._executeModTables(entries);
+			this._finalizeEntries(entries);
+		} catch (err) {
+			console.error('An error occured while loading mod tables', err);
+		}
 	}
 
 	/**
@@ -157,23 +169,22 @@ export class ModLoader {
 	 * @returns {{[key: string]: string}} entries
 	 */
 	_setupGamewindow() {
-		const entries = this._getGameWindow().entries = {};
-		this._getGameWindow().getEntry = name => entries[name];
+		this.ui.applyBindings(this._getGameWindow().console);
+		this._getGameWindow().reloadTables = () => this.reloadTables();
+		this._getGameWindow().getEntry = name => this._getGameWindow().entries[name];
+		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 		
-
 		this._buildCrosscodeVersion();
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
 		};
-
-		return entries;
 	}
 	
 	/**
 	 * Searches for mods and stores them in this.mods
 	 */
-	_getModList() {
+	_getModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
 		this.mods = [];
 		for (const modFile of modFiles) {
@@ -184,47 +195,29 @@ export class ModLoader {
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available
 	 */
-	_loadMods() {
+	_loadModPackages() {
+		this._getModPackages();
 		return Promise.all(this.mods.map((mod) => mod.onload()));
 	}
 
-	/**
-	 * @param {{[key: string]: string}} entries
-	 */
-	_initializeMods(entries) {
+	async _initializeMods() {
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
-		const tempEntries = {};
-		Object.assign(tempEntries, this.table.entries);
+		
 		for (const mod of this.mods) {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
 				this.versions[mod.name] = mod.version;
 
-				mod.executeTable(this);
-				if (mod.table) {
-					Object.assign(tempEntries, mod.table.entries);
+				try {
+					await mod.load();
+				} catch (e) {
+					console.warn(`Could not load "${mod.name}": ${e}`);
 				}
-
-				(mod => {
-					mod.load()
-						.then(() => {
-							this.modsLoaded++;
-						})
-						.catch(() => {
-							console.warn(`Could not load "${mod.name}"`);
-							this.modsLoaded++;
-						});
-				})(mod);
 			} else {
 				this._getGameWindow().inactiveMods.push(mod);
-				this.modsLoaded++;
 			}
 		}
-		Object.defineProperty(this._getGameWindow(), 'entries', {
-			value : Object.freeze(tempEntries),
-			writable : false
-		});
 	}
 	
 
@@ -239,21 +232,6 @@ export class ModLoader {
 			};
 			this.frame.onerror = event => reject(event);
 			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
-		});
-	}
-
-	/**
-	 * Waits for all mods to be completely loaded
-	 * @returns {Promise<void>}
-	 */
-	_waitForMods() {
-		return new Promise(resolve => {
-			const intervalid = setInterval(() => {
-				if(this.modsLoaded >= this._getGameWindow().activeMods.length){
-					clearInterval(intervalid);
-					resolve();
-				}
-			}, 1000);
 		});
 	}
 

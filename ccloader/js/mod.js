@@ -7,7 +7,7 @@ const process = require('process');
 export class Mod {
 	/**
 	 * 
-	 * @param {Modloader} modloader
+	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file 
 	 * @param {string} ccVersion
 	 */
@@ -61,18 +61,14 @@ export class Mod {
 	/**
 	 * @returns {Promise<void>}
 	 */
-	load() {
-		return new Promise((resolve, reject) => {
-			if(!this.loaded)
-				return reject();
-	
-			if(!this.manifest.main)
-				return resolve();
-	
-			this.filemanager.loadMod(this.manifest.main, this.module)
-				.then(() => resolve())
-				.catch(() => reject());
-		});
+	async load() {
+		if(!this.loaded)
+			return;
+
+		if(!this.manifest.main)
+			return;
+
+		return await this.filemanager.loadMod(this.manifest.main, this.module);
 	}
 
 	/**
@@ -154,7 +150,7 @@ export class Mod {
 	}
 
 	/**
-	 * @param {ModLoader} ccloader
+	 * @param {import('./ccloader').ModLoader} ccloader
 	 */
 	initializeTable(ccloader){
 		if(!this.loaded || !this.manifest.table)
@@ -185,6 +181,8 @@ export class Mod {
 				this.disabled = true;
 			}
 		}
+
+		return this.table;
 	}
 
 	/**
