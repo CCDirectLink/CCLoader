@@ -3,7 +3,7 @@ import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
 
-const CCLOADER_VERSION = '2.4.2';
+const CCLOADER_VERSION = '2.5.0';
 
 export class ModLoader {
 	constructor() {
@@ -172,6 +172,10 @@ export class ModLoader {
 		this.ui.applyBindings(this._getGameWindow().console);
 		this._getGameWindow().reloadTables = () => this.reloadTables();
 		this._getGameWindow().getEntry = name => this._getGameWindow().entries[name];
+		this._getGameWindow().getEntryName = value => 
+			Object.keys(this._getGameWindow().entries)
+				.find(key => this._getGameWindow().entries[key] === value);
+
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 		
 		this._buildCrosscodeVersion();
