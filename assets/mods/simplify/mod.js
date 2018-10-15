@@ -855,7 +855,10 @@ class SimplifyResources {
 			if (modified[key] == undefined && original[key] == undefined) {
 				continue;
 			}
-			if(!original.hasOwnProperty(key) || original[key] === undefined || original[key].constructor !== modified[key].constructor) {
+
+			if (modified[key] == undefined && original.hasOwnProperty(key)) {
+				result[key] = null;
+			} else if (!original.hasOwnProperty(key) || original[key] === undefined || original[key].constructor !== modified[key].constructor) {
 				result[key] = modified[key];
 			} else if (original[key] !== modified[key]) {
 				if (modified[key].constructor === Object || modified[key].constructor === Array) {
@@ -876,7 +879,7 @@ class SimplifyResources {
 		}
 
 		for (const key in result) {
-			if(result[key].constructor === Function){
+			if(result[key] && result[key].constructor === Function){
 				result[key] = undefined;
 				delete result[key];
 			}
