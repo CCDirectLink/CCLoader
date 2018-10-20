@@ -79,7 +79,7 @@
                 ]
             }
         },
-        "COMBATANT_PARTY": {
+        "ANT_PARTY": {
             "type": "select",
             "pattern": "left.property.name",
             "from": {
@@ -92,7 +92,7 @@
                 ]
             }
         },
-        "Combat": {
+        "": {
             "type": "select",
             "pattern": "left.property.name",
             "from": {
@@ -100,7 +100,7 @@
                 "values": [
                     {
                         "name": "right.arguments.0.properties.22.value.body.body.0.expression.right.arguments.0.arguments.0.raw",
-                        "value": "\"Tried to add same combatant as active twice!\""
+                        "value": "\"Tried to add same ant as active twice!\""
                     }
                 ]
             }
@@ -586,7 +586,7 @@
                 ]
             }
         },
-        "activeCombatants": {
+        "activeants": {
             "type": "select",
             "pattern": "left.left.callee.object.object.property.name",
             "from": {
@@ -594,7 +594,7 @@
                 "values": [
                     {
                         "name": "right.arguments.0.arguments.0.raw",
-                        "value": "\"Tried to add same combatant as active twice!\""
+                        "value": "\"Tried to add same ant as active twice!\""
                     }
                 ]
             }
@@ -820,7 +820,7 @@
                 ]
             }
         },
-        "combatActions": {
+        "actionSteps": {
             "type": "select",
             "pattern": "object.property.name",
             "from": {
@@ -1722,7 +1722,7 @@
                     },
                     {
                         "type": "static",
-                        "name": "combatActions",
+                        "name": "actionSteps",
                         "parent": "ig"
                     },
                     {
