@@ -2,8 +2,9 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
+import { Preloader } from './preloader.js';
 
-const CCLOADER_VERSION = '2.5.2';
+const CCLOADER_VERSION = '2.6.0';
 
 export class ModLoader {
 	constructor() {
@@ -35,7 +36,8 @@ export class ModLoader {
 		
 		await this._loadModPackages();
 		this._executeDb();
-		
+		await this._preloadMods();
+
 		await this._initializeMods();
 
 		this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
@@ -202,6 +204,17 @@ export class ModLoader {
 	_loadModPackages() {
 		this._getModPackages();
 		return Promise.all(this.mods.map((mod) => mod.onload()));
+	}
+
+	_preloadMods() {
+		const preloader = new Preloader(this.filemanager);
+		preloader.loadDictionary(this._getGameWindow().entries);
+
+		return Promise.all(
+			this.mods
+				.filter(mod => mod.isEnabled && this._canLoad(mod))
+				.map(mod => mod.preload(preloader))
+		);
 	}
 
 	async _initializeMods() {

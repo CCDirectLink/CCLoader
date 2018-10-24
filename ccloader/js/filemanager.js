@@ -25,12 +25,29 @@ export class Filemanager {
 	}
 
 	/**
+	 * Loads a script into the scope of ccloader
+	 * @param {string} file
+	 * @param {boolean} isModule
+	 */
+	loadScript(file, isModule) {
+		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
+	}
+
+	/**
 	 * 
 	 * @param {string} file 
 	 * @param {boolean} isModule 
 	 */
 	loadMod(file, isModule){
 		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
+	}
+	/**
+	 * 
+	 * @param {string} content 
+	 * @param {boolean} isModule 
+	 */
+	loadRawMod(content, isModule){
+		return this._loadRawScript(content, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
 	getTableName(){
 		return this._getHash('assets/js/game.compiled.js');
@@ -95,6 +112,36 @@ export class Filemanager {
 		} catch(e){
 			return undefined;
 		}
+	}
+	
+	/**
+	 * 
+	 * @param {string} resource 
+	 */
+	getResourceAsync(resource){
+		return new Promise((resolve, reject) => {
+			if(isLocal) {
+				fs.readFile(resource, 'utf-8', (err, result) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(result);
+					}
+				});
+			} else {
+				const req = new XMLHttpRequest();
+				req.open('GET', '/' + resource, true);
+
+				req.onerror = err => reject(err);
+				req.onreadystatechange = () => {
+					if (req.status === 200) {
+						resolve(req.responseText);
+					}
+				};
+
+				req.send(null);
+			}
+		});
 	}
 	/**
 	 * 
@@ -231,6 +278,27 @@ export class Filemanager {
 			script.type = type;
 			script.src = url;
 			doc.body.appendChild(script);
+		});
+	}
+	/**
+	 * 
+	 * @param {string} content 
+	 * @param {document} doc
+	 * @param {string} type 
+	 * @returns {Promise<void>}
+	 */
+	_loadRawScript(content, doc, type){
+		if (!type) {
+			type = 'text/javascript';
+		}
+
+		return new Promise((resolve, reject) => {
+			try {
+				doc.defaultView.eval(content);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
 		});
 	}
 	/**
