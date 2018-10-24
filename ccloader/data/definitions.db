@@ -1129,13 +1129,13 @@
         },
         "init": {
             "type": "select",
-            "pattern": "body.32.expression.arguments.1.type.6",
+            "pattern": "value.properties.4.value.type.6",
             "from": {
-                "type": "BlockStatement",
+                "type": "Property",
                 "values": [
                     {
-                        "name": "body.26.expression.right.arguments.0.raw",
-                        "value": "\"controls\""
+                        "name": "key.value",
+                        "value": "volume-sound"
                     }
                 ]
             }
