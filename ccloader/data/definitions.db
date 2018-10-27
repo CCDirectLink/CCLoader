@@ -183,6 +183,19 @@
                 ]
             }
         },
+        "enterPrevSubState": {
+            "type": "select",
+            "pattern": "body.1.expression.callee.property.name",
+            "from": {
+                "type": "BlockStatement",
+                "values": [
+                    {
+                        "name": "body.0.expression.arguments.0.test.right.argument.raw",
+                        "value": "2"
+                    }
+                ]
+            }
+        },
         "Expressions": {
             "type": "select",
             "pattern": "elements.8.properties.1.value.properties.1.key.name",
