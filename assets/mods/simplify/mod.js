@@ -916,11 +916,7 @@ class SimplifyResources {
 
 			//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
 
-			if (window.require) {
-				settings.url = ig.root + fullreplace[0];
-			} else {
-				settings.url = ig.root + fullreplace[0].substr(7);
-			}
+			settings.url = ig.root + fullreplace[0].substr(7);
 		}
 
 		const patches = window.simplify.getAllAssets(settings.url.substr(ig.root.length) + '.patch');
