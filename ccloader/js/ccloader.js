@@ -153,7 +153,6 @@ export class ModLoader {
 		}
 
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
-
 		this._setStatus('Initializing Mods');
 
 		const entries = Object.assign({}, this.table.entries);
@@ -163,12 +162,11 @@ export class ModLoader {
 			this._finalizeEntries(entries);
 		} catch (err) {
 			console.error('An error occured while loading mod tables', err);
-		}
 	}
 
 	/**
 	 * Sets up all global objects from ccloader in the game window
-	 * @returns {{[key: string]: string}} entries
+	 * 
 	 */
 	_setupGamewindow() {
 		this.ui.applyBindings(this._getGameWindow().console);
@@ -179,12 +177,28 @@ export class ModLoader {
 				.find(key => this._getGameWindow().entries[key] === value);
 
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
-		
-		this._buildCrosscodeVersion();
-		this.versions = this._getGameWindow().versions = {
-			ccloader: CCLOADER_VERSION,
-			crosscode: this.ccVersion
+	}
+	/**
+	 * Makes read only definition available in game 
+	 * window.
+	 * Also provides helper functions to interface 
+	 * with the entries array
+	 */
+	_setupGameEntries() {
+		const entries = this.table.entries;
+		Object.defineProperty(this._getGameWindow(), 'entries', {
+			value : Object.freeze(entries),
+			writable : false
+		});
+		this._getGameWindow().getValue = val => {
+			for(let valueKey of Object.keys(entries)) {
+				if(entries[valueKey] === val) { 
+					 return valueKey;
+				}
+		   }
+		   return null;
 		};
+		this._getGameWindow().getEntry = name => entries[name];
 	}
 	
 	/**
@@ -216,7 +230,6 @@ export class ModLoader {
 				.map(mod => mod.preload(preloader))
 		);
 	}
-
 	async _initializeMods() {
 		this._getGameWindow().inactiveMods = [];
 		this._getGameWindow().activeMods = [];
@@ -225,7 +238,6 @@ export class ModLoader {
 			if (mod.isEnabled && this._canLoad(mod)) {
 				this._getGameWindow().activeMods.push(mod);
 				this.versions[mod.name] = mod.version;
-
 				try {
 					await mod.load();
 				} catch (e) {
