@@ -47,7 +47,11 @@ const buttons = {
 
 const SCALING = 2;
 const BORDER_SIZE = 7;
-
+const LOG_TYPE = {
+	ERROR :  0b001,
+	WARNING : 0b010,
+	INFO : 0b100
+};
 export class UI {
 	/**
      * 
@@ -69,19 +73,19 @@ export class UI {
 
 		const logFlags = localStorage.getItem('logFlags') || 3;
 
-		if ((logFlags & 1) === 1) {
+		if (logFlags & LOG_TYPE.ERROR) {
 			console.error = (...msg) => {
 				this.error.apply(this, msg);
 				err.apply(console, msg);
 			};
 		}
-		if ((logFlags & 2) === 2) {
+		if (logFlags & LOG_TYPE.WARNING) {
 			console.warn = (...msg) => {
 				this.warn.apply(this, msg);
 				warn.apply(console, msg);
 			};
 		}
-		if ((logFlags & 4) === 4) {
+		if (logFlags & LOG_TYPE.INFO) {
 			console.log = (...msg) => {
 				this.log.apply(this, msg);
 				log.apply(console, msg);
