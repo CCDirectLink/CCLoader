@@ -729,6 +729,7 @@ class SimplifyResources {
 		this.handlers = [];
 		
 		this._hookAjax();
+		this._hookHttpRequest();
 		this._patchCache();
 		this._hookImage();
 	}
@@ -965,6 +966,36 @@ class SimplifyResources {
 		for (const entry of this.handlers) {
 			if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
 				entry.handler(settings, settings.url.substr(ig.root.length));
+			}
+		}
+	}
+
+	_hookHttpRequest() {
+		const instance = this;
+		const original = XMLHttpRequest.prototype.open;
+		XMLHttpRequest.prototype.open = function(_, url) {
+			arguments[1] = instance._handleHttpRequest(url) || url;
+			return original.apply(this, arguments);
+		};
+	}
+
+	/**
+	 * 
+	 * @param {string} url
+	 */
+	_handleHttpRequest(url) {
+		const fullreplace = window.simplify.getAllAssets(url.substr(ig.root.length));
+
+		if(fullreplace && fullreplace.length > 0){
+			if(fullreplace.length > 1)
+				console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
+
+			//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
+
+			if (fullreplace[0].indexOf('assets') === 0) {
+				return ig.root + fullreplace[0].substr(7);
+			} else {
+				return ig.root + fullreplace[0];
 			}
 		}
 	}
