@@ -151,18 +151,22 @@ export class Filemanager {
 	 * @returns {Promise<string[]>}
 	 */
 	async findFiles(dir, endings) {
-		const files = await this._getFiles(dir);
-		if (files.length === 0) {
+		try {
+			const files = await this._getFiles(dir);
+			if (files.length === 0) {
+				return [];
+			}
+	
+			const promises = [];
+			for (const file of files){
+				promises.push(this._checkFileForAsset(dir, file, endings));
+			}
+			const results = await Promise.all(promises);
+	
+			return [].concat(...results); //Flattens the arrays
+		} catch (e) {
 			return [];
 		}
-
-		const promises = [];
-		for (const file of files){
-			promises.push(this._checkFileForAsset(dir, file, endings));
-		}
-		const results = await Promise.all(promises);
-
-		return [].concat(...results); //Flattens the arrays
 	}
 
 	/**
@@ -293,13 +297,13 @@ export class Filemanager {
 	 * @returns {Promise<string[]>} 
 	 */
 	async _checkFileForAsset(dir, file, endings) {
-		const path = path.resolve(dir, file);
+		const filePath = path.resolve(dir, file);
 
-		const stats = await this._getStats(path);
+		const stats = await this._getStats(filePath);
 		if(stats && stats.isDirectory()){
-			return await this.findFiles(path);
-		} else  if (!endings || endings.some(ending => path.endsWith(ending))) {
-			return [path.relative(process.cwd() + '/assets/', path).replace(/\\/g, '/')];
+			return await this.findFiles(filePath);
+		} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
+			return [filePath.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
 		}
 	}
 
