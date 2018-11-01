@@ -1,8 +1,6 @@
 /** @typedef Modloader import ccloader.js */
 
-const fs = require('fs');
 const path = require('path');
-const process = require('process');
 
 export class Mod {
 	/**
@@ -269,62 +267,20 @@ export class Mod {
 	 * 
 	 * @param {string} dir 
 	 */
-	_findAssets(dir){
-		return new Promise(resolve => {
-			if(!this.manifest.assets && fs && path){
-				/** @type {string[]} */
-				let result = [];
-				
-				fs.readdir(dir, (err, files) => {
-					if (err) {
-						return resolve(result);
-					}
-		
-					let count = files.length;
-		
-					if (count == 0) {
-						return resolve(result);
-					}
-		
-					for (let file of files){
-						file = path.resolve(dir, file);
-		
-						(file => {
-							fs.stat(file, (err, stat) => {				//TODO: simplify this mess
-								if (err) {
-									return resolve(result);
-								}
+	async _findAssets(dir){
+		if(!this.manifest.assets){
+			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
+		} else {
+			if(!this.manifest.assets)
+				return [];
 
-								if(stat && stat.isDirectory()){
-									this._findAssets(file).then(res => {
-										result = result.concat(res);
-										count--;
-										if(count == 0)
-											return resolve(result);
-									});
-								} else {
-									if(file.endsWith('.json') || file.endsWith('.json.patch') || file.endsWith('.png') || file.endsWith('.ogg'))
-										result.push(path.relative(process.cwd() + '/assets/', file).replace(/\\/g, '/'));
-									count--;
-									if(count == 0)
-										return resolve(result);
-								}
-							});
-						})(file);
-					}
-				});
-			} else {
-				if(!this.manifest.assets)
-					return resolve([]);
-	
-				let dir = this._getBaseName(this.file) + '/';
-	
-				const result = [];
-				for(const asset of this.manifest.assets) {
-					result.push(dir + asset);
-				}
-				return resolve(result);
+			let dir = this._getBaseName(this.file) + '/';
+
+			const result = [];
+			for(const asset of this.manifest.assets) {
+				result.push(dir + asset);
 			}
-		});
+			return result;
+		}
 	}
 }

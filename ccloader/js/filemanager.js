@@ -143,6 +143,28 @@ export class Filemanager {
 			}
 		});
 	}
+
+	/**
+	 * 
+	 * @param {string} dir
+	 * @param {string[]} [endings]
+	 * @returns {Promise<string[]>}
+	 */
+	async findFiles(dir, endings) {
+		const files = await this._getFiles(dir);
+		if (files.length === 0) {
+			return [];
+		}
+
+		const promises = [];
+		for (const file of files){
+			promises.push(this._checkFileForAsset(dir, file, endings));
+		}
+		const results = await Promise.all(promises);
+
+		return [].concat(...results); //Flattens the arrays
+	}
+
 	/**
 	 * 
 	 * @param {string} tableName 
@@ -228,6 +250,59 @@ export class Filemanager {
 			return results;
 		}
 	}
+
+	/**
+	 * 
+	 * @param {string} dir
+	 * @returns {Promise<string[]>}
+	 */
+	_getFiles(dir) {
+		return new Promise((resolve, reject) => {
+			fs.readdir(dir, (err, files) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(files);
+				}
+			});
+		});
+	}
+
+	/**
+	 * 
+	 * @param {string} file
+	 * @returns {Promise<fs.Stats>}
+	 */
+	_getStats(file) {
+		return new Promise((resolve, reject) => {
+			fs.stat(file, (err, stats) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(stats);
+				}
+			});
+		});
+	}
+
+	/**
+	 * 
+	 * @param {string} dir 
+	 * @param {string} file 
+	 * @param {string[]} [endings]
+	 * @returns {Promise<string[]>} 
+	 */
+	async _checkFileForAsset(dir, file, endings) {
+		const path = path.resolve(dir, file);
+
+		const stats = await this._getStats(path);
+		if(stats && stats.isDirectory()){
+			return await this.findFiles(path);
+		} else  if (!endings || endings.some(ending => path.endsWith(ending))) {
+			return [path.relative(process.cwd() + '/assets/', path).replace(/\\/g, '/')];
+		}
+	}
+
 	/**
 	 * 
 	 * @param {string} file 
