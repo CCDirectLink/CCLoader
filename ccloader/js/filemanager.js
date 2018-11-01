@@ -299,11 +299,15 @@ export class Filemanager {
 	async _checkFileForAsset(dir, file, endings) {
 		const filePath = path.resolve(dir, file);
 
-		const stats = await this._getStats(filePath);
-		if(stats && stats.isDirectory()){
-			return await this.findFiles(filePath);
-		} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
-			return [filePath.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
+		try {
+			const stats = await this._getStats(filePath);
+			if(stats && stats.isDirectory()){
+				return await this.findFiles(filePath);
+			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
+				return [path.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
+			}
+		} catch (e) {
+			return [];
 		}
 	}
 
