@@ -303,7 +303,7 @@ export class Mod {
 											return resolve(result);
 									});
 								} else {
-									if(file.endsWith('.json') || file.endsWith('.json.patch') || file.endsWith('.png'))
+									if(file.endsWith('.json') || file.endsWith('.json.patch') || file.endsWith('.png') || file.endsWith('.ogg'))
 										result.push(path.relative(process.cwd() + '/assets/', file).replace(/\\/g, '/'));
 									count--;
 									if(count == 0)
