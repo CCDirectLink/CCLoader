@@ -848,6 +848,35 @@ class SimplifyResources {
 
 		return result;
 	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 * @returns {Promise<string>}
+	 */
+	loadFilePatched(path) {
+		return new Promise((resolve, reject) => {
+			path = this._stripAssets(path);
+			const req = new XMLHttpRequest();
+			req.open('GET', path, true);
+			req.onreadystatechange = function(){
+				if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
+					resolve(req.responseText);
+				}
+			};
+			req.onerror = err => reject(err);
+			req.send();
+		});
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 * @returns {Promise<any>}
+	 */
+	async loadJSONPatched(path) {
+		return JSON.parse(await this.loadFilePatched(path));
+	}
 	
 	_generatePatch(original, modified) {
 		const result = {};
@@ -1026,6 +1055,16 @@ class SimplifyResources {
 		for (const image of images){
 			this._handleImage(image);
 		}
+
+		this._patchDatabases(); //This isn't actually awaited since there is no wait functionality while initializing mods
+	}
+
+	async _patchDatabases() {
+		const data = await this.loadJSONPatched('data/database.json');
+		cc.ig.Database.onload(data);
+
+		const itemData = await this.loadJSONPatched('data/item-database.json');
+		cc.sc.inventory.onload(itemData);
 	}
 
 	_searchForImages(obj, layer){

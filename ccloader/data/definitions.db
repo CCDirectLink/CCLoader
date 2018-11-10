@@ -1205,6 +1205,33 @@
                 ]
             }
         },
+        "Inventory": {
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.arguments.0.properties.1.value.body.body.0.consequent.argument.arguments.0.raw",
+                        "value": "\"Can't initialize item database because no ig.ITEM_DATABASE was provided!\""
+                    }
+                ]
+            }
+        },
+        "inventory": {
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.callee.property.name",
+                        "value": "Inventory",
+                        "type": "dynamic"
+                    }
+                ]
+            }
+        },
         "isInCombat": {
             "type": "select",
             "pattern": "key.name",
@@ -2169,6 +2196,16 @@
                     {
                         "type": "static",
                         "name": "EnemyType",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Inventory",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "inventory",
                         "parent": "sc"
                     },
                     {
