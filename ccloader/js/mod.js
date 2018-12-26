@@ -230,6 +230,10 @@ export class Mod {
 	}
 	
 	_getModNameFromFile(){
+		if (!this.file.includes('package.json')) {
+			return 'Unknown mod';
+		}
+
 		let name = this.file.match(/\/[^/]*\/package.json/g).pop().replace(/\//g, '');
 		name = name.substr(0, name.length - 6);
 		return name;
@@ -268,7 +272,7 @@ export class Mod {
 	 * @param {string} dir 
 	 */
 	async _findAssets(dir){
-		if(!this.manifest.assets){
+		if(window.isLocal){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
 			if(!this.manifest.assets)
