@@ -809,7 +809,7 @@
         },
         "cacheList": {
             "type": "select",
-            "pattern": "body.3.expression.left.object.property.name",
+            "pattern": "body.4.expression.left.object.property.name",
             "from": {
                 "type": "BlockStatement",
                 "values": [
@@ -1684,6 +1684,19 @@
                     {
                         "name": "body.6.body.body.1.alternate.expression.arguments.0.consequent.callee.object.property.name",
                         "value": "color"
+                    }
+                ]
+            }
+        },
+        "Timer": {
+            "type": "select",
+            "pattern": "body.1.expression.right.callee.property.name",
+            "from": {
+                "type": "BlockStatement",
+                "values": [
+                    {
+                        "name": "body.4.consequent.expression.right.raw",
+                        "value": "\"imageSmoothingEnabled\""
                     }
                 ]
             }
