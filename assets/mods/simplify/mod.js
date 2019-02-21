@@ -413,9 +413,11 @@ class Simplify {
 		document.createEvent('Event').initEvent('returnToMenu', true, true);
 		document.createEvent('Event').initEvent('mapUnloaded', true, true);
 	}
-	_postInitialize(){
+	async _postInitialize(){
 		this._initializeFont();
 		this._initializeOptions();
+
+		await this.resources.patchCache();
 		
 		document.body.dispatchEvent(new Event('simplifyInitialized'));
 	}
@@ -730,7 +732,6 @@ class SimplifyResources {
 		
 		this._hookAjax();
 		this._hookHttpRequest();
-		this._patchCache();
 		this._hookImage();
 	}
 
@@ -876,6 +877,17 @@ class SimplifyResources {
 	 */
 	async loadJSONPatched(path) {
 		return JSON.parse(await this.loadFilePatched(path));
+	}
+
+	async patchCache(){
+		let images = this._searchForImages(cc.ig.cacheList, 5);
+		images = images.concat(this._searchForImages(cc.sc.fontsystem, 4));
+
+		for (const image of images){
+			this._handleImage(image);
+		}
+
+		await this._patchDatabases();
 	}
 	
 	_generatePatch(original, modified) {
@@ -1046,17 +1058,6 @@ class SimplifyResources {
 			else
 				obj[key] = patch[key];
 		}
-	}
-
-	_patchCache(){
-		let images = this._searchForImages(cc.ig.cacheList, 5);
-		images = images.concat(this._searchForImages(cc.sc.fontsystem, 4));
-
-		for (const image of images){
-			this._handleImage(image);
-		}
-
-		this._patchDatabases(); //This isn't actually awaited since there is no wait functionality while initializing mods
 	}
 
 	async _patchDatabases() {
