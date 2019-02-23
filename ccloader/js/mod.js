@@ -132,7 +132,7 @@ export class Mod {
 		if(!this.loaded || !this.manifest.assets)
 			return;
 
-		path = path.replace(/\\/g, '/');
+		path = path.replace(/\\/g, '/').trim();
 
 		if(this.runtimeAssets && this.runtimeAssets[path]) {
 			return this.runtimeAssets;
