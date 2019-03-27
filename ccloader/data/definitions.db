@@ -1,4 +1,738 @@
 {
+    "tree": {
+        "name": "cc",
+        "type": "object",
+        "children": [
+            {
+                "name": "ig",
+                "type": "object",
+                "children": [
+                    {
+                        "type": "static",
+                        "name": "bgm",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "BGM_TRACK_LIST",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "dynamic",
+                        "name": "saveSlotList",
+                        "parent": "cc.ig.storage"
+                    },
+                    {
+                        "type": "static",
+                        "name": "interact",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "GUI",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "gameMain",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "entityList",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "baseEntity",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "events",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Font",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "combatActions",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Storage",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "storage",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "dynamic",
+                        "name": "playerInstance",
+                        "parent": "cc.ig.gameMain"
+                    },
+                    {
+                        "type": "dynamic",
+                        "name": "getMapName",
+                        "parent": "cc.ig.gameMain"
+                    },
+                    {
+                        "type": "static",
+                        "name": "BGM_SWITCH_MODE",
+                        "parent": "ig"
+                    },
+                    {
+                        "name": "gameMain",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "dynamic",
+                                "name": "getLoadingState",
+                                "parent": "cc.ig.gameMain"
+                            },
+                            {
+                                "type": "static",
+                                "name": "LoadMap",
+                                "parent": "cc.ig.gameMain"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "CreateMap"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "bgm",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "varNames",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "intro"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "loopEnd"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "introEnd"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "bufferHandle"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "endCallback"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "static",
+                                "name": "mapConfig",
+                                "parent": "ig"
+                            },
+                            {
+                                "type": "static",
+                                "name": "stack",
+                                "parent": "cc.ig.bgm"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "interact",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "addEntry",
+                                "parent": "cc.ig.interact"
+                            },
+                            {
+                                "type": "static",
+                                "name": "removeEntry",
+                                "parent": "cc.ig.interact"
+                            },
+                            {
+                                "type": "static",
+                                "name": "entries",
+                                "parent": "cc.ig.interact"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "varNames",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "raw",
+                                "name": "gameMainLoadStart"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "param"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "paramGetStat"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "gameMainSpawnEntity"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "TeleportPosition"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "TeleportPositionFromJson"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "systemHasFocusLost"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "animation"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "currentAnimation"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "mapName"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "entityData"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "entityPosition"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "entityKill"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "run"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "proxies"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "proxyActions"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "slowDownModifier"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "innerGUI"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "jump"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "AnimationState"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "gameMainTeleport"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "gameMainLoadMap"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "gameMainBeginLoadMap"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "storageGlobals"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "currentState"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "BGMpath"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "Gui"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "addGui"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "anims"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "image"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "tint"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "empty"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "paramCurrentHp"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "setTarget"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "activate"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "GUI",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "interact",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "buttonManager"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "button"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "raw",
+                                "name": "setPosition"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "screenPosition"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "GuiConfig"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "GuiArray"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "renameTextButton"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "addTextButton"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "callbackFunction"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "addButton"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "buttonGroup"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "GuiScreen",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "varNames",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "lines"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "CreditsObject"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "GuiScreen",
+                        "parent": "ig"
+                    },
+                    {
+                        "name": "Database",
+                        "type": "object",
+                        "children": []
+                    },
+                    {
+                        "type": "static",
+                        "name": "Database",
+                        "parent": "ig"
+                    },
+                    {
+                        "name": "TextCommand",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "evaluate",
+                                "parent": "cc.ig.TextCommand"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "TextCommand",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "DefaultSound",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "LangLabel",
+                        "parent": "ig"
+                    },
+                    {
+                        "name": "LangLabel",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "varNames",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "langUid"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Gui",
+                        "type": "object",
+                        "children": []
+                    },
+                    {
+                        "type": "static",
+                        "name": "Gui",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "cacheList",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Image",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Sound",
+                        "parent": "ig"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Track",
+                        "parent": "ig"
+                    }
+                ]
+            },
+            {
+                "name": "sc",
+                "type": "object",
+                "children": [
+                    {
+                        "type": "static",
+                        "name": "PlayerConfig",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "EnemyType",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Inventory",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "inventory",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "party",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "playerModelInstance",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "stats",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "fontsystem",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "stats",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "getStat",
+                                "parent": "cc.sc.stats"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "OPTIONS_DEFINITION",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "OPTION_CATEGORY",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "OptionsMenu",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "OptionsTabBox",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "varNames",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "raw",
+                                "name": "init"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "optionsTabBoxTab"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "optionsTabBoxTabArray"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "optionsTabBoxRearrangeTabs"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "optionsTabBoxCreateTabButton"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "optionsLoadGlobals"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "isInCombat"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "activeCombatants"
+                            },
+                            {
+                                "type": "raw",
+                                "name": "autoSlotMiss"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "VoiceActor",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "VoiceActor",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "varNames",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "Expressions"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "Sounds"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "Sounds"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "VoiceActing",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "VoiceActing",
+                        "type": "object",
+                        "children": [
+                            {
+                                "name": "varNames",
+                                "type": "object",
+                                "children": [
+                                    {
+                                        "type": "raw",
+                                        "name": "Config"
+                                    },
+                                    {
+                                        "type": "raw",
+                                        "name": "active"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "SIDE",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "Message",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "CLEAR_SIDE",
+                                "parent": "sc.message"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "GetAreaInfo",
+                        "parent": "sc.map"
+                    },
+                    {
+                        "type": "static",
+                        "name": "Model",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "Model",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "addObserver",
+                                "parent": "cc.sc.Model"
+                            },
+                            {
+                                "type": "static",
+                                "name": "notifyObserver",
+                                "parent": "cc.sc.Model"
+                            },
+                            {
+                                "type": "static",
+                                "name": "observerCallback"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "name": "Combat",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "COMBATANT_PARTY",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "ButtonListBox",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "SaveSlotButton",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "playerModelInstance",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "isMainMenu",
+                                "parent": "cc.sc.playerModelInstance"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
     "entries": {
         "AnimationState": {
             "type": "select",
@@ -183,19 +917,6 @@
                 ]
             }
         },
-        "enterPrevSubState": {
-            "type": "select",
-            "pattern": "body.1.expression.callee.property.name",
-            "from": {
-                "type": "BlockStatement",
-                "values": [
-                    {
-                        "name": "body.0.expression.arguments.0.test.right.argument.raw",
-                        "value": "2"
-                    }
-                ]
-            }
-        },
         "Expressions": {
             "type": "select",
             "pattern": "elements.8.properties.1.value.properties.1.key.name",
@@ -300,19 +1021,6 @@
                 ]
             }
         },
-        "header": {
-            "type": "select",
-            "pattern": "key.name",
-            "from": {
-                "type": "Property",
-                "values": [
-                    {
-                        "name": "value.raw",
-                        "value": "\"cutscenes\""
-                    }
-                ]
-            }
-        },
         "Image": {
             "type": "select",
             "pattern": "left.object.property.name",
@@ -322,6 +1030,19 @@
                     {
                         "name": "right.arguments.0.raw",
                         "value": "\"impact/webworker/image-tasks.js\""
+                    }
+                ]
+            }
+        },
+        "Inventory": {
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.arguments.0.properties.1.value.body.body.0.consequent.argument.arguments.0.raw",
+                        "value": "\"Can't initialize item database because no ig.ITEM_DATABASE was provided!\""
                     }
                 ]
             }
@@ -794,19 +1515,6 @@
                 ]
             }
         },
-        "buttons": {
-            "type": "select",
-            "pattern": "callee.object.object.property.name",
-            "from": {
-                "type": "CallExpression",
-                "values": [
-                    {
-                        "name": "arguments.0.arguments.0.raw",
-                        "value": "\"sc.gui.menu.menu-titles.synopsis\""
-                    }
-                ]
-            }
-        },
         "cacheList": {
             "type": "select",
             "pattern": "body.4.expression.left.object.property.name",
@@ -1205,19 +1913,6 @@
                 ]
             }
         },
-        "Inventory": {
-            "type": "select",
-            "pattern": "left.property.name",
-            "from": {
-                "type": "AssignmentExpression",
-                "values": [
-                    {
-                        "name": "right.arguments.0.properties.1.value.body.body.0.consequent.argument.arguments.0.raw",
-                        "value": "\"Can't initialize item database because no ig.ITEM_DATABASE was provided!\""
-                    }
-                ]
-            }
-        },
         "inventory": {
             "type": "select",
             "pattern": "left.property.name",
@@ -1241,6 +1936,19 @@
                     {
                         "name": "value.body.body.0.argument.alternate.test.left.left.left.left.argument.arguments.0.property.name",
                         "value": "COMBAT_RANK"
+                    }
+                ]
+            }
+        },
+        "isMainMenu": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.body.body.0.argument.right.property.name",
+                        "value": "Wla"
                     }
                 ]
             }
@@ -1332,6 +2040,20 @@
                     {
                         "name": "body.0.expression.right.arguments.0.arguments.0.left.raw",
                         "value": "\"No such active offer at index: \""
+                    }
+                ]
+            }
+        },
+        "observerCallback": {
+            "type": "select",
+            "pattern": "value.body.body.0.body.expression.callee.property.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "key.name",
+						"type" : "dynamic",
+                        "value": "notifyObserver"
                     }
                 ]
             }
@@ -1687,751 +2409,6 @@
                     }
                 ]
             }
-        },
-        "Timer": {
-            "type": "select",
-            "pattern": "body.1.expression.right.callee.property.name",
-            "from": {
-                "type": "BlockStatement",
-                "values": [
-                    {
-                        "name": "body.4.consequent.expression.right.raw",
-                        "value": "\"imageSmoothingEnabled\""
-                    }
-                ]
-            }
-        },
-        "values": {
-            "type": "select",
-            "pattern": "body.1.body.body.1.expression.right.left.object.property.name",
-            "from": {
-                "type": "BlockStatement",
-                "values": [
-                    {
-                        "name": "body.0.expression.arguments.0.raw",
-                        "value": "\"KEY BINDING FAILURE. RESET TO DEFAULT CONFIG\""
-                    }
-                ]
-            }
         }
-    },
-    "tree": {
-        "type": "object",
-        "name": "cc",
-        "children": [
-            {
-                "type": "object",
-                "name": "ig",
-                "children": [
-                    {
-                        "type": "static",
-                        "name": "bgm",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "BGM_TRACK_LIST",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "dynamic",
-                        "name": "saveSlotList",
-                        "parent": "cc.ig.storage"
-                    },
-                    {
-                        "type": "static",
-                        "name": "interact",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "GUI",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "gameMain",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "entityList",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "baseEntity",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "events",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Font",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "combatActions",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Storage",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "storage",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "dynamic",
-                        "name": "playerInstance",
-                        "parent": "cc.ig.gameMain"
-                    },
-                    {
-                        "type": "dynamic",
-                        "name": "getMapName",
-                        "parent": "cc.ig.gameMain"
-                    },
-                    {
-                        "type": "static",
-                        "name": "BGM_SWITCH_MODE",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "object",
-                        "name": "gameMain",
-                        "children": [
-                            {
-                                "type": "dynamic",
-                                "name": "getLoadingState",
-                                "parent": "cc.ig.gameMain"
-                            },
-                            {
-                                "type": "static",
-                                "name": "LoadMap",
-                                "parent": "cc.ig.gameMain"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "CreateMap"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "bgm",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "varNames",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "intro"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "loopEnd"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "introEnd"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "bufferHandle"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "endCallback"
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "static",
-                                "name": "mapConfig",
-                                "parent": "ig"
-                            },
-                            {
-                                "type": "static",
-                                "name": "stack",
-                                "parent": "cc.ig.bgm"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "interact",
-                        "children": [
-                            {
-                                "type": "static",
-                                "name": "addEntry",
-                                "parent": "cc.ig.interact"
-                            },
-                            {
-                                "type": "static",
-                                "name": "removeEntry",
-                                "parent": "cc.ig.interact"
-                            },
-                            {
-                                "type": "static",
-                                "name": "entries",
-                                "parent": "cc.ig.interact"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "varNames",
-                        "children": [
-                            {
-                                "type": "raw",
-                                "name": "gameMainLoadStart"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "param"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "paramGetStat"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "gameMainSpawnEntity"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "TeleportPosition"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "TeleportPositionFromJson"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "systemHasFocusLost"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "animation"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "currentAnimation"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "mapName"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "entityData"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "entityPosition"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "entityKill"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "run"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "proxies"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "proxyActions"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "slowDownModifier"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "innerGUI"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "jump"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "AnimationState"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "gameMainTeleport"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "gameMainLoadMap"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "gameMainBeginLoadMap"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "storageGlobals"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "currentState"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "BGMpath"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "Gui"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "addGui"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "anims"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "image"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "tint"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "empty"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "paramCurrentHp"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "setTarget"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "activate"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "GUI",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "interact",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "buttonManager"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "button"
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "raw",
-                                "name": "setPosition"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "screenPosition"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "GuiConfig"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "GuiArray"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "renameTextButton"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "addTextButton"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "callbackFunction"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "addButton"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "buttonGroup"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "GuiScreen",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "varNames",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "lines"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "CreditsObject"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "GuiScreen",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "object",
-                        "name": "Database",
-                        "children": []
-                    },
-                    {
-                        "type": "static",
-                        "name": "Database",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "object",
-                        "name": "TextCommand",
-                        "children": [
-                            {
-                                "type": "static",
-                                "name": "evaluate",
-                                "parent": "cc.ig.TextCommand"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "TextCommand",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "DefaultSound",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "LangLabel",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "object",
-                        "name": "LangLabel",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "varNames",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "langUid"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "object",
-                        "name": "Gui",
-                        "children": []
-                    },
-                    {
-                        "type": "static",
-                        "name": "Gui",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "cacheList",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Image",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Sound",
-                        "parent": "ig"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Track",
-                        "parent": "ig"
-                    }
-                ]
-            },
-            {
-                "type": "object",
-                "name": "sc",
-                "children": [
-                    {
-                        "type": "static",
-                        "name": "PlayerConfig",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "EnemyType",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Inventory",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "inventory",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "party",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "playerModelInstance",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "stats",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "fontsystem",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "stats",
-                        "children": [
-                            {
-                                "type": "static",
-                                "name": "getStat",
-                                "parent": "cc.sc.stats"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "OPTIONS_DEFINITION",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "OPTION_CATEGORY",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "OptionsMenu",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "OptionsTabBox",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "varNames",
-                        "children": [
-                            {
-                                "type": "raw",
-                                "name": "init"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "optionsTabBoxTab"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "optionsTabBoxTabArray"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "optionsTabBoxRearrangeTabs"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "optionsTabBoxCreateTabButton"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "optionsLoadGlobals"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "isInCombat"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "activeCombatants"
-                            },
-                            {
-                                "type": "raw",
-                                "name": "autoSlotMiss"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "VoiceActor",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "VoiceActor",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "varNames",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "Expressions"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "Sounds"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "Sounds"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "VoiceActing",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "VoiceActing",
-                        "children": [
-                            {
-                                "type": "object",
-                                "name": "varNames",
-                                "children": [
-                                    {
-                                        "type": "raw",
-                                        "name": "Config"
-                                    },
-                                    {
-                                        "type": "raw",
-                                        "name": "active"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "SIDE",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "Message",
-                        "children": [
-                            {
-                                "type": "static",
-                                "name": "CLEAR_SIDE",
-                                "parent": "sc.message"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "GetAreaInfo",
-                        "parent": "sc.map"
-                    },
-                    {
-                        "type": "static",
-                        "name": "Model",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "object",
-                        "name": "Model",
-                        "children": [
-                            {
-                                "type": "static",
-                                "name": "addObserver",
-                                "parent": "cc.sc.Model"
-                            },
-                            {
-                                "type": "static",
-                                "name": "notifyObserver",
-                                "parent": "cc.sc.Model"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "static",
-                        "name": "Combat",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "COMBATANT_PARTY",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "ButtonListBox",
-                        "parent": "sc"
-                    },
-                    {
-                        "type": "static",
-                        "name": "SaveSlotButton",
-                        "parent": "sc"
-                    }
-                ]
-            }
-        ]
     }
 }
