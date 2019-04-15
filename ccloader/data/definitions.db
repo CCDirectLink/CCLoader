@@ -872,6 +872,19 @@
                 ]
             }
         },
+        "currentSubState": {
+            "type": "select",
+            "pattern": "discriminant.property.name",
+            "from": {
+                "type": "SwitchStatement",
+                "values": [
+                    {
+                        "name": "cases.0.consequent.1.consequent.expression.arguments.0.raw",
+                        "value": "\"rookie-harbor.west\""
+                    }
+                ]
+            }
+        },
         "empty": {
             "type": "select",
             "pattern": "body.0.body.body.0.declarations.0.init.object.property.name",
