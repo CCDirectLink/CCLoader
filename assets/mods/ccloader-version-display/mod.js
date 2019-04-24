@@ -55,7 +55,7 @@
 		const titleScreenBackgroundGui = cc.ig.GUI.menues.filter((e) => e[entries.GUI] instanceof cc.sc.TitleScreenBG).pop();
 
 		
-		versionText[entries.setGuiStateTransition]('HIDDEN', h);
+		versionText[entries.setGuiStateTransition]('HIDDEN', true);
 
 		titleScreenBackgroundGui[entries.GUI][entries.addGui](versionText);
 
