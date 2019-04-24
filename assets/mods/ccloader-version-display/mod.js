@@ -33,6 +33,8 @@
 		};
 	}
 	
+	const versionText = createCCLoaderVersionText();
+	
 	function onGameStateChange(object, eventCode) {
 		// eventCode === CHANGED_STATE
 		if (object == cc.sc.playerModelInstance && eventCode === 0) {
@@ -52,7 +54,7 @@
 	document.body.addEventListener('modsLoaded', () => {
 		const titleScreenBackgroundGui = cc.ig.GUI.menues.filter((e) => e[entries.GUI] instanceof cc.sc.TitleScreenBG).pop();
 
-		const versionText = createCCLoaderVersionText();
+		
 		versionText[entries.setGuiStateTransition]('HIDDEN', h);
 
 		titleScreenBackgroundGui[entries.GUI][entries.addGui](versionText);
