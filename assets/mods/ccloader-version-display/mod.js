@@ -1,18 +1,18 @@
 (function() {
-	function createCCLoaderVersionText() {
-		const LOADER_NAME = "CCLoader";
-	 
-		let text = new cc.sc.Text(LOADER_NAME + " V" + versions.ccloader, {
-			font: cc.sc.fontsystem.tiny
-		});
-		text[entries.setPosition](2, 10);
-		text[entries.setAlignment](6, 3);
-		
-		text[entries.GuiConfig][entries.transition] = {
+    function createCCLoaderVersionText() {
+        const LOADER_NAME = "CCLoader";
+
+        let text = new cc.sc.Text(LOADER_NAME + " V" + versions.ccloader, {
+            font: cc.sc.fontsystem.tiny
+        });
+        text[entries.setPosition](2, 10);
+        text[entries.setAlignment](6, 3);
+
+        text[entries.GuiConfig][entries.transition] = {
             DEFAULT: {
                 state: {},
                 time: 0.2,
-                [entries.keySpline] : KEY_SPLINES.EASE
+                [entries.keySpline]: KEY_SPLINES.EASE
             },
             HIDDEN: {
                 state: {
@@ -22,43 +22,48 @@
                 [entries.keySpline]: KEY_SPLINES.LINEAR
             }
         };
-		return text;
-	}
+        return text;
+    }
+
+    function callbackOverride(object, callbackFunctionName, newCallback) {
+        let oldCallBackFunction = object[callbackFunctionName];
+        object[callbackFunctionName] = function() {
+            newCallback.apply(this, arguments);
+            return oldCallBackFunction.apply(this, arguments);
+        }
+    }
 	
-	document.body.addEventListener("modsLoaded", () => {
-		let titleBG = cc.ig.GUI.menues.filter((e) => e[entries.GUI] instanceof cc.sc.TitleScreenBG).pop();
-		if(!titleBG) {
-			throw new Error('Could not find titleBG');
-		}
-		let versionText = createCCLoaderVersionText();
-		versionText[entries.setGuiStateTransition]("HIDDEN", h);
-		
-		titleBG[entries.GUI][entries.addGui](versionText);
-		
-		let oldGuiCallback = titleBG[entries.GUI][entries.observerCallback];
-		
-		titleBG[entries.GUI][entries.observerCallback] = function(object,eventCode) {
-			// eventCode === CHANGED_STATE
-			if(object == cc.sc.playerModelInstance && eventCode === 0) {
-				let currentTransition = cc.sc.playerModelInstance[entries.isMainMenu]() ? "DEFAULT" : "HIDDEN";
-				if(this[entries.GuiConfig][entries.currentTransition] != currentTransition) {
-					versionText[entries.setGuiStateTransition]("HIDDEN");
-				}
-			}	
-			oldGuiCallback.apply(this, arguments);
-		}
-		
+	function onGameStateChange(object, eventCode) {
+        // eventCode === CHANGED_STATE
+        if (object == cc.sc.playerModelInstance && eventCode === 0) {
+            let currentTransition = cc.sc.playerModelInstance[entries.isMainMenu]() ? "DEFAULT" : "HIDDEN";
+            if (this[entries.GuiConfig][entries.currentTransition] != currentTransition) {
+                versionText[entries.setGuiStateTransition]("HIDDEN");
+            }
+        }
+    }
+	function onGameStateAdd(transitionState, transitionType) {
+        // transitionState === ADD (my guess)
+        if (transitionState === 1 && transitionType === "IDLE") {
+            versionText[entries.setGuiStateTransition]("DEFAULT");
+        }
+    }
+	
+    document.body.addEventListener("modsLoaded", () => {
+        let titleScreenBackgroundGui = cc.ig.GUI.menues.filter((e) => e[entries.GUI] instanceof cc.sc.TitleScreenBG).pop();
 
-		let oldTitleCallback = titleBG[entries.GUI][entries.titleParallax][entries.callback];
+        let versionText = createCCLoaderVersionText();
+        versionText[entries.setGuiStateTransition]("HIDDEN", h);
 
-		titleBG[entries.GUI][entries.titleParallax][entries.callback] = function(transitionState, transitionType) {
-			// transitionState === ADD (my guess)
-			if(transitionState === 1 && transitionType === "IDLE") {
-				versionText[entries.setGuiStateTransition]("DEFAULT");	
-			}
-			oldTitleCallback.apply(this, arguments);
-		}
+        titleScreenBackgroundGui[entries.GUI][entries.addGui](versionText);
+
+        callbackOverride(titleScreenBackgroundGui[entries.GUI], 
+						 entries.observerCallback, 
+						 onGameStateChange);
+
+        callbackOverride(titleScreenBackgroundGui[entries.GUI][entries.titleParallax], 
+						 entries.callback, 
+						 onGameStateAdd);
+
 	});
-	
-
 })()
