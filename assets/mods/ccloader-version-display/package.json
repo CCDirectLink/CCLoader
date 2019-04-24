@@ -1,5 +1,6 @@
 {
 	"name" : "CCLoader display version",
 	"main" : "mod.js",
-	"table" : "New File.db"
+	"table" : "version-definitions.db",
+	"version" : "1.0.0"
 }
