@@ -156,7 +156,7 @@ export class DbTree {
 	 */
 	addStatic(name, compiled, parent) {
 		const child = new DbNode('static', name, compiled, parent);
-		this.addChild(child);
+		this.addNode(child);
 		return child;
 	}
 
@@ -169,7 +169,7 @@ export class DbTree {
 	 */
 	addDynamic(name, compiled, parent) {
 		const child = new DbNode('dynamic', name, compiled, parent);
-		this.addChild(child);
+		this.addNode(child);
 		return child;
 	}
 
@@ -181,7 +181,7 @@ export class DbTree {
 	 */
 	addRaw(name, compiled) {
 		const child = new DbNode('raw', name, compiled);
-		this.addChild(child);
+		this.addNode(child);
 		return child;
 	}
 }

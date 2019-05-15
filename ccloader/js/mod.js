@@ -66,11 +66,7 @@ export class Mod {
 		if(!this.manifest.main)
 			return;
 
-		if (this.prepared) {
-			return await this.filemanager.loadRawMod(this.prepared.code, this.module);
-		} else {
-			return await this.filemanager.loadMod(this.manifest.main, this.module);
-		}
+		return await this.filemanager.loadMod(this.manifest.main, this.module);
 	}
 
 	/**
@@ -190,16 +186,6 @@ export class Mod {
 		}
 
 		return this.table;
-	}
-
-	/**
-	 * 
-	 * @param {import('./preloader.js').Preloader} preloader
-	 */
-	async preload(preloader) {
-		if (this.manifest.preload) {
-			this.prepared = await preloader.prepare(this);
-		}
 	}
 
 	/**

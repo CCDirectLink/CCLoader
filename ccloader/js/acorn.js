@@ -190,7 +190,7 @@ export class Acorn {
 
 		const root = new DbTree(dbDefinition.tree.name, []);
 		for (const child of dbDefinition.tree.children) {
-			root.addChild(this._buildTree(child, root, entries));
+			this._buildTree(child, root, entries);
 		}
 
 		return new Db(entries, null, root);
@@ -208,16 +208,20 @@ export class Acorn {
 		case 'object': {
 			const result = new DbTree(node.name, []);
 			for (const child of node.children) {
-				result.addNode(this._buildTree(child, result, entries));
+				this._buildTree(child, result, entries);
 			}
-			return result;
+			parent.addNode(result);
+			break;
 		}
 		case 'static': 
-			return parent.addStatic(node.name, entries[node.name], node.parent);
+			parent.addStatic(node.name, entries[node.name], node.parent);
+			break;
 		case 'dynamic':
-			return parent.addDynamic(node.name, entries[node.name], node.parent);
+			parent.addDynamic(node.name, entries[node.name], node.parent);
+			break;
 		case 'raw':
-			return parent.addRaw(node.name, entries[node.name]);
+			parent.addRaw(node.name, entries[node.name]);
+			break;
 		}
 	}
 
