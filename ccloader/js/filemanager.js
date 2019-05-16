@@ -400,8 +400,10 @@ export class Filemanager {
 						file = path.join(folder, file);
 						
 						if (this._isDirectory(file)) {
-							const innerResults = this._getResourcesLocal(file, ending);
-							results = results.concat(innerResults);
+							if (!file.includes('node_modules')) {
+								const innerResults = this._getResourcesLocal(file, ending);
+								results = results.concat(innerResults);
+							}
 						} else if(file.endsWith(ending)){
 							results.push(file);
 						}

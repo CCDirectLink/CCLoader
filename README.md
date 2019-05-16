@@ -1,4 +1,4 @@
-[![Discord Server](https://img.shields.io/discord/382339402338402315.svg?label=Discord%20Server)](https://discord.gg/SJmMZKy)
+[![Discord Server](https://img.shields.io/discord/382339402338402315.svg?label=Discord%20Server)](https://discord.gg/TFs6n5v)
 # CCLoader
 A Modloader for CrossCode written in javascript.
 

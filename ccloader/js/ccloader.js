@@ -2,9 +2,8 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
-import { Preloader } from './preloader.js';
 
-const CCLOADER_VERSION = '2.7.7';
+const CCLOADER_VERSION = '2.9.0';
 
 export class ModLoader {
 	constructor() {
@@ -20,6 +19,7 @@ export class ModLoader {
 		/** @type {Mod[]} */
 		this.mods = [];
 		
+		this._buildCrosscodeVersion();
 		this._initializeTable();
 	}
 
@@ -36,7 +36,6 @@ export class ModLoader {
 		
 		await this._loadModPackages();
 		this._executeDb();
-		await this._preloadMods();
 
 		await this._initializeMods();
 
@@ -74,11 +73,15 @@ export class ModLoader {
 	 * Loads a cached table if available and creates a new one otherwise
 	 */
 	_initializeTable() {
-		const tableName = this.filemanager.getTableName();
-		if (this.filemanager.tableExists(tableName)) {
-			this._loadTable(tableName);
+		if (this._definitionsNeeded()) {
+			const tableName = this.filemanager.getTableName();
+			if (this.filemanager.tableExists(tableName)) {
+				this._loadTable(tableName);
+			} else {
+				this._createTable(tableName);
+			}
 		} else {
-			this._createTable(tableName);
+			this._loadTable('final.table');
 		}
 	}
 
@@ -111,7 +114,7 @@ export class ModLoader {
 	 * @param {string} tableName 
 	 */
 	_loadTable(tableName) {
-		const hash = this.filemanager.getDefintionHash();
+		const hash = this._definitionsNeeded() ? this.filemanager.getDefintionHash() : 'final';
 		this.table = this.filemanager.loadTable(tableName, hash);
 		if(!this.table) {
 			this._createTable(tableName);
@@ -180,7 +183,6 @@ export class ModLoader {
 
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 		
-		this._buildCrosscodeVersion();
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
@@ -204,17 +206,6 @@ export class ModLoader {
 	_loadModPackages() {
 		this._getModPackages();
 		return Promise.all(this.mods.map((mod) => mod.onload()));
-	}
-
-	_preloadMods() {
-		const preloader = new Preloader(this.filemanager);
-		preloader.loadDictionary(this._getGameWindow().entries);
-
-		return Promise.all(
-			this.mods
-				.filter(mod => mod.isEnabled && this._canLoad(mod))
-				.map(mod => mod.preload(preloader))
-		);
 	}
 
 	async _initializeMods() {
@@ -322,6 +313,10 @@ export class ModLoader {
 		}
 
 		return true;
+	}
+
+	_definitionsNeeded() {
+		return !semver.satisfies(this.ccVersion, '^1.0.4');
 	}
 }
 
