@@ -813,22 +813,6 @@
                 ]
             }
         },
-        "COMBATANT_PARTY": {
-            "type": "select",
-            "pattern": "left.property.name",
-            "from": {
-                "type": "AssignmentExpression",
-                "values": [
-                    {
-                        "name": "right.properties.0.key.name",
-                        "value": "PLAYER"
-                    }
-                ]
-            }
-        },
-<<<<<<< HEAD
-        "Combat": {
-=======
         "currentSubState": {
             "type": "select",
             "pattern": "discriminant.property.name",
@@ -843,7 +827,32 @@
             }
         },
         "empty": {
->>>>>>> f7823cfc938edd864c252e9871142d7505c7c301
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.properties.0.key.name",
+                        "value": "PLAYER"
+                    }
+                ]
+            }
+        },
+        "currentSubState": {
+            "type": "select",
+            "pattern": "discriminant.property.name",
+            "from": {
+                "type": "SwitchStatement",
+                "values": [
+                    {
+                        "name": "cases.0.consequent.1.consequent.expression.arguments.0.raw",
+                        "value": "\"rookie-harbor.west\""
+                    }
+                ]
+            }
+        },
+        "empty": {
             "type": "select",
             "pattern": "left.property.name",
             "from": {

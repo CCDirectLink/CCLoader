@@ -1,0 +1,292 @@
+{
+    "tree": {
+        "name": "cc",
+        "type": "object",
+        "children": [
+            {
+                "name": "sc",
+                "type": "object",
+                "children": [
+                    {
+                        "type": "static",
+                        "name": "Text",
+                        "parent": "sc"
+                    },
+                    {
+                        "type": "static",
+                        "name": "TitleScreenBG",
+                        "parent": "sc"
+                    },
+                    {
+                        "name": "fontsystem",
+                        "type": "object",
+                        "children": [
+                            {
+                                "type": "static",
+                                "name": "tiny",
+                                "parent": "cc.sc.fontsystem"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "static",
+                        "parent": "sc",
+                        "name": "GameState"
+                    }
+                ]
+            },
+            {
+                "type": "raw",
+                "name": "setAlignment",
+                "parent": ""
+            },
+            {
+                "type": "raw",
+                "name": "transition"
+            },
+            {
+                "type": "static",
+                "name": "callback"
+            },
+            {
+                "type": "raw",
+                "name": "titleParallax"
+            },
+            {
+                "type": "static",
+                "name": "setGuiStateTransition"
+            },
+            {
+                "type": "raw",
+                "name": "currentTransition"
+            },
+            {
+                "type": "raw",
+                "name": "Dla"
+            },
+            {
+                "type": "raw",
+                "name": "keySpline"
+            },
+            {
+                "type": "raw",
+                "name": "observerCallback"
+            },
+            {
+                "type": "raw",
+                "name": "isMainMenu"
+            }
+        ]
+    },
+    "entries": {
+        "Dla": {
+            "type": "select",
+            "pattern": "test.right.object.property.name",
+            "from": {
+                "type": "IfStatement",
+                "values": [
+                    {
+                        "name": "consequent.body.0.test.right.raw",
+                        "value": "\"IDLE\""
+                    }
+                ]
+            }
+        },
+        "GameState": {
+            "type": "select",
+            "pattern": "left.left.right.object.property.name",
+            "from": {
+                "type": "LogicalExpression",
+                "values": [
+                    {
+                        "name": "right.right.arguments.0.property.name",
+                        "value": "varConditions"
+                    }
+                ]
+            }
+        },
+        "Text": {
+            "type": "select",
+            "pattern": "callee.property.name",
+            "from": {
+                "type": "NewExpression",
+                "values": [
+                    {
+                        "name": "arguments.0.arguments.0.raw",
+                        "value": "\"sc.gui.menu.credits\""
+                    }
+                ]
+            }
+        },
+        "TitleScreenBG": {
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.arguments.0.properties.0.value.arguments.0.raw",
+                        "value": "\"media/gui/title-bg.png\""
+                    }
+                ]
+            }
+        },
+        "callback": {
+            "type": "select",
+            "pattern": "left.property.name",
+            "from": {
+                "type": "AssignmentExpression",
+                "values": [
+                    {
+                        "name": "right.property.name",
+                        "value": "callback"
+                    }
+                ]
+            }
+        },
+        "currentTransition": {
+            "type": "select",
+            "pattern": "body.0.expression.left.property.name",
+            "from": {
+                "type": "BlockStatement",
+                "values": [
+                    {
+                        "name": "body.1.expression.arguments.0.property.name",
+                        "value": "state"
+                    },
+                    {
+                        "name": "body.1.expression.arguments.1.property.name",
+                        "value": "time"
+                    }
+                ]
+            }
+        },
+        "isMainMenu": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.body.body.0.argument.right.object.property.name",
+						"type" : "dynamic",
+                        "value": "GameState"
+                    }
+                ]
+            }
+        },
+        "keySpline": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.property.name",
+                        "value": "LINEAR"
+                    },
+                    {
+                        "name": "value.object.name",
+                        "value": "KEY_SPLINES"
+                    }
+                ]
+            }
+        },
+		"notifyObserver": {
+            "type": "select",
+            "pattern": "body.2.expression.callee.property.name",
+            "from": {
+                "type": "BlockStatement",
+                "values": [
+                    {
+                        "name": "body.0.expression.right.arguments.0.arguments.0.left.raw",
+                        "value": "\"No such active offer at index: \""
+                    }
+                ]
+            }
+        },
+        "observerCallback": {
+            "type": "select",
+            "pattern": "value.body.body.0.body.expression.callee.property.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "key.name",
+						"type" : "dynamic",
+                        "value": "notifyObserver"
+                    }
+                ]
+            }
+        },
+        "setAlignment": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.body.body.2.expression.left.object.property.name",
+                        "value": "align"
+                    },
+                    {
+                        "name": "value.body.body.1.expression.left.object.property.name",
+                        "value": "align"
+                    }
+                ]
+            }
+        },
+        "setGuiStateTransition": {
+            "type": "select",
+            "pattern": "callee.property.name",
+            "from": {
+                "type": "CallExpression",
+                "values": [
+                    {
+                        "name": "arguments.0.raw",
+                        "value": "\"FADE_OUT\""
+                    }
+                ]
+            }
+        },
+        "tiny": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.arguments.0.raw",
+                        "value": "\"media/font/tiny.png\""
+                    }
+                ]
+            }
+        },
+        "titleParallax": {
+            "type": "select",
+            "pattern": "callee.object.property.name",
+            "from": {
+                "type": "CallExpression",
+                "values": [
+                    {
+                        "name": "arguments.0.raw",
+                        "value": "\"QUICK_END\""
+                    }
+                ]
+            }
+        },
+        "transition": {
+            "type": "select",
+            "pattern": "key.name",
+            "from": {
+                "type": "Property",
+                "values": [
+                    {
+                        "name": "value.properties.0.value.properties.0.key.name",
+                        "value": "state"
+                    }
+                ]
+            }
+        }
+    }
+}
