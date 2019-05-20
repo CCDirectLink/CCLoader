@@ -45,7 +45,7 @@ export class Loader {
 
 
 	_getEntrypointPath() {
-		return window.isLocal ? `file://${process.cwd()}/assets/` : '/assets/';
+		return window.isLocal ? (location.origin + '/assets/') : '/assets/';
 	}
 
 	async _loadEntrypoint() {
