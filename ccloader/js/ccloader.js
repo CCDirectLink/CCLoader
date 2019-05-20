@@ -2,14 +2,16 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
+import { Loader } from './loader.js';
 
-const CCLOADER_VERSION = '2.9.0';
+const CCLOADER_VERSION = '2.8.0';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
+		this.loader = new Loader(this.filemanager);
 		
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
@@ -27,6 +29,11 @@ export class ModLoader {
 	 * Loads and starts the game. It then loads the definitions and mods
 	 */
 	async startGame() {
+		await this.loader.initialize();
+		
+		this._getModPackages();
+		this._registerMods();
+
 		await this._initializeGame();
 		
 		this._setStatus('Loading Game');
@@ -200,11 +207,21 @@ export class ModLoader {
 		}
 	}
 
+	_registerMods() {
+		for (const mod of this.mods) {
+			if (mod.preload) {
+				this.loader.addPreload(mod.preload);
+			}
+			if (mod.postload) {
+				this.loader.addPostload(mod.postload);
+			}
+		}
+	}
+
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available
 	 */
 	_loadModPackages() {
-		this._getModPackages();
 		return Promise.all(this.mods.map((mod) => mod.onload()));
 	}
 
@@ -234,13 +251,25 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
+			if (typeof require !== 'undefined') {
+				this._enableNode();
+			}
+
 			this.frame.onload = () => {
 				this.frame.contentWindow.onbeforeunload = () => this.startGame();
 				resolve();
 			};
 			this.frame.onerror = event => reject(event);
-			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
+			this.loader.startGame(this.frame);
 		});
+	}
+
+	_enableNode() {
+		this.frame.contentWindow.require = require;
+		this.frame.contentWindow.process = process;
+		this.frame.contentWindow.global = global;
+		this.frame.contentWindow.Buffer = Buffer;
+		this.frame.contentWindow.root = global.root;
 	}
 
 	/**

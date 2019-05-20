@@ -41,14 +41,7 @@ export class Filemanager {
 	loadMod(file, isModule){
 		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
-	/**
-	 * 
-	 * @param {string} content 
-	 * @param {boolean} isModule 
-	 */
-	loadRawMod(content, isModule){
-		return this._loadRawScript(content, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
-	}
+
 	getTableName(){
 		return this._getHash('assets/js/game.compiled.js');
 	}
@@ -117,6 +110,7 @@ export class Filemanager {
 	/**
 	 * 
 	 * @param {string} resource 
+	 * @returns {Promise<string>}
 	 */
 	getResourceAsync(resource){
 		return new Promise((resolve, reject) => {
@@ -361,27 +355,6 @@ export class Filemanager {
 			script.type = type;
 			script.src = url;
 			doc.body.appendChild(script);
-		});
-	}
-	/**
-	 * 
-	 * @param {string} content 
-	 * @param {document} doc
-	 * @param {string} type 
-	 * @returns {Promise<void>}
-	 */
-	_loadRawScript(content, doc, type){
-		if (!type) {
-			type = 'text/javascript';
-		}
-
-		return new Promise((resolve, reject) => {
-			try {
-				doc.defaultView.eval(content);
-				resolve();
-			} catch (err) {
-				reject(err);
-			}
 		});
 	}
 	/**
