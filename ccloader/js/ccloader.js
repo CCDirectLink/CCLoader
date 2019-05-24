@@ -41,7 +41,7 @@ export class ModLoader {
 		this._setupGamewindow();
 
 		await this._waitForGame();
-		
+
 		this._executeMainDb();
 		this._setStatus('Initializing Mods');
 		this._executeDb();
@@ -246,14 +246,20 @@ export class ModLoader {
 	}
 
 	_registerMods() {
+		this._getGameWindow().inactiveMods = [];
+		this._getGameWindow().activeMods = [];
+		
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
+				this._getGameWindow().activeMods.push(mod);
 				if (mod.preload) {
 					this.loader.addPreload(mod.preload);
 				}
 				if (mod.postload) {
 					this.loader.addPostload(mod.postload);
 				}
+			} else {
+				this._getGameWindow().inactiveMods.push(mod);
 			}
 		}
 	}
@@ -267,9 +273,6 @@ export class ModLoader {
 	}
 
 	async _initializeMods() {
-		this._getGameWindow().inactiveMods = [];
-		this._getGameWindow().activeMods = [];
-		
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
 				this._getGameWindow().activeMods.push(mod);
@@ -314,7 +317,7 @@ export class ModLoader {
 			root: global.root
 		});
 	}
-
+	
 	/**
 	 * Waits for the game to be completely loaded
 	 * @returns {Promise<void>}
