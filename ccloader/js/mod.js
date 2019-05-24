@@ -209,7 +209,12 @@ export class Mod {
 		if(!this.loaded || this.disabled)
 			return false;
 		
-		try {
+		return localStorage.getItem('modEnabled-' + this.manifest.name.toLowerCase()) !== 'false';
+		/*try {
+			//TODO: Remove ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+			if (!window['frame'].contentWindow.cc) {
+				return true;
+			}
 			const globals = window['frame'].contentWindow.cc.ig.storage[window.frame.contentWindow.cc.ig.varNames.storageGlobals];
 			
 			if(!globals || !globals.options)
@@ -219,7 +224,7 @@ export class Mod {
 		} catch (err) {
 			console.error(`An error occured while accessing the games internal storage. Disabling mod "${this.name}"`, err);
 			return false;
-		}
+		}*/
 	}
 
 	/**

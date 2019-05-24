@@ -22,7 +22,7 @@ export class Loader {
 	 * @param {string} script 
 	 */
 	addPreload(script) {
-		this._insertAfter(this.base, this._createScript(script));
+		this._insertAfter(this._createScript(script), this.base);
 	}
 
 	/**
@@ -30,7 +30,7 @@ export class Loader {
 	 * @param {string} script
 	 */
 	addPostload(script) {
-		this.game.insertBefore(this._createScript(script));
+		this._insertBefore(this._createScript(script), this.game);
 	}
 
 	/**
@@ -97,5 +97,9 @@ export class Loader {
 
 	_insertAfter(newNode, referenceNode) {
 		referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+	}
+
+	_insertBefore(newNode, referenceNode) {
+		referenceNode.parentNode.insertBefore(newNode, referenceNode);
 	}
 }

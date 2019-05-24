@@ -419,7 +419,7 @@ class Simplify {
 
 		await this.resources.patchCache();
 		
-		document.body.dispatchEvent(new Event('simplifyInitialized'));
+		document.dispatchEvent(new Event('simplifyInitialized'));
 	}
 	_initializeFont() {
 		const icons = new cc.ig.Font('mods/simplify/media/icons.png', 16, 2000);
@@ -433,12 +433,24 @@ class Simplify {
 		
 		const tab = this.options.addTab('mods', 'Mods');
 		for (const mod of mods){
-			this.options.addEntry('modEnabled-' + mod.name.toLowerCase(), 'CHECKBOX', true, tab, undefined, true);
+			const optionName = 'modEnabled-' + mod.name.toLowerCase();
+			this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 
 			const name = mod.name;
 			const description = mod.description || 'If checked this mod is enabled. \\c[1]Needs a restart!';
 
-			ig.lang.labels.sc.gui.options['modEnabled-' + mod.name.toLowerCase()] = {name, description};
+			ig.lang.labels.sc.gui.options[optionName] = {name, description};
+
+			
+			const lang = ig.lang.labels.sc.gui.options;
+			lang[optionName] = {name, description};
+
+			Object.defineProperty(sc.options[this.options.valuesName], optionName, {
+				get: () => localStorage.getItem(optionName) !== 'false',
+				set: value => value 
+					? localStorage.setItem(optionName, 'true')
+					: localStorage.setItem(optionName, 'false')
+			});
 		}
 
 		this.options.reload();
