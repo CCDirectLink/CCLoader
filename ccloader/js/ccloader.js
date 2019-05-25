@@ -2,14 +2,16 @@ import { Filemanager } from './filemanager.js';
 import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
+import { Loader } from './loader.js';
 
-const CCLOADER_VERSION = '2.9.0';
+const CCLOADER_VERSION = '2.10.0';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
+		this.loader = new Loader(this.filemanager);
 		
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
@@ -27,14 +29,21 @@ export class ModLoader {
 	 * Loads and starts the game. It then loads the definitions and mods
 	 */
 	async startGame() {
+		await this.loader.initialize();
+
+		await this._loadModPackages();
+		this._orderCheckMods();
+		this._registerMods();
+
 		await this._initializeGame();
 		
 		this._setStatus('Loading Game');
 		this._setupGamewindow();
 
 		await this._waitForGame();
-		
-		await this._loadModPackages();
+
+		this._executeMainDb();
+		this._setStatus('Initializing Mods');
 		this._executeDb();
 
 		await this._initializeMods();
@@ -56,6 +65,35 @@ export class ModLoader {
 	}
 
 	/**
+	 * Orders mods and checks their dependencies
+	 */
+	_orderCheckMods() {
+		const mods = [];
+
+		let lastCount = 0;
+		while (this.mods.length != lastCount) {
+			lastCount = this.mods.length;
+			for (let i = this.mods.length - 1; i >= 0; i--) {
+				const mod = this.mods[i];
+				if (!mod.isEnabled || this._canLoad(mod, mods)) {
+					mods.push(mod);
+					this.mods.splice(i, 1);
+				}
+			}
+		}
+
+		if (this.mods.length > 0) {
+			console.log(`Could not load mods due to missing dependencies: "${this.mods.map(m => m.name).join('", "')}"`);
+			for (const mod of this.mods) {
+				mod.disabled = true;
+				mods.push(mod);
+			}
+		}
+
+		this.mods = mods;
+	}
+
+	/**
 	 * 
 	 * @param {string} text 
 	 */
@@ -65,6 +103,10 @@ export class ModLoader {
 		}
 	}
 
+	/**
+	 * 
+	 * @returns {window}
+	 */
 	_getGameWindow() {
 		return this.frame.contentWindow;
 	}
@@ -127,7 +169,7 @@ export class ModLoader {
 	 */
 	_executeModTables(entries) {
 		for (const mod of this.mods) {
-			if (mod.isEnabled && this._canLoad(mod)) {
+			if (mod.isEnabled) {
 				const table = mod.initializeTable(this);
 				if (table) {
 					Object.assign(entries, table.entries);
@@ -147,18 +189,18 @@ export class ModLoader {
 		});
 	}
 
-	/**
-	 * Applies all definitions and loads the mods
-	 */
-	_executeDb() {
+	_executeMainDb() {
 		if (!this.table) {
 			return this._removeOverlay();
 		}
 
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
+	}
 
-		this._setStatus('Initializing Mods');
-
+	/**
+	 * Applies all definitions and loads the mods
+	 */
+	_executeDb() {
 		const entries = Object.assign({}, this.table.entries);
 
 		try {
@@ -175,18 +217,21 @@ export class ModLoader {
 	 */
 	_setupGamewindow() {
 		this.ui.applyBindings(this._getGameWindow().console);
-		this._getGameWindow().reloadTables = () => this.reloadTables();
-		this._getGameWindow().getEntry = name => this._getGameWindow().entries[name];
-		this._getGameWindow().getEntryName = value => 
-			Object.keys(this._getGameWindow().entries)
-				.find(key => this._getGameWindow().entries[key] === value);
 
-		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
-		
+		Object.assign(this._getGameWindow(), {
+			reloadTables: () => this.reloadTables(),
+			getEntry: name => this._getGameWindow().entries[name],
+			getEntryName: value => 
+				Object.keys(this._getGameWindow().entries)
+					.find(key => this._getGameWindow().entries[key] === value)
+		});
+
 		this.versions = this._getGameWindow().versions = {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
 		};
+
+		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	}
 	
 	/**
@@ -200,6 +245,25 @@ export class ModLoader {
 		}
 	}
 
+	_registerMods() {
+		this._getGameWindow().inactiveMods = [];
+		this._getGameWindow().activeMods = [];
+		
+		for (const mod of this.mods) {
+			if (mod.isEnabled) {
+				this._getGameWindow().activeMods.push(mod);
+				if (mod.preload) {
+					this.loader.addPreload(mod.preload);
+				}
+				if (mod.postload) {
+					this.loader.addPostload(mod.postload);
+				}
+			} else {
+				this._getGameWindow().inactiveMods.push(mod);
+			}
+		}
+	}
+
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available
 	 */
@@ -209,11 +273,8 @@ export class ModLoader {
 	}
 
 	async _initializeMods() {
-		this._getGameWindow().inactiveMods = [];
-		this._getGameWindow().activeMods = [];
-		
 		for (const mod of this.mods) {
-			if (mod.isEnabled && this._canLoad(mod)) {
+			if (mod.isEnabled) {
 				this._getGameWindow().activeMods.push(mod);
 				this.versions[mod.name] = mod.version;
 
@@ -234,15 +295,29 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
+			if (typeof require !== 'undefined') {
+				this._enableNode();
+			}
+
 			this.frame.onload = () => {
-				this.frame.contentWindow.onbeforeunload = () => this.startGame();
+				this._getGameWindow().onbeforeunload = () => this.startGame();
 				resolve();
 			};
 			this.frame.onerror = event => reject(event);
-			this.frame.src = window.isLocal ? '../assets/node-webkit.html' : '/assets/node-webkit.html';
+			this.loader.startGame(this.frame);
 		});
 	}
 
+	_enableNode() {
+		Object.assign(this._getGameWindow(), {
+			require,
+			process,
+			global,
+			Buffer,
+			root: global.root
+		});
+	}
+	
 	/**
 	 * Waits for the game to be completely loaded
 	 * @returns {Promise<void>}
@@ -275,7 +350,12 @@ export class ModLoader {
 	}
 	
 	//Requires bind
-	_canLoad(mod) {
+	/**
+	 * 
+	 * @param {Mod} mod 
+	 * @param {Mod[]} mods 
+	 */
+	_canLoad(mod, mods) {
 		const deps = mod.dependencies;
 		if(!deps) {
 			return true;
@@ -299,9 +379,9 @@ export class ModLoader {
 				satisfied = true;
 			}
 
-			for(let i = 0; i < this.mods.length && !satisfied; i++){
-				if(this.mods[i].name === depName){
-					if(semver.satisfies(semver.valid(this.mods[i].version), depRange)){
+			for(let i = 0; i < mods.length && !satisfied; i++){
+				if(mods[i].isEnabled && mods[i].name === depName){
+					if(semver.satisfies(semver.valid(mods[i].version), depRange)){
 						satisfied = true;
 					}
 				}

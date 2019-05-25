@@ -1,9 +1,11 @@
 {
 	"name": "Simplify",
 	"main": "mod.js",
-	"version": "2.2.1",
+	"preload": "preload.js",
+	"postload": "postload.js",
+	"version": "2.3.0",
 	"dependencies": {
-		"ccloader": "^2.7.3",
+		"ccloader": "^2.10.0",
 		"crosscode": "^1.0.0"
 	}
 }

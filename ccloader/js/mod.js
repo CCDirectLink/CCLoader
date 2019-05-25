@@ -20,7 +20,7 @@ export class Mod {
 		}
 		
 		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
+			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;
@@ -28,13 +28,10 @@ export class Mod {
 			console.error('Could not load mod: ' + file, e);
 			return;
 		}
-		
-		if(this.manifest.main){
-			if(!this._isPathAbsolute(this.manifest.main)) {
-				this.manifest.main = this._getBaseName(file) + '/' + this.manifest.main;
-			}
-			this.manifest.main = this._normalizePath(this.manifest.main);
-		}
+
+		this.manifest.main = this._normalizeScript(file, this.manifest.main);
+		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
+		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
 		
 		if(this.manifest.table){
 			if(!this._isPathAbsolute(this.manifest.table)) {
@@ -114,10 +111,20 @@ export class Mod {
 			return false;
 		return !!this.manifest.module;
 	}
-	get main(){
+	get main() {
 		if(!this.load)
 			return '';
 		return this.manifest.main;
+	}
+	get preload() {
+		if(!this.load)
+			return '';
+		return this.manifest.preload;
+	}
+	get postload() {
+		if(!this.load)
+			return '';
+		return this.manifest.postload;
 	}
 
 	/**
@@ -202,7 +209,12 @@ export class Mod {
 		if(!this.loaded || this.disabled)
 			return false;
 		
-		try {
+		return localStorage.getItem('modEnabled-' + this.manifest.name.toLowerCase()) !== 'false';
+		/*try {
+			//TODO: Remove ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+			if (!window['frame'].contentWindow.cc) {
+				return true;
+			}
 			const globals = window['frame'].contentWindow.cc.ig.storage[window.frame.contentWindow.cc.ig.varNames.storageGlobals];
 			
 			if(!globals || !globals.options)
@@ -212,7 +224,23 @@ export class Mod {
 		} catch (err) {
 			console.error(`An error occured while accessing the games internal storage. Disabling mod "${this.name}"`, err);
 			return false;
+		}*/
+	}
+
+	/**
+	 * 
+	 * @param {string} manifestFile
+	 * @param {string} [input]
+	 * @returns {string | undefined}
+	 */
+	_normalizeScript(manifestFile, input) {
+		if (!input) {
+			return undefined;
 		}
+		if(!this._isPathAbsolute(input)) {
+			return this._normalizePath(this._getBaseName(manifestFile) + '/' + input);
+		}
+		return this._normalizePath(input);
 	}
 	
 	_getModNameFromFile(){
