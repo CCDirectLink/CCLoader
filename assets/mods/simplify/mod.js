@@ -413,7 +413,7 @@
 			this._initializeFont();
 			this._initializeOptions();
 			
-			document.dispatchEvent(new Event('simplifyInitialized'));
+			document.body.dispatchEvent(new Event('simplifyInitialized', { bubbles: true }));
 		}
 		_initializeFont() {
 			const icons = new cc.ig.Font('mods/simplify/media/icons.png', 16, 2000);
