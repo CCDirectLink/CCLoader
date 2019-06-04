@@ -275,7 +275,6 @@ export class ModLoader {
 	async _initializeMods() {
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
-				this._getGameWindow().activeMods.push(mod);
 				this.versions[mod.name] = mod.version;
 
 				try {
@@ -283,8 +282,6 @@ export class ModLoader {
 				} catch (e) {
 					console.warn(`Could not load "${mod.name}": ${e}`);
 				}
-			} else {
-				this._getGameWindow().inactiveMods.push(mod);
 			}
 		}
 	}
