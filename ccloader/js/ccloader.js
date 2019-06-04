@@ -295,7 +295,7 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
-			if (typeof require !== 'undefined') {
+			if (typeof global !== 'undefined') {
 				this._enableNode();
 			}
 
