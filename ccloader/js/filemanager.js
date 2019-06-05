@@ -96,7 +96,7 @@ export class Filemanager {
 				req.open('GET', '/' + resource, false);
 				req.send(null);
 
-				if(req.status === 200) {
+				if(req.readyState === req.DONE && req.status === 200) {
 					return req.responseText;
 				} else {
 					return undefined;
@@ -128,7 +128,7 @@ export class Filemanager {
 
 				req.onerror = err => reject(err);
 				req.onreadystatechange = () => {
-					if (req.status === 200) {
+					if (req.readyState === req.DONE && req.status === 200) {
 						resolve(req.responseText);
 					}
 				};
