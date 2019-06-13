@@ -20,17 +20,19 @@ export class Loader {
 	/**
 	 * Adds a mod script that runs before game scripts are loaded
 	 * @param {string} script 
+	 * @param {boolean} module
 	 */
-	addPreload(script) {
-		this._insertAfter(this._createScript(script), this.base);
+	addPreload(script, module) {
+		this._insertAfter(this._createScript(script, module), this.base);
 	}
 
 	/**
 	 * Adds a mod script that runs after game scripts are loaded
 	 * @param {string} script
+	 * @param {boolean} module
 	 */
-	addPostload(script) {
-		this._insertAfter(this._createScript(script), this.game);
+	addPostload(script, module) {
+		this._insertAfter(this._createScript(script, module), this.game);
 	}
 
 	/**

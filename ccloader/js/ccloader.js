@@ -4,7 +4,7 @@ import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
 
-const CCLOADER_VERSION = '2.10.2';
+const CCLOADER_VERSION = '2.10.3';
 
 export class ModLoader {
 	constructor() {
@@ -253,10 +253,10 @@ export class ModLoader {
 			if (mod.isEnabled) {
 				this._getGameWindow().activeMods.push(mod);
 				if (mod.preload) {
-					this.loader.addPreload(mod.preload);
+					this.loader.addPreload(mod.preload, mod.module);
 				}
 				if (mod.postload) {
-					this.loader.addPostload(mod.postload);
+					this.loader.addPostload(mod.postload, mod.module);
 				}
 			} else {
 				this._getGameWindow().inactiveMods.push(mod);

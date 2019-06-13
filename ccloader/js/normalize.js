@@ -6,7 +6,8 @@ if (!window.require) {
 	window.require = name => {
 		if (name === 'path') {
 			return {
-				sep: '/'
+				sep: '/',
+				join: (...args) => args.join('/')
 			};
 		}
 		return undefined;
