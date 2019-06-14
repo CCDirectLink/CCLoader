@@ -257,8 +257,7 @@
 						});
 				}
 	
-				settings.success = () => {
-					successArgs = arguments;
+				settings.success = (...successArgs) => {
 					resourceLoaded = true;
 					if (patchData.length === patches.length) {
 						this._applyPatches(successArgs[0], patchData);
