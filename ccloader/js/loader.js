@@ -6,15 +6,15 @@ export class Loader {
 	constructor(filemanager) {
 		this.filemanager = filemanager;
 		this.doc = null; /** @type {Document} */
-		this.base = null; /** @type {HTMLBaseElement} */
-		this.game = null; /** @type {HTMLDivElement} */
+		this.preloadPoint = null; /** @type {HTMLElement} */
+		this.postloadPoint = null; /** @type {HTMLElement} */
 	}
 
 	async initialize() {
 		const code = await this._loadEntrypoint();
 		this.doc = this._parseEntrypoint(code);
-		this.base = this._insertBase(this._getEntrypointPath());
-		this.game = this._findGame();
+		this.preloadPoint = this._insertBase(this._getEntrypointPath());
+		this.postloadPoint = this._findGame();
 	}
 
 	/**
@@ -23,7 +23,9 @@ export class Loader {
 	 * @param {boolean} module
 	 */
 	addPreload(script, module) {
-		this._insertAfter(this._createScript(script, module), this.base);
+		const next = this._createScript(script, module);
+		this._insertAfter(next, this.preloadPoint);
+		this.preloadPoint = next;
 	}
 
 	/**
@@ -32,7 +34,9 @@ export class Loader {
 	 * @param {boolean} module
 	 */
 	addPostload(script, module) {
-		this._insertAfter(this._createScript(script, module), this.game);
+		const next = this._createScript(script, module);
+		this._insertAfter(next, this.postloadPoint);
+		this.postloadPoint = next;
 	}
 
 	/**
