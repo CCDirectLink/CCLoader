@@ -18,7 +18,8 @@ module.exports = {
         "reloadTables": true,
         "entries": true,
         "versions": true,
-        "$": true
+        "$": true,
+        "KEY_SPLINES": true
     },
     "rules": {
         "indent": [

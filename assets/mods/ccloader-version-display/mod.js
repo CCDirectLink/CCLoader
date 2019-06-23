@@ -1,30 +1,38 @@
 (function() {
+	/**
+	 * 
+	 * @returns {sc.TextGui}
+	 */
 	function createCCLoaderVersionText() {
 		const LOADER_NAME = 'CCLoader';
 
-		const text = new cc.sc.Text(LOADER_NAME + ' V' + versions.ccloader, {
-			font: cc.sc.fontsystem.tiny
+		const text = new sc.TextGui(LOADER_NAME + ' V' + versions.ccloader, {
+			font: sc.fontsystem.tinyFont
 		});
-		text[entries.setPosition](2, 10);
-		text[entries.setAlignment](6, 3);
-
-		text[entries.GuiConfig][entries.transition] = {
+		
+		text.hook.transitions = {
 			DEFAULT: {
 				state: {},
 				time: 0.2,
-				[entries.keySpline]: window.KEY_SPLINES.EASE
+				timeFunction: KEY_SPLINES.EASE
 			},
 			HIDDEN: {
 				state: {
 					alpha: 0
 				},
 				time: 0.2,
-				[entries.keySpline]: window.KEY_SPLINES.LINEAR
+				timeFunction: KEY_SPLINES.LINEAR
 			}
 		};
 		return text;
 	}
 
+	/**
+	 * 
+	 * @param {any} object 
+	 * @param {string} callbackFunctionName 
+	 * @param {(...args: any[]) => any} newCallback 
+	 */
 	function callbackOverride(object, callbackFunctionName, newCallback) {
 		const oldCallBackFunction = object[callbackFunctionName];
 		object[callbackFunctionName] = function() {
@@ -33,39 +41,60 @@
 		};
 	}
 	
-	const versionText = createCCLoaderVersionText();
+	const versionTextTitleScreen = createCCLoaderVersionText();
 	
-	function onGameStateChange(object, eventCode) {
-		// eventCode === CHANGED_STATE
-		if (object == cc.sc.playerModelInstance && eventCode === 0) {
-			const currentTransition = cc.sc.playerModelInstance[entries.isMainMenu]() ? 'DEFAULT' : 'HIDDEN';
-			if (this[entries.GuiConfig][entries.currentTransition] != currentTransition) {
-				versionText[entries.setGuiStateTransition]('HIDDEN');
+	/**
+	 * 
+	 * @param {any} object 
+	 * @param {number} modelMsg 
+	 */
+	function onModelChange(object, modelMsg) {
+		if (object == sc.model && modelMsg === sc.GAME_MODEL_MSG.STATE_CHANGED) {
+			const currentStateName = object.isTitle() ? 'DEFAULT' : 'HIDDEN';
+			if (this.hook.currentStateName !== currentStateName) {
+				if(currentStateName === 'HIDDEN') {
+					versionTextTitleScreen.doStateTransition('HIDDEN');	
+				}
 			}
 		}
 	}
-	function onGameStateAdd(transitionState, transitionType) {
-		// transitionState === ADD (my guess)
-		if (transitionState === 1 && transitionType === 'IDLE') {
-			versionText[entries.setGuiStateTransition]('DEFAULT');
+	/**
+	 * 
+	 * @param {number} sequenceMsg 
+	 * @param {string} label 
+	 */
+	function bgCallback(sequenceMsg, label) {
+		if (sequenceMsg === ig.SEQUENCE_MSG.LABEL_REACHED  && label === 'IDLE') {
+			versionTextTitleScreen.doStateTransition('DEFAULT');
 		}
 	}
 	
 	document.body.addEventListener('modsLoaded', () => {
-		const titleScreenBackgroundGui = cc.ig.GUI.menues.filter((e) => e[entries.GUI] instanceof cc.sc.TitleScreenBG).pop();
-
+		/** @type {sc.TitleScreenGui} */
+		const titleScreenGui = ig.gui.guiHooks.filter((e) => e.gui instanceof sc.TitleScreenGui).pop();
 		
-		versionText[entries.setGuiStateTransition]('HIDDEN', true);
+		
+		versionTextTitleScreen.setPos(2, 10);
+		versionTextTitleScreen.setAlign(ig.GUI_ALIGN.X_RIGHT, ig.GUI_ALIGN.Y_BOTTOM);
+		versionTextTitleScreen.doStateTransition('HIDDEN', true);
 
-		titleScreenBackgroundGui[entries.GUI][entries.addGui](versionText);
+		titleScreenGui.gui.addChildGui(versionTextTitleScreen);
 
-		callbackOverride(titleScreenBackgroundGui[entries.GUI], 
-			entries.observerCallback, 
-			onGameStateChange);
+		callbackOverride(titleScreenGui.gui, 
+			'modelChanged', 
+			onModelChange);
 
-		callbackOverride(titleScreenBackgroundGui[entries.GUI][entries.titleParallax], 
-			entries.callback, 
-			onGameStateAdd);
-
+		callbackOverride(titleScreenGui.gui.bgGui, 
+			'callback',
+			bgCallback);
+		
+		/** @type {sc.PauseScreenGui} */
+		const pauseScreenGui = ig.gui.guiHooks.filter((e) => e.gui instanceof sc.PauseScreenGui).pop();
+		const versionTextPauseScreen = createCCLoaderVersionText();
+		
+		versionTextPauseScreen.setAlign(ig.GUI_ALIGN.X_CENTER, ig.GUI_ALIGN.Y_TOP);
+		versionTextPauseScreen.setPos(0, 10);
+		
+		pauseScreenGui.gui.addChildGui(versionTextPauseScreen);
 	});
 })();
