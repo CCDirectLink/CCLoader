@@ -20,7 +20,7 @@ export class Mod {
 		}
 		
 		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
+			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;
