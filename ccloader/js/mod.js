@@ -33,6 +33,10 @@ export class Mod {
 		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
 		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
 		
+		if(!this.manifest.ccmodDependencies) {
+			this.manifest.ccmodDependencies = this.manifest.dependencies;
+		}
+		
 		if(this.manifest.table){
 			if(!this._isPathAbsolute(this.manifest.table)) {
 				this.manifest.table = this._getBaseName(file) + '/' + this.manifest.table;
@@ -99,7 +103,7 @@ export class Mod {
 	get dependencies(){
 		if(!this.loaded)
 			return undefined;
-		return this.manifest.dependencies;
+		return this.manifest.ccmodDependencies;
 	}
 	get version(){
 		if(!this.loaded)
