@@ -3,9 +3,9 @@
 	"main": "mod.js",
 	"preload": "preload.js",
 	"postload": "postload.js",
-	"version": "2.3.2",
-	"dependencies": {
-		"ccloader": "^2.10.0",
+	"version": "2.3.3",
+	"ccmodDependencies": {
+		"ccloader": "^2.11.0",
 		"crosscode": "^1.0.0"
 	}
 }
