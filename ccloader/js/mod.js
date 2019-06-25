@@ -20,7 +20,7 @@ export class Mod {
 		}
 		
 		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], dependencies: {[key: string]: string}}} */
+			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;
@@ -32,6 +32,10 @@ export class Mod {
 		this.manifest.main = this._normalizeScript(file, this.manifest.main);
 		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
 		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
+		
+		if(!this.manifest.ccmodDependencies) {
+			this.manifest.ccmodDependencies = this.manifest.dependencies;
+		}
 		
 		if(this.manifest.table){
 			if(!this._isPathAbsolute(this.manifest.table)) {
@@ -99,7 +103,7 @@ export class Mod {
 	get dependencies(){
 		if(!this.loaded)
 			return undefined;
-		return this.manifest.dependencies;
+		return this.manifest.ccmodDependencies;
 	}
 	get version(){
 		if(!this.loaded)
