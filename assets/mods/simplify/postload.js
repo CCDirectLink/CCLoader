@@ -15,7 +15,7 @@
 			this._hookHttpRequest();
 			this._hookImages();
 		}
-	
+
 		/**
 		 * Generates patches for specified mod and prints them into the console
 		 * @param {string|Mod} mod 
@@ -33,27 +33,59 @@
 				}
 	
 				const original = asset.substr(baseDir.length + 7);
-				this.generatePatch(original, asset, 'File: ' + asset + '.patch');
+				this.generatePatch(original, asset).then((res) => {
+					console.log('File: ' + asset + '.patch');
+					console.log(JSON.stringify(res));
+				});
 			}
 		}
 	
 		/**
-		 * Generates patches for given objects or files and prints them into the console
+		 * Imports the PatchSteps library, which can also run the older style of patching.
+		 * @return {Promise<object>} result
+		 */
+		_importPatchLibrary() {
+			return import("./patch-steps-es6.js");
+		}
+	
+		/**
+		 * Generates patches for a pair of given objects or files.
+		 * @param {object} target
+		 * @param {object|array} patch
+		 * @param {string} modbase
+		 * @return {Promise<any>} result
+		 */
+		_applyPatch(target, patch, modbase) {
+			return new Promise((resolve, reject) => {
+				const ipl = this._importPatchLibrary();
+				ipl.then((v) => {
+					return v.patch(target, patch, (imp, impurl, success, failure) => {
+						if (imp) {
+							// Import (game file)
+							this.loadJSONPatched(ig.root + impurl).then(success).catch(failure);
+						} else {
+							// Include (mod file)
+							this.loadJSON(modbase + impurl).then(success).catch(failure);
+						}
+					}, resolve, reject);
+				}).catch(reject);
+			});
+		}
+	
+		/**
+		 * Generates patches for a pair of given objects or files.
 		 * @param {string|object} original 
 		 * @param {string|object} modified 
-		 * @param {string=} message 
+		 * @return {Promise<array>} result
 		 */
-		generatePatch(original, modified, message){
+		async generatePatch(original, modified) {
 			if(original.constructor === String)
-				return $.ajax({url: original, success: o => this.generatePatch(o, modified, message), context: this, dataType: 'json', bypassHook: true});
-	
+				original = await this.loadJSON(original);
+
 			if(modified.constructor === String)
-				return $.ajax({url: modified, success: m => this.generatePatch(original, m, message), context: this, dataType: 'json', bypassHook: true});
-	
-			if(message) {
-				console.log(message);
-			}
-			console.log(JSON.stringify(this._generatePatch(original, modified)));
+				modified = await this.loadJSON(modified);
+
+			return (await this._importPatchLibrary()).diff(original, modified);
 		}
 	
 		/**
@@ -130,6 +162,32 @@
 	
 			return result;
 		}
+
+		/**
+		 * Given an ig.root-prefixed string, applies asset overrides.
+		 *
+		 * @param {string} oldpath
+		 * @returns {string} newpath
+		 */
+		_applyAssetOverrides(path) {
+			if (!path.startsWith(ig.root))
+				return;
+			const fullreplace = this._getAllAssets(path.substr(ig.root.length));
+	
+			if(fullreplace && fullreplace.length > 0){
+				if(fullreplace.length > 1)
+					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
+	
+				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
+	
+				if (fullreplace[0].indexOf('assets') === 0) {
+					return ig.root + fullreplace[0].substr(7);
+				} else {
+					return ig.root + fullreplace[0];
+				}
+			}
+			return path;
+		}
 	
 		/**
 		 * 
@@ -137,18 +195,7 @@
 		 * @returns {Promise<string>}
 		 */
 		loadFilePatched(path) {
-			return new Promise((resolve, reject) => {
-				path = this._stripAssets(path);
-				const req = new XMLHttpRequest();
-				req.open('GET', path, true);
-				req.onreadystatechange = function(){
-					if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
-						resolve(req.responseText);
-					}
-				};
-				req.onerror = err => reject(err);
-				req.send();
-			});
+			return this.loadFile(this._applyAssetOverrides(path));
 		}
 	
 		/**
@@ -156,52 +203,18 @@
 		 * @param {string} path 
 		 * @returns {Promise<any>}
 		 */
-		async loadJSONPatched(path) {
-			return JSON.parse(await this.loadFilePatched(path));
-		}
-		
-		_generatePatch(original, modified) {
-			const result = {};
-	
-			for (const key in modified) {
-				if (modified[key] == undefined && original[key] == undefined) {
-					continue;
-				}
-	
-				if (modified[key] == undefined && original.hasOwnProperty(key)) {
-					result[key] = null;
-				} else if (!original.hasOwnProperty(key) || original[key] === undefined || original[key].constructor !== modified[key].constructor) {
-					result[key] = modified[key];
-				} else if (original[key] !== modified[key]) {
-					if (modified[key].constructor === Object || modified[key].constructor === Array) {
-						const res = this._generatePatch(original[key], modified[key]);
-						if(res !== undefined) {
-							result[key] = res;
-						}
-					} else {
-						result[key] = modified[key];
-					}
-				}
-			}
-	
-			for (const key in original) {
-				if(modified[key] === undefined) {
-					result[key] = null;
-				}
-			}
-	
-			for (const key in result) {
-				if(result[key] && result[key].constructor === Function){
-					result[key] = undefined;
-					delete result[key];
-				}
-			}
-	
-			if (Object.keys(result).length == 0) {
-				return undefined;
-			} else {
-				return result;
-			}
+		loadJSONPatched(path) {
+			// To avoid reimplementing the code that was already implemented.
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					dataType: "json",
+					url: path,
+					success: (val) => {
+						resolve(val);
+					},
+					error: reject
+				});
+			});
 		}
 	
 		_hookAjax() {
@@ -220,58 +233,63 @@
 		}
 	
 		_handleAjax(settings){
-			const fullreplace = this._getAllAssets(settings.url.substr(ig.root.length));
-	
-			if(fullreplace && fullreplace.length > 0){
-				if(fullreplace.length > 1)
-					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
-	
-				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-	
-				if (fullreplace[0].indexOf('assets') === 0) {
-					settings.url = ig.root + fullreplace[0].substr(7);
-				} else {
-					settings.url = ig.root + fullreplace[0];
-				}
-			}
-	
-			const patches = this._getAllAssets(settings.url.substr(ig.root.length) + '.patch');
-			if(patches && patches.length > 0){
-				const patchData = [];
-				const success = settings.success;
-				let successArgs;
-				let resourceLoaded = false;
-	
-				for (const patch of patches) {
-					this.loadJSON(patch)
-						.then(data => {
-							patchData.push(data);
-							if(patchData.length === patches.length && resourceLoaded){
-								this._applyPatches(successArgs[0], patchData);
-								success.apply(settings.context, successArgs);
-							}
-						})
-						.catch(err => {
-							console.error(err);
-							patchData.push({});
-						});
-				}
-	
-				settings.success = (...successArgs) => {
-					resourceLoaded = true;
-					if (patchData.length === patches.length) {
-						this._applyPatches(successArgs[0], patchData);
-	
-						for (const entry of this.handlers) {
-							if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-								entry.handler(successArgs[0], settings.url.substr(ig.root.length));
-							}
-						}
-	
-						success.apply(settings.context, successArgs);
+			// Apply asset overrides.
+			settings.url = this._applyAssetOverrides(settings.url);
+
+			// To simplify the timeline, assume patching is always going on.
+			let patches = this._getAllAssetsEx(settings.url.substr(ig.root.length) + '.patch');
+
+			const success = settings.success;
+			let successArgs;
+			// Required 'loaded' == patchData.length + 1 (res.)
+			let loaded = 0;
+
+			const finalize = () => {
+				for (const entry of this.handlers) {
+					if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
+						entry.handler(successArgs[0], settings.url.substr(ig.root.length));
 					}
-				};
+				}
+				success.apply(settings.context, successArgs);
+			};
+
+			const check = () => {
+				if (loaded == patches.length + 1) {
+					// Done loading the main files, run the actual patches in sequence.
+					(async () => {
+						for (const patch of patches)
+							await this._applyPatch(successArgs[0], patch.data, patch.mod.baseDirectory);
+					})().then(() => {
+						finalize();
+					}).catch((err) => {
+						console.error(err);
+						finalize();
+					})
+				}
+			};
+
+			// Start parallel requests. These call check() on completion. When it's all complete, finalize() occurs.
+
+			for (const patch of patches) {
+				this.loadJSON(patch.path)
+					.then(data => {
+						patch.data = data;
+						loaded++;
+						check();
+					})
+					.catch(err => {
+						console.error(err);
+						patch.data = {};
+						loaded++;
+						check();
+					});
 			}
+
+			settings.success = (...sArgs) => {
+				successArgs = sArgs;
+				loaded++;
+				check();
+			};
 	
 			for (const entry of this.handlers) {
 				if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
@@ -335,26 +353,7 @@
 				}
 			};
 		}
-		
-		_applyPatches(data, patches){
-			for (const patch of patches) {
-				this._applyPatch(data, patch);
-			}
-		}
-	
-		_applyPatch(obj, patch){
-			for (const key in patch){
-				if(obj[key] === undefined)
-					obj[key] = patch[key];
-				else if(patch[key] === undefined)
-					obj[key] = undefined;
-				else if(patch[key].constructor === Object)
-					this._applyPatch(obj[key], patch[key]);
-				else
-					obj[key] = patch[key];
-			}
-		}
-	
+
 		/**
 		 * 
 		 * @param {string} path 
@@ -364,6 +363,7 @@
 		}
 		
 		/**
+		 * Gets all assets with the given path.
 		 * 
 		 * @param {string} name
 		 * @returns {string[]} 
@@ -375,6 +375,32 @@
 				const asset = mod.getAsset(name);
 				if(asset) {
 					result.push(asset);
+				}
+			}
+
+			return result;
+		}
+		
+		/**
+		 * Gets all assets with the given path. Extended version.
+		 * Notes on the new return value layout:
+		 * mod: Mod
+		 * path: string
+		 * data: Reserved for use by recipients, must not be present (must be undefined)
+		 * 
+		 * @param {string} name
+		 * @returns {object[]} 
+		 */
+		_getAllAssetsEx(name){
+			const result = [];
+
+			for (const mod of window.activeMods) {
+				const asset = mod.getAsset(name);
+				if(asset) {
+					result.push({
+						mod: mod,
+						path: asset
+					});
 				}
 			}
 
