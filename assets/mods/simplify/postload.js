@@ -196,7 +196,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 */
 		async loadFilePatched(path) {
 			// Detect if this would be patched, which implies it's a JSON file.
-			const patches = this._getRelevantPatches(path);
+			const patches = this._getRelevantPatchDetails(path);
 			if (patches.length > 0) {
 				// It would.
 				return JSON.stringify(await this.loadJSONPatched(path));
