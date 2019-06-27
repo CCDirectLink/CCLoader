@@ -195,13 +195,14 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @returns {Promise<string>}
 		 */
 		async loadFilePatched(path) {
+			const newPath = this._applyAssetOverrides(path);
 			// Detect if this would be patched, which implies it's a JSON file.
-			const patches = this._getRelevantPatchDetails(path);
+			const patches = this._getRelevantPatchDetails(newPath);
 			if (patches.length > 0) {
-				// It would.
+				// It would. loadJSONPatched - with original path for equivalent functionality.
 				return JSON.stringify(await this.loadJSONPatched(path));
 			}
-			return await this.loadFile(this._applyAssetOverrides(path));
+			return await this.loadFile(newPath);
 		}
 	
 		/**
