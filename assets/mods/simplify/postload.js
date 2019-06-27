@@ -22,7 +22,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * Generates patches for specified mod and prints them into the console
 		 * @param {string|Mod} mod 
 		 */
-		generatePatches(mod){
+		async generatePatches(mod){
 			if (mod.constructor === String){
 				return this.generatePatches(window.simplify.getMod(mod));
 			}
@@ -35,10 +35,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 				}
 	
 				const original = asset.substr(baseDir.length + 7);
-				this.generatePatch(original, asset).then((res) => {
-					console.log('File: ' + asset + '.patch');
-					console.log(JSON.stringify(res));
-				});
+				const patch = await this.generatePatch(original, asset);
+				console.log('File: ' + asset + '.patch');
+				console.log(JSON.stringify(patch));
 			}
 		}
 	
@@ -153,7 +152,8 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		}
 
 		/**
-		 * Given an ig.root-prefixed string, applies asset overrides.
+		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
+		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
 		 *
 		 * @param {string} oldpath
 		 * @returns {string} newpath
@@ -177,17 +177,35 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			}
 			return path;
 		}
-	
+
 		/**
-		 * 
-		 * @param {string} path 
+		 * Given an ig.root-prefixed string, returns an array of the relevant patch files.
+		 *
+		 * @param {string} oldpath
+		 * @returns {object[]} patches
+		 */
+		_getRelevantPatchDetails(path) {
+			return this._getAllAssetDetails(path.substr(ig.root.length) + '.patch');
+		}
+
+		/**
+		 * Loads a file and patches it as necessary.
+		 *
+		 * @param {string} path
 		 * @returns {Promise<string>}
 		 */
-		loadFilePatched(path) {
-			return this.loadFile(this._applyAssetOverrides(path));
+		async loadFilePatched(path) {
+			// Detect if this would be patched, which implies it's a JSON file.
+			const patches = this._getRelevantPatches(path);
+			if (patches.length > 0) {
+				// It would.
+				return JSON.stringify(await this.loadJSONPatched(path));
+			}
+			return await this.loadFile(this._applyAssetOverrides(path));
 		}
 	
 		/**
+		 * Parses a JSON file, potentially patching it.
 		 * 
 		 * @param {string} path 
 		 * @returns {Promise<any>}
@@ -226,60 +244,42 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			settings.url = this._applyAssetOverrides(settings.url);
 
 			// To simplify the timeline, assume patching is always going on.
-			let patches = this._getAllAssetsEx(settings.url.substr(ig.root.length) + '.patch');
+			// If any patches are actually *present*, the file must be JSON.
+			const patches = this._getRelevantPatchDetails(settings.url);
 
 			const success = settings.success;
-			let successArgs;
-			// Required 'loaded' == patchData.length + 1 (res.)
-			let loaded = 0;
+			// It is assumed that a patch's index in here is the patch's normal index + 1.
+			// The same applies to the resulting value table later.
+			const promises = [];
 
-			const finalize = () => {
-				for (const entry of this.handlers) {
-					if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-						entry.handler(successArgs[0], settings.url.substr(ig.root.length));
+			promises.push(new Promise((resolve) => { // _reject omitted, see below.
+				settings.success = (...sArgs) => resolve(sArgs);
+				// Failure is handled by just using the AJAX failure, which will basically cause this whole thing to be forgotten. That's okay.
+			}));
+
+			for (const patch of patches)
+				promises.push(this.loadJSON(patch.path));
+
+			// Done making the parallel requests (unless patch application requires more requests), turn it into one big promise
+			Promise.all(promises).then((values) => {
+				const successArgs = values[0];
+				(async () => {
+					for (let i = 0; i < patches.length; i++)
+						await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
+				})().catch((err) => {
+					console.error(err);
+				}).finally(() => {
+					// Done, run final handlers
+					for (const entry of this.handlers) {
+						if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
+							entry.handler(successArgs[0], settings.url.substr(ig.root.length));
+						}
 					}
-				}
-				success.apply(settings.context, successArgs);
-			};
+					success.apply(settings.context, successArgs);
+				});
+			});
 
-			const check = () => {
-				if (loaded == patches.length + 1) {
-					// Done loading the main files, run the actual patches in sequence.
-					(async () => {
-						for (const patch of patches)
-							await this._applyPatch(successArgs[0], patch.data, patch.mod.baseDirectory);
-					})().then(() => {
-						finalize();
-					}).catch((err) => {
-						console.error(err);
-						finalize();
-					});
-				}
-			};
-
-			// Start parallel requests. These call check() on completion. When it's all complete, finalize() occurs.
-
-			for (const patch of patches) {
-				this.loadJSON(patch.path)
-					.then(data => {
-						patch.data = data;
-						loaded++;
-						check();
-					})
-					.catch(err => {
-						console.error(err);
-						patch.data = {};
-						loaded++;
-						check();
-					});
-			}
-
-			settings.success = (...sArgs) => {
-				successArgs = sArgs;
-				loaded++;
-				check();
-			};
-	
+			// Now everything's setup, run request handlers
 			for (const entry of this.handlers) {
 				if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
 					entry.handler(settings, settings.url.substr(ig.root.length));
@@ -380,7 +380,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @param {string} name
 		 * @returns {object[]} 
 		 */
-		_getAllAssetsEx(name){
+		_getAllAssetDetails(name){
 			const result = [];
 
 			for (const mod of window.activeMods) {

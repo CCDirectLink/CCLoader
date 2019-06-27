@@ -38,8 +38,8 @@ module.exports = {
         "no-console": [
             "warn"
         ],
-		"no-var": [
-			"error"
-		]
+        "no-var": [
+            "error"
+        ]
     }
 };
