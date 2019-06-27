@@ -16,10 +16,10 @@ export const defaultSettings = {
 
 export function photomerge(a, b) {
 	if (b.constructor === Object) {
-		for (var k in b)
+		for (let k in b)
 			a[photocopy(k)] = photocopy(b[k]);
 	} else if (b.constructor == Array) {
-		for (var i = 0; i < b.length; i++)
+		for (let i = 0; i < b.length; i++)
 			a.push(photocopy(b[i]));
 	} else {
 		throw new Error("We can't do that! ...Who'd clean up the mess?");
@@ -47,13 +47,13 @@ export function diffHeuristic(a, b, settings) {
 		return 1;
 
 	if (a.constructor === Array) {
-		var array = diffArrayHeuristic(a, b, settings);
+		let array = diffArrayHeuristic(a, b, settings);
 		if (array.length == 0)
 			return 0;
-		var changes = 0;
-		var ai = 0;
-		var bi = 0;
-		for (var i = 0; i < array.length; i++) {
+		let changes = 0;
+		let ai = 0;
+		let bi = 0;
+		for (let i = 0; i < array.length; i++) {
 			if (array[i] == "POPA") {
 				changes++;
 				ai++;
@@ -68,14 +68,14 @@ export function diffHeuristic(a, b, settings) {
 		}
 		return changes / array.length;
 	} else if (a.constructor === Object) {
-		var total = [];
-		for (var k in a)
+		let total = [];
+		for (let k in a)
 			total.push(k);
-		for (var k in b)
+		for (let k in b)
 			if (!(k in a))
 				total.push(k);
-		var change = 0;
-		for (var i = 0; i < total.length; i++) {
+		let change = 0;
+		for (let i = 0; i < total.length; i++) {
 			if ((total[i] in a) && !(total[i] in b)) {
 				change += settings.diffAddNewKey;
 			} else if ((total[i] in b) && !(total[i] in a)) {
@@ -110,13 +110,13 @@ export function diffHeuristic(a, b, settings) {
  */
 export function diffArrayHeuristic(a, b, settings) {
 	const lookahead = settings.arrayLookahead;
-	var sublog = [];
-	var ia = 0;
-	for (var i = 0; i < b.length; i++) {
-		var validDif = 2;
-		var validSrc = null;
-		for (var j = ia; j < Math.min(ia + lookahead, a.length); j++) {
-			var dif = diffHeuristic(a[j], b[i], settings);
+	let sublog = [];
+	let ia = 0;
+	for (let i = 0; i < b.length; i++) {
+		let validDif = 2;
+		let validSrc = null;
+		for (let j = ia; j < Math.min(ia + lookahead, a.length); j++) {
+			let dif = diffHeuristic(a[j], b[i], settings);
 			if (dif < validDif) {
 				validDif = dif;
 				validSrc = j;
@@ -150,23 +150,23 @@ export function diffArrayHeuristic(a, b, settings) {
 /*
  * Diffs two objects
  * 
- * @param {*} a The original value
- * @param {*} b The target value
- * @param {*} [settings] Optional bunch of settings. May include "comment".
- * @return {*} Null if unpatchable (this'll never occur for an Object or Array), Array of JSON-ready Patch Steps otherwise
+ * @param {any} a The original value
+ * @param {any} b The target value
+ * @param {object} [settings] Optional bunch of settings. May include "comment".
+ * @return {array<object>|null} Null if unpatchable (this'll never occur for an Object or Array), Array of JSON-ready Patch Steps otherwise
  */
 export function diff(a, b, settings) {
-	var trueSettings = photocopy(defaultSettings);
+	let trueSettings = photocopy(defaultSettings);
 	if (settings !== void 0)
 		photomerge(trueSettings, settings);
 	return diffInterior(a, b, trueSettings);
 }
 
 export function diffCommentExpansion(a, b, element, settings) {
-	var bkcomment = settings.comment;
+	let bkcomment = settings.comment;
 	if (settings.comment !== void 0)
 		settings.comment = settings.comment + "." + element;
-	var log = diffInterior(a, b, settings);
+	let log = diffInterior(a, b, settings);
 	settings.comment = bkcomment;
 	return log;
 }
@@ -178,26 +178,26 @@ export function diffInterior(a, b, settings) {
 		return null;
 	if (a.constructor !== b.constructor)
 		return null;
-	var log = [];
+	let log = [];
 
 	if (a.constructor === Array) {
-		var array = diffArrayHeuristic(a, b, settings);
-		var ai = 0;
-		var bi = 0;
+		let array = diffArrayHeuristic(a, b, settings);
+		let ai = 0;
+		let bi = 0;
 		// Advancing ai/bi pops from the respective stack.
 		// Since outputting an element always involves popping from B,
 		//  and vice versa, the 'b' stack position is also the live array position.
 		// At patch time, a[ai + x] for arbitrary 'x' is in the live array at [bi + x]
-		for (var i = 0; i < array.length; i++) {
+		for (let i = 0; i < array.length; i++) {
 			if (array[i] == "POPA") {
 				log.push({"type": "REMOVE_ARRAY_ELEMENT", "index": bi, "comment": settings.comment});
 				ai++;
 			} else if (array[i] == "INSERT") {
-				var insertion = {"type": "ADD_ARRAY_ELEMENT", "index": bi, "content": photocopy(b[bi]), "comment": settings.comment};
+				let insertion = {"type": "ADD_ARRAY_ELEMENT", "index": bi, "content": photocopy(b[bi]), "comment": settings.comment};
 				// Is this a set of elements being inserted at the end?
-				var j;
+				let j;
 				for (j = i + 1; j < array.length; j++)
-					if (array[i] != "INSERT")
+					if ((array[j] != "INSERT") && (array[j] != "POPA"))
 						break;
 				// If it is a set of elements being inserted at the end, they are appended
 				if (j == array.length)
@@ -205,7 +205,7 @@ export function diffInterior(a, b, settings) {
 				log.push(insertion);
 				bi++;
 			} else if (array[i] == "PATCH") {
-				var xd = diffCommentExpansion(a[ai], b[bi], bi, settings);
+				let xd = diffCommentExpansion(a[ai], b[bi], bi, settings);
 				if (xd != null) {
 					if (xd.length != 0) {
 						log.push({"type": "ENTER", "index": bi});
@@ -220,12 +220,12 @@ export function diffInterior(a, b, settings) {
 			}
 		}
 	} else if (a.constructor === Object) {
-		for (var k in a) {
+		for (let k in a) {
 			if (k in b) {
 				if (diffHeuristic(a[k], b[k], settings) >= settings.trulyDifferentThreshold) {
 					log.push({"type": "SET_KEY", "index": k, "content": photocopy(b[k]), "comment": settings.comment});
 				} else {
-					var xd = diffCommentExpansion(a[k], b[k], k, settings);
+					let xd = diffCommentExpansion(a[k], b[k], k, settings);
 					if (xd != null) {
 						if (xd.length != 0) {
 							log.push({"type": "ENTER", "index": k});
@@ -241,7 +241,7 @@ export function diffInterior(a, b, settings) {
 				log.push({"type": "SET_KEY", "index": k, "comment": settings.comment});
 			}
 		}
-		for (var k in b)
+		for (let k in b)
 			if (!(k in a))
 				log.push({"type": "SET_KEY", "index": k, "content": photocopy(b[k]), "comment": settings.comment});
 	} else if (a != b) {
@@ -251,113 +251,87 @@ export function diffInterior(a, b, settings) {
 }
 
 // Custom extensions are registered here.
-// They are passed the state, and call state.advance() or state.failure() depending on how well it goes.
+// Their 'this' is the Step, they are passed the state, and they are expected to return a Promise.
+// In practice this is done with async old-style functions.
 export const appliers = {};
 
 /*
  * a: The object to modify
  * steps: The array of steps, fresh from the JSON
  * 'loader' has the signature:
- * loader(imp, impurl, success(obj), failure(...)) -> void
+ * loader(imp: boolean, impurl: string) -> Promise<object>
  * Note: "imp", if true, retrieves the file from the game. Otherwise it's retrieved from a mod.
- * This function is designed in an asynchronous fashion.
+ * Returns a Promise.
  */
-export function patch(a, steps, loader, success, failure) {
+export async function patch(a, steps, loader) {
 	if (steps.constructor === Object) {
 		// Standardized Mods specification
-		for (var k in steps) {
+		for (let k in steps) {
 			if ((steps[k].constructor === Object) && (a[k] !== void 0)) {
-				// Not actually async
-				patch(a[k], steps[k], loader, function () {}, function () {});
+				// steps[k] is Object, so this won't escape the Standardized Mods version of patching
+				await patch(a[k], steps[k], loader);
 			} else {
 				a[k] = steps[k];
 			}
 		}
-		success();
 		return;
 	}
-	var init = {
+	const state = {
 		currentValue: a,
 		stack: [],
-		loader: loader,
-		index: 0,
-		steps: steps,
-		success: success,
-		failure: failure,
-		currentlyAdvancing: 0,
-		advance: function () {
-			// This trick prevents potential recursion, which could be dangerous on long patches.
-			this.currentlyAdvancing++;
-			if (this.currentlyAdvancing == 1) {
-				while (this.currentlyAdvancing > 0) {
-					if (this.index >= this.steps.length) {
-						this.success();
-						return;
-					} else {
-						var step = this.steps[this.index++];
-						appliers[step["type"]].call(step, this);
-					}
-					this.currentlyAdvancing--;
-				}
-			}
-		}
+		loader: loader
 	};
-	init.advance();
+	for (let index = 0; index < steps.length; index++)
+		await appliers[steps[index]["type"]].call(steps[index], state);
 }
 
 // -- Step Execution --
 
-appliers["ENTER"] = function (state) {
+appliers["ENTER"] = async function (state) {
 	state.stack.push(state.currentValue);
 	state.currentValue = state.currentValue[this["index"]];
-	state.advance();
 };
 
-appliers["EXIT"] = function (state) {
+appliers["EXIT"] = async function (state) {
 	state.currentValue = state.stack.pop();
-	state.advance();
 };
 
-appliers["SET_KEY"] = function (state) {
+appliers["SET_KEY"] = async function (state) {
 	if ("content" in this) {
 		state.currentValue[this["index"]] = photocopy(this["content"]);
 	} else {
 		delete state.currentValue[this["index"]];
 	}
-	state.advance();
 };
 
-appliers["REMOVE_ARRAY_ELEMENT"] = function (state) {
+appliers["REMOVE_ARRAY_ELEMENT"] = async function (state) {
 	state.currentValue.splice(this["index"], 1);
-	state.advance();
 };
 
-appliers["ADD_ARRAY_ELEMENT"] = function (state) {
+appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 	if ("index" in this) {
 		state.currentValue.splice(this["index"], 0, photocopy(this["content"]));
 	} else {
 		state.currentValue.push(photocopy(this["content"]));
 	}
-	state.advance();
 };
 
-appliers["IMPORT"] = function (state) {
-	state.loader(true, this["src"], (function (obj) {
-		if ("path" in this)
-			for (var i = 0; i < this["path"].length; i++)
-				obj = obj[this["path"][i]];
-		if ("index" in this) {
-			state.currentValue[this["index"]] = photocopy(obj);
-		} else {
-			photomerge(state.currentValue, obj);
-		}
-		state.advance();
-	}).bind(this), state.failure);
+appliers["IMPORT"] = async function (state) {
+	let obj = await state.loader(true, this["src"]);
+
+	if ("path" in this)
+		for (let i = 0; i < this["path"].length; i++)
+			obj = obj[this["path"][i]];
+
+	if ("index" in this) {
+		state.currentValue[this["index"]] = photocopy(obj);
+	} else {
+		photomerge(state.currentValue, obj);
+	}
 };
 
-appliers["INCLUDE"] = function (state) {
-	state.loader(false, this["src"], (function (obj) {
-		patch(state.currentValue, obj, state.loader, state.advance.bind(state), state.failure);
-	}).bind(this), state.failure);
+appliers["INCLUDE"] = async function (state) {
+	const includedSteps = await state.loader(false, this["src"]);
+	await patch(state.currentValue, includedSteps, state.loader);
 };
 

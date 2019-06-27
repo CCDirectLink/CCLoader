@@ -1,3 +1,5 @@
+import * as patchSteps from './lib/patch-steps-es6.js';
+
 (() => {
 	const event = document.createEvent('Event');
 	event.initEvent('postload', true, false);
@@ -41,34 +43,21 @@
 		}
 	
 		/**
-		 * Imports the PatchSteps library, which can also run the older style of patching.
-		 * @return {Promise<object>} result
-		 */
-		_importPatchLibrary() {
-			return import("./patch-steps-es6.js");
-		}
-	
-		/**
 		 * Generates patches for a pair of given objects or files.
 		 * @param {object} target
 		 * @param {object|array} patch
 		 * @param {string} modbase
 		 * @return {Promise<any>} result
 		 */
-		_applyPatch(target, patch, modbase) {
-			return new Promise((resolve, reject) => {
-				const ipl = this._importPatchLibrary();
-				ipl.then((v) => {
-					return v.patch(target, patch, (imp, impurl, success, failure) => {
-						if (imp) {
-							// Import (game file)
-							this.loadJSONPatched(ig.root + impurl).then(success).catch(failure);
-						} else {
-							// Include (mod file)
-							this.loadJSON(modbase + impurl).then(success).catch(failure);
-						}
-					}, resolve, reject);
-				}).catch(reject);
+		async _applyPatch(target, patch, modbase) {
+			await patchSteps.patch(target, patch, async (imp, impurl) => {
+				if (imp) {
+					// Import (game file)
+					return await this.loadJSONPatched(ig.root + impurl);
+				} else {
+					// Include (mod file)
+					return await this.loadJSON(modbase + impurl);
+				}
 			});
 		}
 	
@@ -85,7 +74,7 @@
 			if(modified.constructor === String)
 				modified = await this.loadJSON(modified);
 
-			return (await this._importPatchLibrary()).diff(original, modified);
+			return patchSteps.diff(original, modified);
 		}
 	
 		/**
@@ -207,7 +196,7 @@
 			// To avoid reimplementing the code that was already implemented.
 			return new Promise((resolve, reject) => {
 				$.ajax({
-					dataType: "json",
+					dataType: 'json',
 					url: path,
 					success: (val) => {
 						resolve(val);
@@ -264,7 +253,7 @@
 					}).catch((err) => {
 						console.error(err);
 						finalize();
-					})
+					});
 				}
 			};
 

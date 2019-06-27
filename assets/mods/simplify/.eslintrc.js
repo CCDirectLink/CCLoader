@@ -24,10 +24,6 @@ module.exports = {
             "error",
             "tab"
         ],
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
         "quotes": [
             "error",
             "single"
@@ -41,6 +37,9 @@ module.exports = {
         ],
         "no-console": [
             "warn"
-        ]
+        ],
+		"no-var": [
+			"error"
+		]
     }
 };

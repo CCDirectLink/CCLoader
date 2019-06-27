@@ -3,6 +3,7 @@
 	"main": "mod.js",
 	"preload": "preload.js",
 	"postload": "postload.js",
+	"module": true,
 	"version": "2.3.3",
 	"ccmodDependencies": {
 		"ccloader": "^2.11.0",
