@@ -195,14 +195,13 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @returns {Promise<string>}
 		 */
 		async loadFilePatched(path) {
-			const newPath = this._applyAssetOverrides(path);
 			// Detect if this would be patched, which implies it's a JSON file.
-			const patches = this._getRelevantPatchDetails(newPath);
+			const patches = this._getRelevantPatchDetails(path);
 			if (patches.length > 0) {
 				// It would. loadJSONPatched - with original path for equivalent functionality.
 				return JSON.stringify(await this.loadJSONPatched(path));
 			}
-			return await this.loadFile(newPath);
+			return await this.loadFile(this._applyAssetOverrides(path));
 		}
 	
 		/**
@@ -231,61 +230,68 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					if (settings.url.constructor !== String) {
 						return console.log(settings);
 					}
-		
-					const result = this._handleAjax(settings);
-					if (result) {
-						settings = result;
+
+					const success = settings.success;
+					const promise = new Promise((resolve) => { // _reject omitted, see below.
+						settings.success = (...sArgs) => resolve(sArgs);
+						// Failure is handled by just using the AJAX failure, which will basically cause this whole thing to be forgotten. That's okay.
+					});
+
+					const originalUrl = settings.url;
+
+					// Apply asset overrides.
+					settings.url = this._applyAssetOverrides(settings.url);
+
+					this._handleAjaxPatching(originalUrl, promise).then((successArgs) => {
+						// Done, run final handlers
+						for (const entry of this.handlers) {
+							if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
+								entry.handler(successArgs[0], settings.url.substr(ig.root.length));
+							}
+						}
+						success.apply(settings.context, successArgs);
+					}, (err) => {
+						console.error(err);
+					});
+
+					// Now everything's setup, run request handlers
+					for (const entry of this.handlers) {
+						if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
+							entry.handler(settings, settings.url.substr(ig.root.length));
+						}
 					}
 				}
 			});
 		}
 	
-		_handleAjax(settings){
-			// Apply asset overrides.
-			settings.url = this._applyAssetOverrides(settings.url);
+		/*
+		 * Given a promise for when an AJAX request finishes, setup patching.
+		 * Returns a promise for the value given by the AJAX request.
+		 *
+		 * @param {object} settings
+		 * @returns {Promise<any>}
+		 */
+		async _handleAjaxPatching(url, promise){
 
 			// To simplify the timeline, assume patching is always going on.
 			// If any patches are actually *present*, the file must be JSON.
-			const patches = this._getRelevantPatchDetails(settings.url);
+			const patches = this._getRelevantPatchDetails(url);
 
-			const success = settings.success;
 			// It is assumed that a patch's index in here is the patch's normal index + 1.
 			// The same applies to the resulting value table later.
 			const promises = [];
 
-			promises.push(new Promise((resolve) => { // _reject omitted, see below.
-				settings.success = (...sArgs) => resolve(sArgs);
-				// Failure is handled by just using the AJAX failure, which will basically cause this whole thing to be forgotten. That's okay.
-			}));
+			promises.push(promise);
 
 			for (const patch of patches)
 				promises.push(this.loadJSON(patch.path));
 
-			// Done making the parallel requests (unless patch application requires more requests), turn it into one big promise
-			Promise.all(promises).then((values) => {
-				const successArgs = values[0];
-				(async () => {
-					for (let i = 0; i < patches.length; i++)
-						await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
-				})().catch((err) => {
-					console.error(err);
-				}).finally(() => {
-					// Done, run final handlers
-					for (const entry of this.handlers) {
-						if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-							entry.handler(successArgs[0], settings.url.substr(ig.root.length));
-						}
-					}
-					success.apply(settings.context, successArgs);
-				});
-			});
-
-			// Now everything's setup, run request handlers
-			for (const entry of this.handlers) {
-				if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-					entry.handler(settings, settings.url.substr(ig.root.length));
-				}
-			}
+			// Done making the parallel requests
+			const values = await Promise.all(promises);
+			const successArgs = values[0];
+			for (let i = 0; i < patches.length; i++)
+				await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
+			return successArgs;
 		}
 	
 		_hookHttpRequest() {
