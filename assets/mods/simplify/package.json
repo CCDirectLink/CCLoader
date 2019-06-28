@@ -4,7 +4,7 @@
 	"preload": "preload.js",
 	"postload": "postload.js",
 	"module": true,
-	"version": "2.3.3",
+	"version": "2.4.0",
 	"ccmodDependencies": {
 		"ccloader": "^2.11.0",
 		"crosscode": "^1.0.0"
