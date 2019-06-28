@@ -49,13 +49,13 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @return {Promise<any>} result
 		 */
 		async _applyPatch(target, patch, modbase) {
-			await patchSteps.patch(target, patch, async (imp, impurl) => {
-				if (imp) {
+			await patchSteps.patch(target, patch, async (fromGame, url) => {
+				if (fromGame) {
 					// Import (game file)
-					return await this.loadJSONPatched(ig.root + impurl);
+					return await this.loadJSONPatched(ig.root + url);
 				} else {
 					// Include (mod file)
-					return await this.loadJSON(modbase + impurl);
+					return await this.loadJSON(modbase + url);
 				}
 			});
 		}
@@ -78,7 +78,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 	
 		/**
 		 * 
-		 * @param {(xhr: any, url: string) => void)} handler 
+		 * @param {(xhr: any, url: string) => void} handler 
 		 * @param {string=} filter 
 		 * @param {boolean=} beforeCall 
 		 */
@@ -152,43 +152,6 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		}
 
 		/**
-		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
-		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
-		 *
-		 * @param {string} oldpath
-		 * @returns {string} newpath
-		 */
-		_applyAssetOverrides(path) {
-			if (!path.startsWith(ig.root))
-				return;
-			const fullreplace = this._getAllAssets(path.substr(ig.root.length));
-	
-			if(fullreplace && fullreplace.length > 0){
-				if(fullreplace.length > 1)
-					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
-	
-				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-	
-				if (fullreplace[0].indexOf('assets') === 0) {
-					return ig.root + fullreplace[0].substr(7);
-				} else {
-					return ig.root + fullreplace[0];
-				}
-			}
-			return path;
-		}
-
-		/**
-		 * Given an ig.root-prefixed string, returns an array of the relevant patch files.
-		 *
-		 * @param {string} oldpath
-		 * @returns {object[]} patches
-		 */
-		_getRelevantPatchDetails(path) {
-			return this._getAllAssetDetails(path.substr(ig.root.length) + '.patch');
-		}
-
-		/**
 		 * Loads a file and patches it as necessary.
 		 *
 		 * @param {string} path
@@ -223,47 +186,115 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 				});
 			});
 		}
+		
+		/**
+		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
+		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
+		 *
+		 * @param {string} oldpath
+		 * @returns {string} newpath
+		 */
+		_applyAssetOverrides(path) {
+			if (!path.startsWith(ig.root))
+				return;
+			const fullreplace = this._getAllAssets(path.substr(ig.root.length));
+	
+			if(fullreplace && fullreplace.length > 0){
+				if(fullreplace.length > 1)
+					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
+	
+				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
+	
+				if (fullreplace[0].indexOf('assets') === 0) {
+					return ig.root + fullreplace[0].substr(7);
+				} else {
+					return ig.root + fullreplace[0];
+				}
+			}
+			return path;
+		}
+
+		/**
+		 * Given an ig.root-prefixed string, returns an array of the relevant patch files.
+		 *
+		 * @param {string} oldpath
+		 * @returns {Array<{mod: Mod, path: string}>} patches
+		 */
+		_getRelevantPatchDetails(path) {
+			return this._getAllAssetDetails(path.substr(ig.root.length) + '.patch');
+		}
 	
 		_hookAjax() {
 			$.ajaxSetup({
-				beforeSend: (xhr, settings) => {
+				beforeSend: async (_, settings) => {
 					if (settings.url.constructor !== String) {
 						return console.log(settings);
 					}
 
-					const success = settings.success;
-					const promise = new Promise((resolve) => { // _reject omitted, see below.
-						settings.success = (...sArgs) => resolve(sArgs);
-						// Failure is handled by just using the AJAX failure, which will basically cause this whole thing to be forgotten. That's okay.
-					});
-
-					const originalUrl = settings.url;
-
 					// Apply asset overrides.
+					const originalUrl = settings.url;
 					settings.url = this._applyAssetOverrides(settings.url);
+					
+					// Run request pre handlers
+					this._callHandlers(settings, true);
 
-					this._handleAjaxPatching(originalUrl, promise).then((successArgs) => {
-						// Done, run final handlers
-						for (const entry of this.handlers) {
-							if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-								entry.handler(successArgs[0], settings.url.substr(ig.root.length));
-							}
-						}
-						success.apply(settings.context, successArgs);
-					}, (err) => {
-						console.error(err);
-					});
+					const successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
 
-					// Now everything's setup, run request handlers
-					for (const entry of this.handlers) {
-						if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-							entry.handler(settings, settings.url.substr(ig.root.length));
-						}
-					}
+					// Done, run final handlers
+					this._callHandlers(settings, false);
+
+					settings.success.apply(settings.context, successArgs);
 				}
 			});
 		}
+
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @param {boolean} beforeCall 
+		 */
+		_callHandlers(settings, beforeCall) {
+			/** @type {string} */
+			const url = settings.url.substr(ig.root.length);
+			for (const entry of this.handlers) {
+				if(entry.beforeCall == beforeCall && (!entry.filter || url.match(entry.filter))) {
+					entry.handler(settings, url);
+				}
+			}
+		}
 	
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @returns {Promise<any[]>}
+		 */
+		_waitForAjax(settings) {
+			const success = settings.success;
+			const error = settings.error;
+
+			return new Promise((resolve, reject) => {
+				settings.success = (...sArgs) => {
+					this._restoreSettings(settings, success, error);
+					resolve(sArgs);
+				};
+				settings.error = (_, text) => {
+					this._restoreSettings(settings, success, error);
+					reject(text);
+				};
+			});
+		}
+
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @param {Function} success 
+		 * @param {Function} error 
+		 */
+		_restoreSettings(settings, success, error) {
+			settings.success = success;
+			settings.error = error;
+		}
+
 		/*
 		 * Given a promise for when an AJAX request finishes, setup patching.
 		 * Returns a promise for the value given by the AJAX request.
@@ -281,8 +312,8 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			// The same applies to the resulting value table later.
 			const promises = [];
 
+			// Load all resources needed
 			promises.push(promise);
-
 			for (const patch of patches)
 				promises.push(this.loadJSON(patch.path));
 
@@ -298,30 +329,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			const instance = this;
 			const original = XMLHttpRequest.prototype.open;
 			XMLHttpRequest.prototype.open = function(_, url) {
-				arguments[1] = instance._handleHttpRequest(url) || url;
+				arguments[1] = instance._applyAssetOverrides(url) || url;
 				return original.apply(this, arguments);
 			};
-		}
-	
-		/**
-		 * 
-		 * @param {string} url
-		 */
-		_handleHttpRequest(url) {
-			const fullreplace = this._getAllAssets(url.substr(ig.root.length));
-	
-			if(fullreplace && fullreplace.length > 0){
-				if(fullreplace.length > 1)
-					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
-	
-				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-	
-				if (fullreplace[0].indexOf('assets') === 0) {
-					return ig.root + fullreplace[0].substr(7);
-				} else {
-					return ig.root + fullreplace[0];
-				}
-			}
 		}
 
 		_hookImages() {
@@ -385,7 +395,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * data: Reserved for use by recipients, must not be present (must be undefined)
 		 * 
 		 * @param {string} name
-		 * @returns {object[]} 
+		 * @returns {Array<{mod: Mod, path: string}>} 
 		 */
 		_getAllAssetDetails(name){
 			const result = [];
