@@ -1,3 +1,5 @@
+import * as patchSteps from './lib/patch-steps-es6.js';
+
 (() => {
 	const event = document.createEvent('Event');
 	event.initEvent('postload', true, false);
@@ -15,12 +17,12 @@
 			this._hookHttpRequest();
 			this._hookImages();
 		}
-	
+
 		/**
 		 * Generates patches for specified mod and prints them into the console
 		 * @param {string|Mod} mod 
 		 */
-		generatePatches(mod){
+		async generatePatches(mod){
 			if (mod.constructor === String){
 				return this.generatePatches(window.simplify.getMod(mod));
 			}
@@ -33,32 +35,50 @@
 				}
 	
 				const original = asset.substr(baseDir.length + 7);
-				this.generatePatch(original, asset, 'File: ' + asset + '.patch');
+				const patch = await this.generatePatch(original, asset);
+				console.log('File: ' + asset + '.patch');
+				console.log(JSON.stringify(patch));
 			}
 		}
 	
 		/**
-		 * Generates patches for given objects or files and prints them into the console
+		 * Generates patches for a pair of given objects or files.
+		 * @param {object} target
+		 * @param {object|array} patch
+		 * @param {string} modbase
+		 * @return {Promise<any>} result
+		 */
+		async _applyPatch(target, patch, modbase) {
+			await patchSteps.patch(target, patch, async (fromGame, url) => {
+				if (fromGame) {
+					// Import (game file)
+					return await this.loadJSONPatched(ig.root + url);
+				} else {
+					// Include (mod file)
+					return await this.loadJSON(modbase + url);
+				}
+			});
+		}
+	
+		/**
+		 * Generates patches for a pair of given objects or files.
 		 * @param {string|object} original 
 		 * @param {string|object} modified 
-		 * @param {string=} message 
+		 * @return {Promise<array>} result
 		 */
-		generatePatch(original, modified, message){
+		async generatePatch(original, modified) {
 			if(original.constructor === String)
-				return $.ajax({url: original, success: o => this.generatePatch(o, modified, message), context: this, dataType: 'json', bypassHook: true});
-	
+				original = await this.loadJSON(original);
+
 			if(modified.constructor === String)
-				return $.ajax({url: modified, success: m => this.generatePatch(original, m, message), context: this, dataType: 'json', bypassHook: true});
-	
-			if(message) {
-				console.log(message);
-			}
-			console.log(JSON.stringify(this._generatePatch(original, modified)));
+				modified = await this.loadJSON(modified);
+
+			return patchSteps.diff(original, modified);
 		}
 	
 		/**
 		 * 
-		 * @param {(xhr: any, url: string) => void)} handler 
+		 * @param {(xhr: any, url: string) => void} handler 
 		 * @param {string=} filter 
 		 * @param {boolean=} beforeCall 
 		 */
@@ -130,171 +150,54 @@
 	
 			return result;
 		}
-	
+
 		/**
-		 * 
-		 * @param {string} path 
+		 * Loads a file and patches it as necessary.
+		 *
+		 * @param {string} path
 		 * @returns {Promise<string>}
 		 */
-		loadFilePatched(path) {
-			return new Promise((resolve, reject) => {
-				path = this._stripAssets(path);
-				const req = new XMLHttpRequest();
-				req.open('GET', path, true);
-				req.onreadystatechange = function(){
-					if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
-						resolve(req.responseText);
-					}
-				};
-				req.onerror = err => reject(err);
-				req.send();
-			});
+		async loadFilePatched(path) {
+			// Detect if this would be patched, which implies it's a JSON file.
+			const patches = this._getRelevantPatchDetails(path);
+			if (patches.length > 0) {
+				// It would. loadJSONPatched - with original path for equivalent functionality.
+				return JSON.stringify(await this.loadJSONPatched(path));
+			}
+			return await this.loadFile(this._applyAssetOverrides(path));
 		}
 	
 		/**
+		 * Parses a JSON file, potentially patching it.
 		 * 
 		 * @param {string} path 
 		 * @returns {Promise<any>}
 		 */
-		async loadJSONPatched(path) {
-			return JSON.parse(await this.loadFilePatched(path));
-		}
-		
-		_generatePatch(original, modified) {
-			const result = {};
-	
-			for (const key in modified) {
-				if (modified[key] == undefined && original[key] == undefined) {
-					continue;
-				}
-	
-				if (modified[key] == undefined && original.hasOwnProperty(key)) {
-					result[key] = null;
-				} else if (!original.hasOwnProperty(key) || original[key] === undefined || original[key].constructor !== modified[key].constructor) {
-					result[key] = modified[key];
-				} else if (original[key] !== modified[key]) {
-					if (modified[key].constructor === Object || modified[key].constructor === Array) {
-						const res = this._generatePatch(original[key], modified[key]);
-						if(res !== undefined) {
-							result[key] = res;
-						}
-					} else {
-						result[key] = modified[key];
-					}
-				}
-			}
-	
-			for (const key in original) {
-				if(modified[key] === undefined) {
-					result[key] = null;
-				}
-			}
-	
-			for (const key in result) {
-				if(result[key] && result[key].constructor === Function){
-					result[key] = undefined;
-					delete result[key];
-				}
-			}
-	
-			if (Object.keys(result).length == 0) {
-				return undefined;
-			} else {
-				return result;
-			}
-		}
-	
-		_hookAjax() {
-			$.ajaxSetup({
-				beforeSend: (xhr, settings) => {
-					if (settings.url.constructor !== String) {
-						return console.log(settings);
-					}
-		
-					const result = this._handleAjax(settings);
-					if (result) {
-						settings = result;
-					}
-				}
+		loadJSONPatched(path) {
+			// To avoid reimplementing the code that was already implemented.
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					dataType: 'json',
+					url: path,
+					success: (val) => {
+						resolve(val);
+					},
+					error: reject
+				});
 			});
 		}
-	
-		_handleAjax(settings){
-			const fullreplace = this._getAllAssets(settings.url.substr(ig.root.length));
-	
-			if(fullreplace && fullreplace.length > 0){
-				if(fullreplace.length > 1)
-					console.warn('Conflict between \'' + fullreplace.join('\', \'') + '\' found. Taking \'' + fullreplace[0] + '\'');
-	
-				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
-	
-				if (fullreplace[0].indexOf('assets') === 0) {
-					settings.url = ig.root + fullreplace[0].substr(7);
-				} else {
-					settings.url = ig.root + fullreplace[0];
-				}
-			}
-	
-			const patches = this._getAllAssets(settings.url.substr(ig.root.length) + '.patch');
-			if(patches && patches.length > 0){
-				const patchData = [];
-				const success = settings.success;
-				let successArgs;
-				let resourceLoaded = false;
-	
-				for (const patch of patches) {
-					this.loadJSON(patch)
-						.then(data => {
-							patchData.push(data);
-							if(patchData.length === patches.length && resourceLoaded){
-								this._applyPatches(successArgs[0], patchData);
-								success.apply(settings.context, successArgs);
-							}
-						})
-						.catch(err => {
-							console.error(err);
-							patchData.push({});
-						});
-				}
-	
-				settings.success = (...successArgs) => {
-					resourceLoaded = true;
-					if (patchData.length === patches.length) {
-						this._applyPatches(successArgs[0], patchData);
-	
-						for (const entry of this.handlers) {
-							if(!entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-								entry.handler(successArgs[0], settings.url.substr(ig.root.length));
-							}
-						}
-	
-						success.apply(settings.context, successArgs);
-					}
-				};
-			}
-	
-			for (const entry of this.handlers) {
-				if(entry.beforeCall && (!entry.filter || settings.url.substr(ig.root.length).match(entry.filter))) {
-					entry.handler(settings, settings.url.substr(ig.root.length));
-				}
-			}
-		}
-	
-		_hookHttpRequest() {
-			const instance = this;
-			const original = XMLHttpRequest.prototype.open;
-			XMLHttpRequest.prototype.open = function(_, url) {
-				arguments[1] = instance._handleHttpRequest(url) || url;
-				return original.apply(this, arguments);
-			};
-		}
-	
+		
 		/**
-		 * 
-		 * @param {string} url
+		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
+		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
+		 *
+		 * @param {string} oldpath
+		 * @returns {string} newpath
 		 */
-		_handleHttpRequest(url) {
-			const fullreplace = this._getAllAssets(url.substr(ig.root.length));
+		_applyAssetOverrides(path) {
+			if (!path.startsWith(ig.root))
+				return;
+			const fullreplace = this._getAllAssets(path.substr(ig.root.length));
 	
 			if(fullreplace && fullreplace.length > 0){
 				if(fullreplace.length > 1)
@@ -308,6 +211,127 @@
 					return ig.root + fullreplace[0];
 				}
 			}
+			return path;
+		}
+
+		/**
+		 * Given an ig.root-prefixed string, returns an array of the relevant patch files.
+		 *
+		 * @param {string} oldpath
+		 * @returns {Array<{mod: Mod, path: string}>} patches
+		 */
+		_getRelevantPatchDetails(path) {
+			return this._getAllAssetDetails(path.substr(ig.root.length) + '.patch');
+		}
+	
+		_hookAjax() {
+			$.ajaxSetup({
+				beforeSend: async (_, settings) => {
+					if (settings.url.constructor !== String) {
+						return console.log(settings);
+					}
+
+					// Apply asset overrides.
+					const originalUrl = settings.url;
+					settings.url = this._applyAssetOverrides(settings.url);
+					
+					// Run request pre handlers
+					this._callHandlers(settings, true);
+
+					const successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
+
+					// Done, run final handlers
+					this._callHandlers(settings, false);
+
+					settings.success.apply(settings.context, successArgs);
+				}
+			});
+		}
+
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @param {boolean} beforeCall 
+		 */
+		_callHandlers(settings, beforeCall) {
+			/** @type {string} */
+			const url = settings.url.substr(ig.root.length);
+			for (const entry of this.handlers) {
+				if(entry.beforeCall == beforeCall && (!entry.filter || url.match(entry.filter))) {
+					entry.handler(settings, url);
+				}
+			}
+		}
+	
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @returns {Promise<any[]>}
+		 */
+		_waitForAjax(settings) {
+			const success = settings.success;
+			const error = settings.error;
+
+			return new Promise((resolve, reject) => {
+				settings.success = (...sArgs) => {
+					this._restoreSettings(settings, success, error);
+					resolve(sArgs);
+				};
+				settings.error = (_, text) => {
+					this._restoreSettings(settings, success, error);
+					reject(text);
+				};
+			});
+		}
+
+		/**
+		 * 
+		 * @param {object} settings 
+		 * @param {Function} success 
+		 * @param {Function} error 
+		 */
+		_restoreSettings(settings, success, error) {
+			settings.success = success;
+			settings.error = error;
+		}
+
+		/*
+		 * Given a promise for when an AJAX request finishes, setup patching.
+		 * Returns a promise for the value given by the AJAX request.
+		 *
+		 * @param {object} settings
+		 * @returns {Promise<any>}
+		 */
+		async _handleAjaxPatching(url, promise){
+
+			// To simplify the timeline, assume patching is always going on.
+			// If any patches are actually *present*, the file must be JSON.
+			const patches = this._getRelevantPatchDetails(url);
+
+			// It is assumed that a patch's index in here is the patch's normal index + 1.
+			// The same applies to the resulting value table later.
+			const promises = [];
+
+			// Load all resources needed
+			promises.push(promise);
+			for (const patch of patches)
+				promises.push(this.loadJSON(patch.path));
+
+			// Done making the parallel requests
+			const values = await Promise.all(promises);
+			const successArgs = values[0];
+			for (let i = 0; i < patches.length; i++)
+				await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
+			return successArgs;
+		}
+	
+		_hookHttpRequest() {
+			const instance = this;
+			const original = XMLHttpRequest.prototype.open;
+			XMLHttpRequest.prototype.open = function(_, url) {
+				arguments[1] = instance._applyAssetOverrides(url) || url;
+				return original.apply(this, arguments);
+			};
 		}
 
 		_hookImages() {
@@ -335,26 +359,7 @@
 				}
 			};
 		}
-		
-		_applyPatches(data, patches){
-			for (const patch of patches) {
-				this._applyPatch(data, patch);
-			}
-		}
-	
-		_applyPatch(obj, patch){
-			for (const key in patch){
-				if(obj[key] === undefined)
-					obj[key] = patch[key];
-				else if(patch[key] === undefined)
-					obj[key] = undefined;
-				else if(patch[key].constructor === Object)
-					this._applyPatch(obj[key], patch[key]);
-				else
-					obj[key] = patch[key];
-			}
-		}
-	
+
 		/**
 		 * 
 		 * @param {string} path 
@@ -364,6 +369,7 @@
 		}
 		
 		/**
+		 * Gets all assets with the given path.
 		 * 
 		 * @param {string} name
 		 * @returns {string[]} 
@@ -375,6 +381,32 @@
 				const asset = mod.getAsset(name);
 				if(asset) {
 					result.push(asset);
+				}
+			}
+
+			return result;
+		}
+		
+		/**
+		 * Gets all assets with the given path. Extended version.
+		 * Notes on the new return value layout:
+		 * mod: Mod
+		 * path: string
+		 * data: Reserved for use by recipients, must not be present (must be undefined)
+		 * 
+		 * @param {string} name
+		 * @returns {Array<{mod: Mod, path: string}>} 
+		 */
+		_getAllAssetDetails(name){
+			const result = [];
+
+			for (const mod of window.activeMods) {
+				const asset = mod.getAsset(name);
+				if(asset) {
+					result.push({
+						mod: mod,
+						path: asset
+					});
 				}
 			}
 
