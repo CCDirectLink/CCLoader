@@ -20,7 +20,7 @@ export class Mod {
 		}
 		
 		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;
@@ -62,12 +62,25 @@ export class Mod {
 	 */
 	async load() {
 		if(!this.loaded)
-			return;
+			return Promise.reject();
 
 		if(!this.manifest.main)
-			return;
+			return Promise.resolve();
 
 		return await this.filemanager.loadMod(this.manifest.main, this.module);
+	}
+
+	/**
+	 * @returns {Promise<void>}
+	 */
+	async loadPrestart() {
+		if(!this.loaded)
+			return Promise.reject();
+
+		if(!this.manifest.prestart)
+			return Promise.resolve();
+
+		return await this.filemanager.loadMod(this.manifest.prestart, this.module);
 	}
 
 	/**
@@ -129,6 +142,11 @@ export class Mod {
 		if(!this.load)
 			return '';
 		return this.manifest.postload;
+	}
+	get prestart() {
+		if(!this.load)
+			return '';
+		return this.manifest.prestart;
 	}
 
 	/**

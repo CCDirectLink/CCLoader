@@ -707,7 +707,7 @@
 		}
 		
 		_getVarNameByChildren(obj, child) {
-			for (var key in obj) {
+			for (let key in obj) {
 				if (typeof(obj[key]) === 'object' && obj[key][child] !== undefined) {
 					return key;
 				}

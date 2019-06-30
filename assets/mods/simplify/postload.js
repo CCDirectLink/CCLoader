@@ -16,6 +16,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			this._hookAjax();
 			this._hookHttpRequest();
 			this._hookImages();
+			this._hookStart();
 		}
 
 		/**
@@ -187,6 +188,21 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			});
 		}
 		
+		_hookStart() {
+			const original = window.startCrossCode;
+			window.startCrossCode = async function(...args) {
+				for (const mod of window.activeMods) {
+					await mod.loadPrestart();
+				}
+				
+				const event = document.createEvent('Event');
+				event.initEvent('prestart', true, false);
+				document.dispatchEvent(event);
+
+				return original(...args);
+			};
+		}
+
 		/**
 		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
 		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
