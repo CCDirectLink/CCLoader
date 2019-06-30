@@ -1,0 +1,10 @@
+{
+	"name" : "prestart-support",
+	"description" : "CCLoader mod that allows prestart property to be utilized.",
+	"version" : "1.0.0",
+	"postload" : "postload.js",
+	"module": true,
+	"ccmodDependencies": {
+		"crosscode": ">=1.1.0"
+	}
+}
