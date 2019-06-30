@@ -51,6 +51,11 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 */
 		async _applyPatch(target, patch, modbase) {
 			await patchSteps.patch(target, patch, async (fromGame, url) => {
+				if (url.startsWith("mod://")) {
+					url = url.replace("mod://","");
+					fromGame = false;
+				}
+
 				if (fromGame) {
 					// Import (game file)
 					return await this.loadJSONPatched(ig.root + url);
