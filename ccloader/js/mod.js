@@ -62,10 +62,10 @@ export class Mod {
 	 */
 	async load() {
 		if(!this.loaded)
-			return Promise.reject();
+			return;
 
 		if(!this.manifest.main)
-			return Promise.resolve();
+			return;
 
 		return await this.filemanager.loadMod(this.manifest.main, this.module);
 	}
@@ -75,10 +75,10 @@ export class Mod {
 	 */
 	async loadPrestart() {
 		if(!this.loaded)
-			return Promise.reject();
+			return;
 
 		if(!this.manifest.prestart)
-			return Promise.resolve();
+			return;
 
 		return await this.filemanager.loadMod(this.manifest.prestart, this.module);
 	}
