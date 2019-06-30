@@ -189,18 +189,29 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		}
 		
 		_hookStart() {
-			const original = window.startCrossCode;
-			window.startCrossCode = async function(...args) {
-				for (const mod of window.activeMods) {
-					await mod.loadPrestart();
-				}
-				
-				const event = document.createEvent('Event');
-				event.initEvent('prestart', true, false);
-				document.dispatchEvent(event);
+			let original = undefined;
+			Object.defineProperty(window, 'startCrossCode', {
+				get() {
+					if (original) {
+						return async(...args) => {
+							for (const mod of window.activeMods) {
+								await mod.loadPrestart();
+							}
+							
+							const event = document.createEvent('Event');
+							event.initEvent('prestart', true, false);
+							document.dispatchEvent(event);
 
-				return original(...args);
-			};
+							return original(...args);
+						};
+					}
+					return undefined;
+				},
+				set(val) {
+					original = val;
+					return true;
+				}
+			});
 		}
 
 		/**
