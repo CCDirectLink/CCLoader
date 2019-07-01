@@ -304,12 +304,21 @@ export async function patch(a, steps, loader) {
 // -- Step Execution --
 
 appliers["ENTER"] = async function (state) {
-	state.stack.push(state.currentValue);
-	state.currentValue = state.currentValue[this["index"]];
+	let path = [this["index"]];
+	if (this["index"].constructor == Array)
+		path = this["index"];
+	for (let idx of path) {
+		state.stack.push(state.currentValue);
+		state.currentValue = state.currentValue[idx];
+	}
 };
 
 appliers["EXIT"] = async function (state) {
-	state.currentValue = state.stack.pop();
+	let count = 1;
+	if ("count" in this)
+		count = this["count"];
+	for (let i = 0; i < count; i++)
+		state.currentValue = state.stack.pop();
 };
 
 appliers["SET_KEY"] = async function (state) {
@@ -332,8 +341,33 @@ appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 	}
 };
 
+function resolveUrl(url, opts = {}) {
+	const config = Object.assign({
+		fromGame: false,
+		url
+	}, opts);
+
+	try {
+		const decomposedUrl = new URL(url);
+		const protocol = decomposedUrl.protocol;
+		config.url = decomposedUrl.pathname;
+		
+		if (protocol === 'mod:') {
+			config.fromGame = false;
+		} else if (protocol === 'game:') {
+			config.fromGame = true;
+		}
+	} catch (e) {}
+
+	return config;
+}
+
 appliers["IMPORT"] = async function (state) {
-	let obj = await state.loader(true, this["src"]);
+	const {fromGame, url} = resolveUrl(this["src"], {
+		fromGame: true
+	});
+	
+	let obj = await state.loader(fromGame, url);
 
 	if ("path" in this)
 		for (let i = 0; i < this["path"].length; i++)
@@ -347,7 +381,11 @@ appliers["IMPORT"] = async function (state) {
 };
 
 appliers["INCLUDE"] = async function (state) {
-	const includedSteps = await state.loader(false, this["src"]);
+	const {fromGame, url} = resolveUrl(this["src"], {
+		fromGame: false
+	});
+
+	const includedSteps = await state.loader(fromGame, url);
 	await patch(state.currentValue, includedSteps, state.loader);
 };
 
