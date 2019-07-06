@@ -32,6 +32,7 @@ export class Mod {
 		this.manifest.main = this._normalizeScript(file, this.manifest.main);
 		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
 		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
+		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
 		
 		if(!this.manifest.ccmodDependencies) {
 			this.manifest.ccmodDependencies = this.manifest.dependencies;
