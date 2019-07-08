@@ -338,8 +338,17 @@ export class ModLoader {
 
 	_buildCrosscodeVersion(){
 		try {
-			const json = JSON.parse(localStorage.getItem('cc.version'));
-			this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+			let ccVersion = localStorage.getItem('cc.version');
+			if (!ccVersion) {
+				// should only check the changelog as a fallback
+				const fs = require('fs');
+				const {changelog} = JSON.parse(fs.readFileSync('/assets/data/changelog.json'));
+				this.ccVersion = changelog[0].version;
+			} else {
+				const json = JSON.parse(ccVersion);
+				this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;	
+			}
+
 		} catch (e) {
 			console.error('Could not find crosscode version. Assuming "0.0.0".', e);
 			this.ccVersion = '0.0.0';
