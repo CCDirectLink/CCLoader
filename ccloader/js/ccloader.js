@@ -341,8 +341,7 @@ export class ModLoader {
 			let ccVersion = localStorage.getItem('cc.version');
 			if (!ccVersion) {
 				// should only check the changelog as a fallback
-				const fs = require('fs');
-				const {changelog} = JSON.parse(fs.readFileSync('./assets/data/changelog.json', 'utf8'));
+				const {changelog} = JSON.parse(this.filemanager.getResource('./assets/data/changelog.json'));
 				this.ccVersion = changelog[0].version;
 			} else {
 				const json = JSON.parse(ccVersion);
