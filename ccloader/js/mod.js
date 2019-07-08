@@ -129,6 +129,11 @@ export class Mod {
 			return false;
 		return !!this.manifest.module;
 	}
+	get hidden() {
+		if(!this.loaded)
+			return false;
+		return !!this.manifest.hidden;
+	}
 	get main() {
 		if(!this.load)
 			return '';

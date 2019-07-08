@@ -427,6 +427,10 @@
 			
 			const tab = this.options.addTab('mods', 'Mods');
 			for (const mod of mods){
+				if (mod.hidden) {
+					continue;
+				}
+
 				const optionName = 'modEnabled-' + mod.name.toLowerCase();
 				this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 
