@@ -1,6 +1,12 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
 
 (() => {
+	for (const mod of window.parent.modloader.mods) {
+		if (mod.isPlugin && mod.isEnabled) {
+			mod.loadPostload();
+		}
+	}	
+
 	const event = document.createEvent('Event');
 	event.initEvent('postload', true, false);
 	document.dispatchEvent(event);
@@ -195,7 +201,14 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					if (original) {
 						return async(...args) => {
 							for (const mod of window.activeMods) {
-								await mod.loadPrestart();
+								if (mod.isPlugin) {
+									await mod.loadPrestart();
+								}
+							}
+							for (const mod of window.activeMods) {
+								if (!mod.isPlugin) {
+									await mod.loadPrestart();
+								}
 							}
 							
 							const event = document.createEvent('Event');

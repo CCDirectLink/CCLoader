@@ -169,7 +169,7 @@ export class Acorn {
 			
 			walker.findNodeAt(this.tree, undefined, undefined, (nodeType, node) => {
 				for (const i in defs) {
-					if (!defs.hasOwnProperty(i)) {
+					if (!Object.prototype.hasOwnProperty.call(defs, i)) {
 						continue;
 					}
 

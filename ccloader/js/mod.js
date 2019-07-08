@@ -1,3 +1,4 @@
+/// <reference path="types/plugin.d.ts" />
 /** @typedef Modloader import ccloader.js */
 
 const path = require('path');
@@ -7,13 +8,250 @@ export class Mod {
 	 * 
 	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file 
-	 * @param {string} ccVersion
+	 * @param {boolean} plugin
 	 */
-	constructor(modloader, file, ccVersion){
+	constructor(modloader, file, plugin){
 		this.file = file;
 		this.filemanager = modloader.filemanager;
-		this.ccVersion = ccVersion;
+		this.plugin = plugin;
+		this.window = modloader._getGameWindow();
 
+		if (!plugin) {
+			this._loadManifest();
+		}
+	}
+
+	load() {
+		return this._loadStage('main');
+	}
+	loadPrestart() {
+		return this._loadStage('prestart');
+	}
+	loadPreload() {
+		return this._loadStage('preload');
+	}
+	loadPostload() {
+		return this._loadStage('postload');
+	}
+
+	/**
+	 * @param {Mod[]} mods
+	 * @returns {Promise<void>}
+	 */
+	async onload(mods) {
+		if (this.isPlugin) {
+			return this._loadPlugin(mods);
+		} 
+
+		return new Promise(resolve => {
+			if(this.loaded) {
+				resolve();
+			} else {
+				this.onloaded = () => resolve();
+			}
+		});
+	}
+
+	get name() {
+		if(!this.loaded)
+			return undefined;
+		if (this.pluginInst) 
+			return this.pluginInst.name;
+		return this.manifest.name;
+	}
+	get description(){
+		if(!this.loaded)
+			return undefined;
+		if (this.pluginInst)
+			return this.pluginInst.description;
+		return this.manifest.description;
+	}
+	get assets(){
+		if(!this.loaded)
+			return undefined;
+		if (this.pluginInst)
+			return this.assetsList;
+		return this.manifest.assets;
+	}
+	get dependencies(){
+		if(!this.loaded)
+			return undefined;
+		if (this.pluginInst)
+			return this.pluginInst.dependencies;
+		return this.manifest.ccmodDependencies;
+	}
+	get version(){
+		if(!this.loaded)
+			return undefined;
+		if (this.pluginInst)
+			return this.pluginInst.version;
+		return this.manifest.version;
+	}
+	get module() {
+		if(!this.loaded)
+			return false;
+		if (this.pluginInst)
+			return true;
+		return !!this.manifest.module;
+	}
+	get hidden() {
+		if(!this.loaded)
+			return false;
+		if (this.pluginInst)
+			return this.pluginInst.hidden;
+		return !!this.manifest.hidden;
+	}
+	get main() {
+		if(!this.load || this.plugin)
+			return '';
+		return this.manifest.main;
+	}
+	get preload() {
+		if(!this.load || this.plugin)
+			return '';
+		return this.manifest.preload;
+	}
+	get postload() {
+		if(!this.load || this.plugin)
+			return '';
+		return this.manifest.postload;
+	}
+	get prestart() {
+		if(!this.load || this.plugin)
+			return '';
+		return this.manifest.prestart;
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 */
+	getAsset(path){
+		if(!this.loaded)
+			return;
+
+		path = path.replace(/\\/g, '/').trim();
+
+		if(this.runtimeAssets && this.runtimeAssets[path]) {
+			return this.runtimeAssets;
+		}
+
+		for(const asset of this.assets) {
+			if(asset.endsWith(path)) {
+				return asset;
+			}
+		}
+	}
+	/**
+	 * 
+	 * @param {string} original 
+	 * @param {string} newPath 
+	 */
+	setAsset(original, newPath){
+		this.runtimeAssets[original] = newPath;
+	}
+	get baseDirectory(){
+		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
+	}
+
+	/**
+	 * @param {import('./ccloader').ModLoader} ccloader
+	 */
+	initializeTable(ccloader){
+		if(!this.loaded || this.isPlugin || !this.manifest.table)
+			return;
+		
+		const hash = this.filemanager.getModDefintionHash(this.manifest.table);
+		const tablePath = path.join(this._getBaseName(this.file), hash);
+			
+		this.table = this.filemanager.loadTable(tablePath, hash);
+		if(!this.table){
+			console.log('[' + this.manifest.name + '] Creating mod definition database..');
+			if(ccloader.acorn.needsParsing) {
+				console.log('[' + this.manifest.name + '] Parsing...');
+				const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
+				ccloader.acorn.parse(jscode);
+			}
+
+			try {
+				const dbtext = this.filemanager.getResource('assets/' + this.manifest.table);
+				const dbdef = JSON.parse(dbtext);
+				console.log('[' + this.manifest.name + '] Analysing...');
+				this.table = ccloader.acorn.analyse(dbdef);
+				console.log('[' + this.manifest.name + '] Writing...');
+				this.filemanager.saveTable(tablePath, this.table, hash);
+				console.log('[' + this.manifest.name + '] Finished!');
+			} catch (e) {
+				console.error(`Could not load definitions of mod ${this.manifest.name}. Disabling.`, e);
+				this.disabled = true;
+			}
+		}
+
+		return this.table;
+	}
+
+	/**
+	 * @param {ModLoader} ccloader
+	 */
+	executeTable(ccloader){
+		if(!this.loaded || this.isPlugin || !this.table)
+			return;
+
+		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
+	}
+
+	get isEnabled(){
+		if(!this.loaded || this.disabled)
+			return false;
+		
+		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
+	}
+
+	get isPlugin() {
+		return this.plugin;
+	}
+
+	/**
+	 * @param {string} name
+	 * @returns {Promise<void>}
+	 */
+	async _loadStage(name) {
+		if(!this.loaded)
+			return;
+
+		if (this.pluginInst) {
+			if (this.pluginInst[name]) {
+				this.pluginInst[name]();
+			}
+			return;
+		}
+
+		if(!this.manifest[name])
+			return;
+
+		return await this.filemanager.loadMod(this.manifest[name], this.module);
+	}
+
+	/**
+	 * 
+	 * @param {Mod[]} mods 
+	 */
+	async _loadPlugin(mods) {
+		const pluginClass = (await import('../../' + this.file)).default;
+		if (!pluginClass || !pluginClass.prototype || !(pluginClass.prototype instanceof Plugin)) {
+			this.disabled = true;
+			this.loaded = true;
+			return;
+		}
+
+		/** @type {ccloader.Plugin} */
+		this.pluginInst = new pluginClass(mods);
+		this.assetsList = await this._findAssets(this._getBaseName(this.file) + '/assets/');
+		this.loaded = true;
+	}
+
+	_loadManifest() {
+		const file = this.file;
 		const data = this.filemanager.getResource(file);
 		if(!data) {
 			return;
@@ -56,203 +294,6 @@ export class Mod {
 				this.onloaded();
 			}
 		});
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 */
-	async load() {
-		if(!this.loaded)
-			return;
-
-		if(!this.manifest.main)
-			return;
-
-		return await this.filemanager.loadMod(this.manifest.main, this.module);
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 */
-	async loadPrestart() {
-		if(!this.loaded)
-			return;
-
-		if(!this.manifest.prestart)
-			return;
-
-		return await this.filemanager.loadMod(this.manifest.prestart, this.module);
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 */
-	onload() {
-		return new Promise(resolve => {
-			if(this.loaded) {
-				resolve();
-			} else {
-				this.onloaded = () => resolve();
-			}
-		});
-	}
-
-	get name() {
-		if(!this.loaded)
-			return undefined;
-		
-		return this.manifest.name;
-	}
-	get description(){
-		if(!this.loaded)
-			return undefined;
-		
-		return this.manifest.description;
-	}
-	get assets(){
-		if(!this.loaded)
-			return undefined;
-		return this.manifest.assets;
-	}
-	get dependencies(){
-		if(!this.loaded)
-			return undefined;
-		return this.manifest.ccmodDependencies;
-	}
-	get version(){
-		if(!this.loaded)
-			return undefined;
-		return this.manifest.version;
-	}
-	get module() {
-		if(!this.loaded)
-			return false;
-		return !!this.manifest.module;
-	}
-	get hidden() {
-		if(!this.loaded)
-			return false;
-		return !!this.manifest.hidden;
-	}
-	get main() {
-		if(!this.load)
-			return '';
-		return this.manifest.main;
-	}
-	get preload() {
-		if(!this.load)
-			return '';
-		return this.manifest.preload;
-	}
-	get postload() {
-		if(!this.load)
-			return '';
-		return this.manifest.postload;
-	}
-	get prestart() {
-		if(!this.load)
-			return '';
-		return this.manifest.prestart;
-	}
-
-	/**
-	 * 
-	 * @param {string} path 
-	 */
-	getAsset(path){
-		if(!this.loaded || !this.manifest.assets)
-			return;
-
-		path = path.replace(/\\/g, '/').trim();
-
-		if(this.runtimeAssets && this.runtimeAssets[path]) {
-			return this.runtimeAssets;
-		}
-
-		for(const asset of this.assets) {
-			if(asset.endsWith(path)) {
-				return asset;
-			}
-		}
-	}
-	/**
-	 * 
-	 * @param {string} original 
-	 * @param {string} newPath 
-	 */
-	setAsset(original, newPath){
-		this.runtimeAssets[original] = newPath;
-	}
-	get baseDirectory(){
-		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
-	}
-
-	/**
-	 * @param {import('./ccloader').ModLoader} ccloader
-	 */
-	initializeTable(ccloader){
-		if(!this.loaded || !this.manifest.table)
-			return;
-		
-		const hash = this.filemanager.getModDefintionHash(this.manifest.table);
-		const tablePath = path.join(this._getBaseName(this.file), hash);
-			
-		this.table = this.filemanager.loadTable(tablePath, hash);
-		if(!this.table){
-			console.log('[' + this.manifest.name + '] Creating mod definition database..');
-			if(ccloader.acorn.needsParsing) {
-				console.log('[' + this.manifest.name + '] Parsing...');
-				const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
-				ccloader.acorn.parse(jscode);
-			}
-
-			try {
-				const dbtext = this.filemanager.getResource('assets/' + this.manifest.table);
-				const dbdef = JSON.parse(dbtext);
-				console.log('[' + this.manifest.name + '] Analysing...');
-				this.table = ccloader.acorn.analyse(dbdef);
-				console.log('[' + this.manifest.name + '] Writing...');
-				this.filemanager.saveTable(tablePath, this.table, hash);
-				console.log('[' + this.manifest.name + '] Finished!');
-			} catch (e) {
-				console.error(`Could not load definitions of mod ${this.manifest.name}. Disabling.`, e);
-				this.disabled = true;
-			}
-		}
-
-		return this.table;
-	}
-
-	/**
-	 * @param {ModLoader} ccloader
-	 */
-	executeTable(ccloader){
-		if(!this.loaded || !this.table)
-			return;
-
-		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
-	}
-
-	get isEnabled(){
-		if(!this.loaded || this.disabled)
-			return false;
-		
-		return localStorage.getItem('modEnabled-' + this.manifest.name.toLowerCase()) !== 'false';
-		/*try {
-			//TODO: Remove ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-			if (!window['frame'].contentWindow.cc) {
-				return true;
-			}
-			const globals = window['frame'].contentWindow.cc.ig.storage[window.frame.contentWindow.cc.ig.varNames.storageGlobals];
-			
-			if(!globals || !globals.options)
-				return true;
-			
-			return globals.options['modEnabled-' + this.manifest.name.toLowerCase()] !== false;
-		} catch (err) {
-			console.error(`An error occured while accessing the games internal storage. Disabling mod "${this.name}"`, err);
-			return false;
-		}*/
 	}
 
 	/**
@@ -317,13 +358,14 @@ export class Mod {
 		if(window.isLocal){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
-			if(!this.manifest.assets)
+			const assets = this.plugin ? this.pluginInst.assets : this.manifest.assets;
+			if (!assets) {
 				return [];
-
+			}
 			let dir = this._getBaseName(this.file) + '/';
 
 			const result = [];
-			for(const asset of this.manifest.assets) {
+			for(const asset of assets) {
 				result.push(dir + asset);
 			}
 			return result;

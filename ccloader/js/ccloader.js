@@ -3,11 +3,14 @@ import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
+import { Plugin } from './plugin.js';
 
-const CCLOADER_VERSION = '2.13.0';
+const CCLOADER_VERSION = '2.14.0';
 
 export class ModLoader {
 	constructor() {
+		this.Plugin = Plugin;
+
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
@@ -219,6 +222,7 @@ export class ModLoader {
 		this.ui.applyBindings(this._getGameWindow().console);
 
 		Object.assign(this._getGameWindow(), {
+			Plugin: Plugin,
 			reloadTables: () => this.reloadTables(),
 			getEntry: name => this._getGameWindow().entries[name],
 			getEntryName: value => 
@@ -239,9 +243,14 @@ export class ModLoader {
 	 */
 	_getModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
+		const pluginFiles = this.filemanager.getAllPluginFiles();
+
 		this.mods = [];
 		for (const modFile of modFiles) {
-			this.mods.push(new Mod(this, modFile));
+			this.mods.push(new Mod(this, modFile, false));
+		}
+		for (const pluginFile of pluginFiles) {
+			this.mods.push(new Mod(this, pluginFile, true));
 		}
 	}
 
@@ -253,7 +262,11 @@ export class ModLoader {
 			if (mod.isEnabled) {
 				this._getGameWindow().activeMods.push(mod);
 				if (mod.preload) {
-					this.loader.addPreload(mod.preload, mod.module);
+					if (mod.name === 'Simplify') {
+						this.loader.addPreloadFirst(mod.preload, mod.module);
+					} else {	
+						this.loader.addPreload(mod.preload, mod.module);
+					}
 				}
 				if (mod.postload) {
 					this.loader.addPostload(mod.postload, mod.module);
@@ -269,7 +282,7 @@ export class ModLoader {
 	 */
 	_loadModPackages() {
 		this._getModPackages();
-		return Promise.all(this.mods.map((mod) => mod.onload()));
+		return Promise.all(this.mods.map((mod) => mod.onload(this.mods)));
 	}
 
 	async _initializeMods() {
@@ -285,7 +298,6 @@ export class ModLoader {
 			}
 		}
 	}
-	
 
 	/**
 	 * @returns {Promise<void>}
@@ -359,7 +371,7 @@ export class ModLoader {
 		}
 
 		for (const depName in deps){
-			if(!deps.hasOwnProperty(depName))
+			if(!Object.prototype.hasOwnProperty.call(deps, depName))
 				continue;
 
 			const depRange = semver.validRange(deps[depName]);
@@ -387,6 +399,10 @@ export class ModLoader {
 			if(!satisfied){
 				return false;
 			}
+		}
+
+		if (mod.isPlugin) {
+			return mod.pluginInst.checkDependencies(mods);
 		}
 
 		return true;
