@@ -340,7 +340,7 @@ export class ModLoader {
 		try {
 			const {changelog} = JSON.parse(this.filemanager.getResource('./assets/data/changelog.json'));
 			this.ccVersion = changelog[0].version;
-		} catch (_) {
+		} catch (e) {
 			let ccVersion = localStorage.getItem('cc.version');
 			if (ccVersion) {
 				const json = JSON.parse(ccVersion);
