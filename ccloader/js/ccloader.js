@@ -9,8 +9,6 @@ const CCLOADER_VERSION = '2.14.0';
 
 export class ModLoader {
 	constructor() {
-		this.Plugin = Plugin;
-
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
@@ -38,10 +36,13 @@ export class ModLoader {
 		this._orderCheckMods();
 		this._registerMods();
 
+		this._setupGamewindow();
+		await this._loadPlugins();
+		await this._executePluginPreload();
+		await this._executeModulePreload();
 		await this._initializeGame();
 		
 		this._setStatus('Loading Game');
-		this._setupGamewindow();
 
 		await this._waitForGame();
 
@@ -220,6 +221,10 @@ export class ModLoader {
 	 */
 	_setupGamewindow() {
 		this.ui.applyBindings(this._getGameWindow().console);
+		
+		if (typeof global !== 'undefined') {
+			this._enableNode();
+		}
 
 		Object.assign(this._getGameWindow(), {
 			Plugin: Plugin,
@@ -237,20 +242,34 @@ export class ModLoader {
 
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	}
+
+	async _loadPlugins() {
+		for (const mod of this.mods.filter(m => m.isEnabled && m.plugin)) {
+			await mod.loadPlugin(this.mods);
+		}
+	}
+
+	async _executePluginPreload() {
+		for (const mod of this.mods.filter(m => m.isEnabled && m.pluginInstance)) {
+			await mod.pluginInstance.preload();
+		}
+	}
+
+	async _executeModulePreload() {
+		for (const mod of this.mods.filter(m => m.isEnabled && m.module && m.preload)) {
+			await mod.loadPreload();
+		}
+	}
 	
 	/**
 	 * Searches for mods and stores them in this.mods
 	 */
 	_getModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
-		const pluginFiles = this.filemanager.getAllPluginFiles();
 
 		this.mods = [];
 		for (const modFile of modFiles) {
 			this.mods.push(new Mod(this, modFile, false));
-		}
-		for (const pluginFile of pluginFiles) {
-			this.mods.push(new Mod(this, pluginFile, true));
 		}
 	}
 
@@ -261,12 +280,8 @@ export class ModLoader {
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
 				this._getGameWindow().activeMods.push(mod);
-				if (mod.preload) {
-					if (mod.name === 'Simplify') {
-						this.loader.addPreloadFirst(mod.preload, mod.module);
-					} else {	
-						this.loader.addPreload(mod.preload, mod.module);
-					}
+				if (mod.preload && !mod.module) {
+					this.loader.addPreload(mod.preload, mod.module);
 				}
 				if (mod.postload) {
 					this.loader.addPostload(mod.postload, mod.module);
@@ -304,10 +319,6 @@ export class ModLoader {
 	 */
 	_initializeGame() {
 		return new Promise((resolve, reject) => {
-			if (typeof global !== 'undefined') {
-				this._enableNode();
-			}
-
 			this.frame.onload = () => {
 				this._getGameWindow().onbeforeunload = () => this.startGame();
 				resolve();
@@ -400,11 +411,6 @@ export class ModLoader {
 				return false;
 			}
 		}
-
-		if (mod.isPlugin) {
-			return mod.pluginInst.checkDependencies(mods);
-		}
-
 		return true;
 	}
 

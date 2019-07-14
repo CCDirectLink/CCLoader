@@ -13,8 +13,8 @@ export class Loader {
 	async initialize() {
 		const code = await this._loadEntrypoint();
 		this.doc = this._parseEntrypoint(code);
-		this.base = this._insertBase(this._getEntrypointPath());
-		this.preloadPoint = this.base;
+		const base = this._insertBase(this._getEntrypointPath());
+		this.preloadPoint = base;
 		this.postloadPoint = this._findGame();
 	}
 
@@ -27,20 +27,6 @@ export class Loader {
 		const next = this._createScript(script, module);
 		this._insertAfter(next, this.preloadPoint);
 		this.preloadPoint = next;
-	}
-
-	/**
-	 * Adds a mod script that runs before game scripts are loaded. Inserts the script before everything else is loaded.
-	 * @param {string} script 
-	 * @param {boolean} module
-	 */
-	addPreloadFirst(script, module) {
-		const next = this._createScript(script, module);
-		this._insertAfter(next, this.base);
-
-		if (this.preloadPoint === this.base) {
-			this.preloadPoint = next;
-		}
 	}
 
 	/**

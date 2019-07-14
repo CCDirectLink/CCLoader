@@ -65,14 +65,6 @@ export class Filemanager {
 
 	/**
 	 * 
-	 * @param {string} folder 
-	 */
-	getAllPluginFiles(folder){
-		return this._getResources(folder, path.sep + 'plugin.js');
-	}
-
-	/**
-	 * 
 	 * @param {string} table 
 	 */
 	tableExists(table){

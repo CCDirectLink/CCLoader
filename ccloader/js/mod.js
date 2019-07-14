@@ -1,4 +1,5 @@
-/// <reference path="types/plugin.d.ts" />
+import { Plugin } from './plugin.js';
+
 /** @typedef Modloader import ccloader.js */
 
 const path = require('path');
@@ -8,17 +9,13 @@ export class Mod {
 	 * 
 	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file 
-	 * @param {boolean} plugin
 	 */
-	constructor(modloader, file, plugin){
+	constructor(modloader, file){
 		this.file = file;
 		this.filemanager = modloader.filemanager;
-		this.plugin = plugin;
 		this.window = modloader._getGameWindow();
 
-		if (!plugin) {
-			this._loadManifest();
-		}
+		this._loadManifest();
 	}
 
 	load() {
@@ -27,22 +24,27 @@ export class Mod {
 	loadPrestart() {
 		return this._loadStage('prestart');
 	}
-	loadPreload() {
-		return this._loadStage('preload');
-	}
 	loadPostload() {
 		return this._loadStage('postload');
 	}
+	loadPreload() {
+		if (this.module) {
+			return this._loadPreloadModule();
+		}
+		return this._loadStage('preload');
+	}
+	/**
+	 * 
+	 * @param {Mod[]} mods 
+	 */
+	loadPlugin(mods) {
+		return this._loadPlugin(mods);
+	}
 
 	/**
-	 * @param {Mod[]} mods
 	 * @returns {Promise<void>}
 	 */
-	async onload(mods) {
-		if (this.isPlugin) {
-			return this._loadPlugin(mods);
-		} 
-
+	async onload() {
 		return new Promise(resolve => {
 			if(this.loaded) {
 				resolve();
@@ -55,71 +57,62 @@ export class Mod {
 	get name() {
 		if(!this.loaded)
 			return undefined;
-		if (this.pluginInst) 
-			return this.pluginInst.name;
 		return this.manifest.name;
 	}
 	get description(){
 		if(!this.loaded)
 			return undefined;
-		if (this.pluginInst)
-			return this.pluginInst.description;
 		return this.manifest.description;
 	}
 	get assets(){
 		if(!this.loaded)
 			return undefined;
-		if (this.pluginInst)
-			return this.assetsList;
 		return this.manifest.assets;
 	}
 	get dependencies(){
 		if(!this.loaded)
 			return undefined;
-		if (this.pluginInst)
-			return this.pluginInst.dependencies;
 		return this.manifest.ccmodDependencies;
 	}
 	get version(){
 		if(!this.loaded)
 			return undefined;
-		if (this.pluginInst)
-			return this.pluginInst.version;
 		return this.manifest.version;
 	}
 	get module() {
 		if(!this.loaded)
 			return false;
-		if (this.pluginInst)
-			return true;
 		return !!this.manifest.module;
 	}
 	get hidden() {
 		if(!this.loaded)
 			return false;
-		if (this.pluginInst)
-			return this.pluginInst.hidden;
 		return !!this.manifest.hidden;
 	}
 	get main() {
-		if(!this.load || this.plugin)
+		if(!this.load)
 			return '';
 		return this.manifest.main;
 	}
 	get preload() {
-		if(!this.load || this.plugin)
+		if(!this.load)
 			return '';
 		return this.manifest.preload;
 	}
 	get postload() {
-		if(!this.load || this.plugin)
+		if(!this.load)
 			return '';
 		return this.manifest.postload;
 	}
 	get prestart() {
-		if(!this.load || this.plugin)
+		if(!this.load)
 			return '';
 		return this.manifest.prestart;
+	}
+	get plugin() {
+		if(!this.load)
+			return '';
+		return this.manifest.plugin;
 	}
 
 	/**
@@ -206,48 +199,27 @@ export class Mod {
 		
 		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
 	}
-
-	get isPlugin() {
-		return this.plugin;
+	get isPlugin(){
+		return !!this.pluginInstance;
 	}
 
 	/**
 	 * @param {string} name
+	 * @param {boolean} forceModule
 	 * @returns {Promise<void>}
 	 */
-	async _loadStage(name) {
+	async _loadStage(name, forceModule) {
 		if(!this.loaded)
 			return;
 
-		if (this.pluginInst) {
-			if (this.pluginInst[name]) {
-				this.pluginInst[name]();
-			}
-			return;
+		if (this.pluginInstance) {
+			this.pluginInstance[name]();
 		}
 
 		if(!this.manifest[name])
 			return;
 
-		return await this.filemanager.loadMod(this.manifest[name], this.module);
-	}
-
-	/**
-	 * 
-	 * @param {Mod[]} mods 
-	 */
-	async _loadPlugin(mods) {
-		const pluginClass = (await import('../../' + this.file)).default;
-		if (!pluginClass || !pluginClass.prototype || !(pluginClass.prototype instanceof Plugin)) {
-			this.disabled = true;
-			this.loaded = true;
-			return;
-		}
-
-		/** @type {ccloader.Plugin} */
-		this.pluginInst = new pluginClass(mods);
-		this.assetsList = await this._findAssets(this._getBaseName(this.file) + '/assets/');
-		this.loaded = true;
+		return await this.filemanager.loadMod(this.manifest[name], this.module || forceModule);
 	}
 
 	_loadManifest() {
@@ -271,6 +243,7 @@ export class Mod {
 		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
 		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
 		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
+		this.manifest.plugin = this._normalizeScript(file, this.manifest.plugin);
 		
 		if(!this.manifest.ccmodDependencies) {
 			this.manifest.ccmodDependencies = this.manifest.dependencies;
@@ -294,6 +267,43 @@ export class Mod {
 				this.onloaded();
 			}
 		});
+	}
+
+	async _loadPreloadModule() {
+		this.window._tmp = this.preload;
+		/** @type {Promise<any>} */
+		const normal = this.window.eval.bind(this)(`
+			import('../../assets/' + window._tmp);
+		`);
+		delete this.window._tmp;
+
+		if (this.pluginInstance) {
+			await this.pluginInstance.preload();
+		}
+		await normal;
+	}
+
+	/**
+	 * 
+	 * @param {Mod[]} mods 
+	 */
+	async _loadPlugin(mods) {
+		this.window._tmp = this.plugin;
+		const module = await this.window.eval.bind(this)(`
+			import('../../assets/' + window._tmp);
+		`);
+		delete this.window._tmp;
+
+		const plugin = module.default;
+		if (!plugin
+			|| !plugin.prototype
+			|| !(plugin.prototype instanceof Plugin)) {
+			return;
+		}
+
+		/** @type {Plugin} */
+		this.pluginInstance = new plugin(mods);
+		return this.pluginInstance;
 	}
 
 	/**
@@ -358,15 +368,15 @@ export class Mod {
 		if(window.isLocal){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
-			const assets = this.plugin ? this.pluginInst.assets : this.manifest.assets;
+			const assets = this.manifest.assets;
 			if (!assets) {
 				return [];
 			}
-			let dir = this._getBaseName(this.file) + '/';
+			const base = this._getBaseName(this.file) + '/';
 
 			const result = [];
 			for(const asset of assets) {
-				result.push(dir + asset);
+				result.push(base + asset);
 			}
 			return result;
 		}
