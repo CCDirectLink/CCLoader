@@ -3,7 +3,7 @@
 	"main": "mod.js",
 	"preload": "preload.js",
 	"postload": "postload.js",
-	"module": true,
+	"plugin": "plugin.js",
 	"hidden": true,
 	"version": "2.6.0",
 	"ccmodDependencies": {

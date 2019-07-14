@@ -80,7 +80,11 @@ export class ModLoader {
 			for (let i = this.mods.length - 1; i >= 0; i--) {
 				const mod = this.mods[i];
 				if (!mod.isEnabled || this._canLoad(mod, mods)) {
-					mods.push(mod);
+					if (mod.name !== 'Simplify') {
+						mods.push(mod);
+					} else {
+						mods.unshift(mod);
+					}
 					this.mods.splice(i, 1);
 				}
 			}

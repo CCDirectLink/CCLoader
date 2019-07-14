@@ -25,7 +25,9 @@ export class Mod {
 		return this._loadStage('prestart');
 	}
 	loadPostload() {
-		return this._loadStage('postload');
+		if (this.pluginInstance) {
+			return this.pluginInstance.postload();
+		}
 	}
 	loadPreload() {
 		if (this.module) {
@@ -213,7 +215,7 @@ export class Mod {
 			return;
 
 		if (this.pluginInstance) {
-			this.pluginInstance[name]();
+			await this.pluginInstance[name]();
 		}
 
 		if(!this.manifest[name])
