@@ -249,19 +249,31 @@ export class ModLoader {
 
 	async _loadPlugins() {
 		for (const mod of this.mods.filter(m => m.isEnabled && m.plugin)) {
-			await mod.loadPlugin(this.mods);
+			try {
+				await mod.loadPlugin(this.mods);
+			} catch (e) {
+				console.error(`Could not load plugin of mod '${mod.name}'`);
+			}
 		}
 	}
 
 	async _executePluginPreload() {
 		for (const mod of this.mods.filter(m => m.isEnabled && m.pluginInstance)) {
-			await mod.pluginInstance.preload();
+			try {
+				await mod.pluginInstance.preload();
+			} catch (e) {
+				console.error(`Could not run preload of mod '${mod.name}'`);
+			}
 		}
 	}
 
 	async _executeModulePreload() {
 		for (const mod of this.mods.filter(m => m.isEnabled && m.module && m.preload)) {
-			await mod.loadPreload();
+			try {
+				await mod.loadPreload();
+			} catch (e) {
+				console.error(`Could not run preload of mod '${mod.name}'`);
+			}
 		}
 	}
 	
