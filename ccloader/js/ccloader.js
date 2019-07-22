@@ -250,7 +250,7 @@ export class ModLoader {
 	async _loadPlugins() {
 		for (const mod of this.mods.filter(m => m.isEnabled && m.plugin)) {
 			try {
-				await mod.loadPlugin(this.mods);
+				await mod.loadPlugin();
 			} catch (e) {
 				console.error(`Could not load plugin of mod '${mod.name}'`);
 			}

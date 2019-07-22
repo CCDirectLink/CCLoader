@@ -35,12 +35,8 @@ export class Mod {
 		}
 		return this._loadStage('preload');
 	}
-	/**
-	 * 
-	 * @param {Mod[]} mods 
-	 */
-	loadPlugin(mods) {
-		return this._loadPlugin(mods);
+	loadPlugin() {
+		return this._loadPlugin();
 	}
 
 	/**
@@ -285,11 +281,7 @@ export class Mod {
 		await normal;
 	}
 
-	/**
-	 * 
-	 * @param {Mod[]} mods 
-	 */
-	async _loadPlugin(mods) {
+	async _loadPlugin() {
 		this.window._tmp = this.plugin;
 		const module = await this.window.eval.bind(this)(`
 			import('../../assets/' + window._tmp);
@@ -304,7 +296,7 @@ export class Mod {
 		}
 
 		/** @type {Plugin} */
-		this.pluginInstance = new plugin(mods);
+		this.pluginInstance = new plugin(this);
 		return this.pluginInstance;
 	}
 
