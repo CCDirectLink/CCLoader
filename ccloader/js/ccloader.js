@@ -377,11 +377,17 @@ export class ModLoader {
 
 	_buildCrosscodeVersion(){
 		try {
-			const json = JSON.parse(localStorage.getItem('cc.version'));
-			this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
+			const {changelog} = JSON.parse(this.filemanager.getResource('./assets/data/changelog.json'));
+			this.ccVersion = changelog[0].version;
 		} catch (e) {
-			console.error('Could not find crosscode version. Assuming "0.0.0".', e);
-			this.ccVersion = '0.0.0';
+			let ccVersion = localStorage.getItem('cc.version');
+			if (ccVersion) {
+				const json = JSON.parse(ccVersion);
+				this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;	
+			} else {
+				console.error('Could not find crosscode version. Assuming "0.0.0".', e);
+				this.ccVersion = '0.0.0';
+			}
 		}
 	}
 	
