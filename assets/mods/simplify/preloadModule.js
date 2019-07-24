@@ -1,10 +1,7 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
 
 (() => {
-
-	const event = document.createEvent('Event');
-	event.initEvent('postload', true, false);
-	document.dispatchEvent(event);
+	const igroot = window.IG_ROOT || '';
 	
 	/** @type {typeof import("fs")} */
 	const fs = (!window.fs && window.require) ? require('fs') : window.fs;
@@ -53,7 +50,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			await patchSteps.patch(target, patch, async (fromGame, url) => {
 				if (fromGame) {
 					// Import (game file)
-					return await this.loadJSONPatched(ig.root + url);
+					return await this.loadJSONPatched(igroot + url);
 				} else {
 					// Include (mod file)
 					return await this.loadJSON(modbase + url);
@@ -187,19 +184,46 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 				});
 			});
 		}
+
+		_loadJQuery() {
+			return Promise.all([
+				this._loadScript('impact/page/js/jquery-1.11.1.min.js')
+			]);
+		}
+
+		/**
+		 * 
+		 * @param {string} url 
+		 * @param {string} type 
+		 * @returns {Promise<void>}
+		 */
+		_loadScript(url, type){
+			if (!type) {
+				type = 'text/javascript';
+			}
+
+			return new Promise((resolve, reject) => {
+				const script = document.createElement('script');
+				script.onload = () => resolve();
+				script.onerror = () => reject();
+				script.type = type;
+				script.src = url;
+				document.body.appendChild(script);
+			});
+		}
 		
 
 		/**
-		 * Given an ig.root-prefixed string, returns the path with asset replacements applied.
+		 * Given an igroot-prefixed string, returns the path with asset replacements applied.
 		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
 		 *
 		 * @param {string} oldpath
 		 * @returns {string} newpath
 		 */
 		_applyAssetOverrides(path) {
-			if (!path.startsWith(ig.root))
+			if (!path.startsWith(igroot))
 				return;
-			const fullreplace = this._getAllAssets(path.substr(ig.root.length));
+			const fullreplace = this._getAllAssets(path.substr(igroot.length));
 	
 			if(fullreplace && fullreplace.length > 0){
 				if(fullreplace.length > 1)
@@ -208,25 +232,26 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 				//console.log("Replacing '" + settings.url + "' with '" + fullreplace[0]  + "'");
 	
 				if (fullreplace[0].indexOf('assets') === 0) {
-					return ig.root + fullreplace[0].substr(7);
+					return igroot + fullreplace[0].substr(7);
 				} else {
-					return ig.root + fullreplace[0];
+					return igroot + fullreplace[0];
 				}
 			}
 			return path;
 		}
 
 		/**
-		 * Given an ig.root-prefixed string, returns an array of the relevant patch files.
+		 * Given an igroot-prefixed string, returns an array of the relevant patch files.
 		 *
 		 * @param {string} oldpath
 		 * @returns {Array<{mod: Mod, path: string}>} patches
 		 */
 		_getRelevantPatchDetails(path) {
-			return this._getAllAssetDetails(path.substr(ig.root.length) + '.patch');
+			return this._getAllAssetDetails(path.substr(igroot.length) + '.patch');
 		}
 	
-		_hookAjax() {
+		async _hookAjax() {
+			await this._loadJQuery();
 			$.ajaxSetup({
 				beforeSend: async (_, settings) => {
 					if (settings.url.constructor !== String) {
@@ -257,7 +282,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 */
 		_callHandlers(settings, beforeCall) {
 			/** @type {string} */
-			const url = settings.url.substr(ig.root.length);
+			const url = settings.url.substr(igroot.length);
 			for (const entry of this.handlers) {
 				if(entry.beforeCall == beforeCall && (!entry.filter || url.match(entry.filter))) {
 					entry.handler(settings, url);
@@ -341,7 +366,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			const original = window.Image;
 			window.Image = class Image extends original {
 				set src(url) {
-					const fullreplace = instance._getAllAssets(url.substr(ig.root.length));
+					const fullreplace = instance._getAllAssets(url.substr(igroot.length));
 			
 					if(fullreplace && fullreplace.length > 0){
 						if(fullreplace.length > 1) {
@@ -351,9 +376,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 						//console.log('Replacing \'' + url + '\' with \'' + fullreplace[0]  + '\'');
 			
 						if (fullreplace[0].indexOf('assets') === 0) {
-							url = ig.root + fullreplace[0].substr(7);
+							url = igroot + fullreplace[0].substr(7);
 						} else {
-							url = ig.root + fullreplace[0];
+							url = igroot + fullreplace[0];
 						}
 					}
 

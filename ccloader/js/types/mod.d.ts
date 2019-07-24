@@ -11,6 +11,7 @@ declare namespace ccloader {
     	loadPrestart(): Promise<void>;
     	loadPreload(): Promise<void>;
     	loadPostload(): Promise<void>;
+    	loadPlugin(): Promise<void>;
 	    onload(): Promise<void>;
 
         get name(): string | undefined;
@@ -24,14 +25,12 @@ declare namespace ccloader {
         get preload(): string | undefined;
         get postload(): string | undefined;
         get prestart(): string | undefined;
+        get plugin(): string | undefined;
         
         get baseDirectory(): string;
         get isEnabled(): boolean;
-        get isPlugin(): boolean;
 
 	    getAsset(path: string): string | undefined;
         setAsset(original: string, newPath: string): void;
-        
-        setPluginInstance(plugin: Plugin): void;
     }
 }

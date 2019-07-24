@@ -25,15 +25,6 @@ export class Filemanager {
 	}
 
 	/**
-	 * Loads a script into the scope of ccloader
-	 * @param {string} file
-	 * @param {boolean} isModule
-	 */
-	loadScript(file, isModule) {
-		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
-	}
-
-	/**
 	 * 
 	 * @param {string} file 
 	 * @param {boolean} isModule 
@@ -42,19 +33,6 @@ export class Filemanager {
 		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
 
-	getTableName(){
-		return this._getHash('assets/js/game.compiled.js');
-	}
-	getDefintionHash(){
-		return this._getHash('ccloader/data/definitions.db');
-	}
-	/**
-	 * 
-	 * @param {string} def 
-	 */
-	getModDefintionHash(def){
-		return this._getHash('assets/' + def);
-	}
 	/**
 	 * 
 	 * @param {string} folder 
@@ -63,26 +41,6 @@ export class Filemanager {
 		return this._getResources(folder, path.sep + 'package.json');
 	}
 
-	/**
-	 * 
-	 * @param {string} table 
-	 */
-	tableExists(table){
-		if(!table)
-			return false;
-		
-		return this._resourceExists('ccloader/data/' + table);
-	}
-	/**
-	 * 
-	 * @param {string} table 
-	 */
-	modTableExists(table){
-		if(!table)
-			return false;
-		
-		return this._resourceExists('ccloader/data/assets/' + table);
-	}
 	/**
 	 * 
 	 * @param {string} resource 
@@ -163,54 +121,6 @@ export class Filemanager {
 		}
 	}
 
-	/**
-	 * 
-	 * @param {string} tableName 
-	 * @param {Db} table 
-	 * @param {string?} hash
-	 * @returns {void}
-	 */
-	saveTable(tableName, table, hash){
-		if(!hash){
-			return this.saveTable(tableName, table, this.getDefintionHash());
-		}
-		
-		if(isLocal) {
-			try {
-				this._createDirectory(path.dirname('ccloader/data/' + tableName));
-			} catch(e) {}
-			table.hash = hash;
-			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify(table), 'utf-8');
-		}
-	}
-	/**
-	 * 
-	 * @param {string} tableName 
-	 * @param {string} hash
-	 * @returns {Db | undefined}
-	 */
-	loadTable(tableName, hash){
-		const text = this.getResource('ccloader/data/' + tableName);
-		if(!text) {
-			return undefined;
-		}
-		
-		try {
-			const json = JSON.parse(text);
-			const table = new Db();
-			
-			if(!json || !json.hash)
-				return undefined;
-			
-			if(hash && hash != json.hash)
-				return undefined;
-			
-			table.load(json);
-			return table;
-		} catch (e) {
-			console.error('Could not load definitions: ' + tableName, e);
-		}
-	}
 
 	/**
 	 * 
@@ -307,14 +217,6 @@ export class Filemanager {
 
 	/**
 	 * 
-	 * @param {string} file 
-	 * @returns {string}
-	 */
-	_getHash(file) {
-		return Crypto.MD5(this.getResource(file)) + '.table';
-	}
-	/**
-	 * 
 	 * @param {string} resource 
 	 */
 	_resourceExists(resource){
@@ -336,6 +238,7 @@ export class Filemanager {
 			}
 		}
 	}
+
 	/**
 	 * 
 	 * @param {string} url 
@@ -357,6 +260,7 @@ export class Filemanager {
 			doc.body.appendChild(script);
 		});
 	}
+
 	/**
 	 * Returns all files with the given ending in the folder
 	 * @param {string} folder 
@@ -397,11 +301,13 @@ export class Filemanager {
 		const stat = fs.statSync(file);
 		return stat && stat.isDirectory();
 	}
+
 	_createDirectories(){
 		if(isLocal){
 			this._createDirectory('ccloader/data/assets/mods');
 		}
 	}
+	
 	/**
 	 * 
 	 * @param {string} dir 
@@ -419,5 +325,117 @@ export class Filemanager {
 		this._createDirectory(parent);
 
 		fs.mkdirSync(dir);
+	}
+
+	
+	// -------------- DEPRECATED --------------
+
+	/**
+	 * @deprecated
+	 */
+	getTableName(){
+		return this._getHash('assets/js/game.compiled.js');
+	}
+
+	/**
+	 * @deprecated
+	 */
+	getDefintionHash(){
+		return this._getHash('ccloader/data/definitions.db');
+	}
+
+	/**
+	 * 
+	 * @param {string} def 
+	 * @deprecated
+	 */
+	getModDefintionHash(def){
+		return this._getHash('assets/' + def);
+	}
+
+	/**
+	 * 
+	 * @param {string} table 
+	 * @deprecated
+	 */
+	tableExists(table){
+		if(!table)
+			return false;
+		
+		return this._resourceExists('ccloader/data/' + table);
+	}
+
+	/**
+	 * 
+	 * @param {string} table 
+	 * @deprecated
+	 */
+	modTableExists(table){
+		if(!table)
+			return false;
+		
+		return this._resourceExists('ccloader/data/assets/' + table);
+	}
+
+	/**
+	 * 
+	 * @param {string} tableName 
+	 * @param {Db} table 
+	 * @param {string?} hash
+	 * @returns {void}
+	 * @deprecated
+	 */
+	saveTable(tableName, table, hash){
+		if(!hash){
+			return this.saveTable(tableName, table, this.getDefintionHash());
+		}
+		
+		if(isLocal) {
+			try {
+				this._createDirectory(path.dirname('ccloader/data/' + tableName));
+			} catch(e) {}
+			table.hash = hash;
+			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify(table), 'utf-8');
+		}
+	}
+
+	/**
+	 * 
+	 * @param {string} tableName 
+	 * @param {string} hash
+	 * @returns {Db | undefined}
+	 * @deprecated
+	 */
+	loadTable(tableName, hash){
+		const text = this.getResource('ccloader/data/' + tableName);
+		if(!text) {
+			return undefined;
+		}
+		
+		try {
+			const json = JSON.parse(text);
+			const table = new Db();
+			
+			if(!json || !json.hash)
+				return undefined;
+			
+			if(hash && hash != json.hash)
+				return undefined;
+			
+			table.load(json);
+			return table;
+		} catch (e) {
+			console.error('Could not load definitions: ' + tableName, e);
+		}
+	}
+
+	/**
+	 * 
+	 * @param {string} file 
+	 * @returns {string}
+	 * @deprecated
+	 */
+	_getHash(file) {
+		return Crypto.MD5(this.getResource(file)) + '.table';
 	}
 }

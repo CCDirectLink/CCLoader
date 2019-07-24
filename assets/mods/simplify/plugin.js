@@ -4,7 +4,7 @@
  * @extends {ccloader.Plugin}
  */
 export default class Test extends Plugin {
-	postload() {
-		return import('./postloadModule.js');
+	preload() {
+		return import('./preloadModule.js');
 	}
 }

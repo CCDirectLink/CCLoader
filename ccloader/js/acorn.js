@@ -3,6 +3,9 @@ import * as walker from '../../node_modules/acorn/dist/walk.es.js';
 
 import { Db, DbTree } from './db.js';
 
+/**
+ * @deprecated Do not use definitions
+ */
 export class Acorn {
 	get needsParsing(){
 		return !this.tree;
@@ -14,140 +17,6 @@ export class Acorn {
 	 */
 	parse(jscode){
 		this.tree = acorn.parse(jscode, {onToken: () => {}});
-		
-		//Fancy new and fast searching algorithm
-		/*setTimeout(function(){
-			console.log("searching..")
-			var perNode = 3, steps = 5, depth = 20;
-			var pattern = "\"hp\"";
-			var searched = "Rc";
-			var results = [];
-			var single = false;	
-
-
-			walker.fullAncestor(tree, function(node, state, ancestor, type){
-				if(single && results.length)
-					return;
-				
-				function search(n, layers){
-					if(layers < 0)
-						return -1;
-					
-					if(n === pattern)
-						return layers;
-					
-					if(typeof(n) === "function")
-						return -1;
-					
-					for(var key in n){
-						var s = search(n[key], layers - 1);
-						if(s > -1)
-							return s;
-					}
-					
-					return -1;
-				}
-					
-				var res = search(node, perNode);
-				if(res >= 0){
-					
-					for(var i = 0; (ancestor.length - steps + (perNode - res) - i) >= 0; i++)
-						if(ancestor[ancestor.length - steps + (perNode - res) - i].type){
-							results.push(ancestor[ancestor.length - steps + (perNode - res) - i]);
-							return;
-						}
-						
-					console.warn("Could not find fitting node");
-					if(ancestor.length - steps < 0)
-						results.push(ancestor[0]);
-					else
-						results.push(ancestor[ancestor.length - steps]);
-				}
-			});
-
-			console.log(results.length);
-
-			for(var i = 0; i < results.length; i++){
-				var result = results[i];
-				var selec, pat;
-				
-				function search(node, i, path){
-					if(!node)
-						return;
-					for(var key in node){
-						if(node[key] === searched){
-							selec = path + key;
-						} else if(node[key] === pattern){
-							pat = path + key;
-						} else if(i <= depth){
-							search(node[key], i + 1, path + key + ".");
-						}
-					}
-				}
-				
-				search(result, 0, "");
-				
-				if(selec){
-					console.log(result);
-					console.log("pattern: " + selec);
-					console.log("value: " + pat);
-				} else {
-					console.log("value not matched: " + pat);
-				}
-			}
-		}, 1000);*/
-		/*
-		//Old but reliable algorithm
-		setTimeout(function(){
-			console.log("searching..")
-			var i = 0, steps = 14, depth = 20;
-			var pattern = "CURRENT_STATE";
-			var searched = "de";
-			var result = walker.findNodeAt(tree, null, null, function(nodeType, node){
-					function search(n, layers){
-						if(layers <= 0)
-							if(n === pattern){
-								i++;
-								return i > 0;
-							}else
-								return false;
-						
-						for(var key in n){
-							if(search(n[key], layers - 1))
-								return true;
-						}
-						
-						return false;
-					}
-					
-					return search(node, steps);
-				});
-			console.log(result);
-			
-			if(result){
-				var selec, pat;
-				
-				function search(node, i, path){
-					if(!node)
-						return;
-					for(var key in node){
-						if(node[key] === searched){
-							selec = path + key;
-						} else if(node[key] === pattern){
-							pat = path + key;
-						} else if(i <= depth){
-							search(node[key], i + 1, path + key + ".");
-						}
-					}
-				}
-				
-				search(result, 0, "");
-				
-				console.log("pattern: " + selec);
-				console.log("value: " + pat);
-			}
-		}, 1000);*/
-			
 	}
 
 	/**
