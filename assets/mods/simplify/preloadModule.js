@@ -185,34 +185,6 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 			});
 		}
 
-		_loadJQuery() {
-			return Promise.all([
-				this._loadScript('impact/page/js/jquery-1.11.1.min.js')
-			]);
-		}
-
-		/**
-		 * 
-		 * @param {string} url 
-		 * @param {string} type 
-		 * @returns {Promise<void>}
-		 */
-		_loadScript(url, type){
-			if (!type) {
-				type = 'text/javascript';
-			}
-
-			return new Promise((resolve, reject) => {
-				const script = document.createElement('script');
-				script.onload = () => resolve();
-				script.onerror = () => reject();
-				script.type = type;
-				script.src = url;
-				document.body.appendChild(script);
-			});
-		}
-		
-
 		/**
 		 * Given an igroot-prefixed string, returns the path with asset replacements applied.
 		 * This only changes the path, not the contents at it, so it doesn't apply JSON patches.
@@ -251,7 +223,6 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		}
 	
 		async _hookAjax() {
-			await this._loadJQuery();
 			$.ajaxSetup({
 				beforeSend: async (_, settings) => {
 					if (settings.url.constructor !== String) {

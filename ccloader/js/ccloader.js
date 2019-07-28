@@ -46,6 +46,7 @@ export class ModLoader {
 		await this.loader.startGame(this.frame); //Executes until postload
 
 		await this._executePostload();
+		this.loader.continue(this.frame);
 		await this._waitForGame();
 
 		this._executeLegacy();
@@ -249,7 +250,7 @@ export class ModLoader {
 			try {
 				await mod.loadPreload();
 			} catch (e) {
-				console.error(`Could not run preload of mod '${mod.name}'`);
+				console.error(`Could not run preload of mod '${mod.name}': `, e);
 			}
 		}
 	}
@@ -269,7 +270,7 @@ export class ModLoader {
 			try {
 				await mod.loadPostload();
 			} catch (e) {
-				console.error(`Could not run preload of mod '${mod.name}'`);
+				console.error(`Could not run preload of mod '${mod.name}': `, e);
 			}
 		}
 	}

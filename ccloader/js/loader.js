@@ -5,8 +5,13 @@ export class Loader {
 	 */
 	constructor(filemanager) {
 		this.filemanager = filemanager;
-		this.doc = null; /** @type {Document} */
-		this.postloadPoint = null; /** @type {HTMLElement} */
+		/** @type {Document} */
+		this.doc = null;
+		/** @type {HTMLElement} */
+		this.postloadPoint = null;
+		/** @type {() => void | null} */
+		this._DOMReady = null;
+		this.readyCalled = false;
 	}
 
 	async initialize() {
@@ -30,13 +35,27 @@ export class Loader {
 	startGame(frame) {
 		return new Promise((resolve) => {
 			Object.assign(window, {
-				postload: () => resolve(),
+				postload: () => {
+					this._hookDOM(frame);
+					resolve();
+				},
 			});
 	
 			const hook = this._createScript('window.parent.postload()');
 			this._insertAfter(hook, this.postloadPoint);
 			this._startGame(frame);
 		});
+	}
+
+	/**
+	 * Returns a promise that resolves when the postload point is reached.
+	 * @param {HTMLIFrameElement} frame 
+	 */
+	continue(frame) {
+		frame.contentWindow['ig']['_DOMReady'] = this._DOMReady;
+		if (this.readyCalled) {
+			frame.contentWindow['ig']['_DOMReady']();
+		}
 	}
 
 	/**
@@ -100,5 +119,16 @@ export class Loader {
 	 */
 	_insertAfter(newNode, referenceNode) {
 		referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+	}
+
+	/**
+	 * 
+	 * @param {HTMLIFrameElement} frame 
+	 */
+	_hookDOM(frame) {
+		this._DOMReady = frame.contentWindow['ig']['_DOMReady'];
+		frame.contentWindow['ig']['_DOMReady'] = () => {
+			this.readyCalled = true;
+		};
 	}
 }
