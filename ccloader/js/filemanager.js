@@ -257,7 +257,7 @@ export class Filemanager {
 			script.onerror = () => reject();
 			script.type = type;
 			script.src = url;
-			doc.body.appendChild(script);
+			doc.head.appendChild(script);
 		});
 	}
 

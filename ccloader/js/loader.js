@@ -12,6 +12,10 @@ export class Loader {
 		/** @type {() => void | null} */
 		this._DOMReady = null;
 		this.readyCalled = false;
+		/** @type {HTMLBodyElement} */
+		this.originalBody = undefined;
+		/** @type {HTMLBodyElement} */
+		this.currentBody = undefined;
 	}
 
 	async initialize() {
@@ -35,14 +39,12 @@ export class Loader {
 	startGame(frame) {
 		return new Promise((resolve) => {
 			Object.assign(window, {
-				postload: () => {
-					this._hookDOM(frame);
-					resolve();
-				},
+				postload: resolve,
 			});
 	
 			const hook = this._createScript('window.parent.postload()');
 			this._insertAfter(hook, this.postloadPoint);
+			this._hookDOM(frame);
 			this._startGame(frame);
 		});
 	}
@@ -52,10 +54,8 @@ export class Loader {
 	 * @param {HTMLIFrameElement} frame 
 	 */
 	continue(frame) {
-		frame.contentWindow['ig']['_DOMReady'] = this._DOMReady;
-		if (this.readyCalled) {
-			frame.contentWindow['ig']['_DOMReady']();
-		}
+		this.currentBody = this.originalBody;
+		frame.contentWindow['ig']['_DOMReady']();
 	}
 
 	/**
@@ -126,9 +126,15 @@ export class Loader {
 	 * @param {HTMLIFrameElement} frame 
 	 */
 	_hookDOM(frame) {
-		this._DOMReady = frame.contentWindow['ig']['_DOMReady'];
-		frame.contentWindow['ig']['_DOMReady'] = () => {
-			this.readyCalled = true;
-		};
+		this.originalBody = frame.contentDocument.body;
+		this.currentBody = undefined;
+		Object.defineProperty(frame.contentDocument, 'body', {
+			get: () => {
+				return this.currentBody;
+			},
+			set: (value) => {
+				this.currentBody = value;
+			}
+		});
 	}
 }
