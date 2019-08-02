@@ -21,6 +21,8 @@ export class ModLoader {
 		this.modsLoaded = 0;
 		/** @type {Mod[]} */
 		this.mods = [];
+		/** @type {{[name: string]: string}} */
+		this.versions = {};
 		
 		this._buildCrosscodeVersion();
 		this._initializeLegacy();
@@ -173,17 +175,18 @@ export class ModLoader {
 	}
 	
 	/**
-	 * Pushes mods into the game window's inactiveMods and activeMods arrays.
+	 * Pushes mods into the game window's inactiveMods and activeMods arrays and registers their versions.
 	 */
 	_registerMods() {
-		this._getGameWindow().inactiveMods = [];
-		this._getGameWindow().activeMods = [];
+		const inactiveMods = this._getGameWindow().inactiveMods = [];
+		const activeMods = this._getGameWindow().activeMods = [];
 		
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
-				this._getGameWindow().activeMods.push(mod);
+				activeMods.push(mod);
+				this.versions[mod.name] = mod.version;
 			} else {
-				this._getGameWindow().inactiveMods.push(mod);
+				inactiveMods.push(mod);
 			}
 		}
 	}
@@ -203,10 +206,11 @@ export class ModLoader {
 		this.ui.applyBindings(this._getGameWindow().console);
 		this._enableNode();
 
-		const versions = this.versions = {
+
+		const versions = Object.assign(this.versions, {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
-		};
+		});
 
 		Object.assign(this._getGameWindow(), {
 			Plugin,
@@ -307,21 +311,6 @@ export class ModLoader {
 		if (this.status && this.overlay && this.status.isConnected && this.overlay.isConnected) {
 			this.status.outerHTML = '';
 			this.overlay.outerHTML = '';
-		}
-	}
-	
-
-	async _initializeMods() { //TODO----------------------------------------------------------------------------------------------------------------------------------------
-		for (const mod of this.mods) {
-			if (mod.isEnabled) {
-				this.versions[mod.name] = mod.version;
-
-				try {
-					await mod.load();
-				} catch (e) {
-					console.warn(`Could not load "${mod.name}": ${e}`);
-				}
-			}
 		}
 	}
 
