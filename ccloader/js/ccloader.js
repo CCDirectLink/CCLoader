@@ -244,7 +244,7 @@ export class ModLoader {
 			try {
 				await mod.loadPlugin();
 			} catch (e) {
-				console.error(`Could not load plugin of mod '${mod.name}'`);
+				console.error(`Could not load plugin of mod '${mod.name}': `, e);
 			}
 		}
 	}
@@ -298,7 +298,7 @@ export class ModLoader {
 			try {
 				await mod.load();
 			} catch (e) {
-				console.error(`Could not run preload of mod '${mod.name}'`);
+				console.error(`Could not run main of mod '${mod.name}': `, e);
 			}
 		}
 	}

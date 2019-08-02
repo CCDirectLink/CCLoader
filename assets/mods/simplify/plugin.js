@@ -19,7 +19,11 @@ export default class Test extends Plugin {
 				if (original) {
 					return async(...args) => {
 						for (const mod of window.activeMods) {
-							await mod.loadPrestart();
+							try {
+								await mod.loadPrestart();
+							} catch (e) {
+								console.error(`Could not run prestart of mod '${mod.name}': `, e);
+							}
 						}
 						
 						const event = document.createEvent('Event');
