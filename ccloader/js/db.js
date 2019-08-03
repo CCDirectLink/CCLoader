@@ -1,3 +1,6 @@
+/**
+ * @deprecated
+ */
 export class Db {
 	/**
 	 * 
@@ -95,6 +98,9 @@ export class Db {
 	}
 }
 
+/**
+ * @deprecated
+ */
 export class DbTree {
 	/**
 	 * 
@@ -186,6 +192,9 @@ export class DbTree {
 	}
 }
 
+/**
+ * @deprecated
+ */
 class DbNode {
 	/**
 	 * 

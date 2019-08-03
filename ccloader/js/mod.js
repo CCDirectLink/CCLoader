@@ -1,3 +1,5 @@
+import { Plugin } from './plugin.js';
+
 /** @typedef Modloader import ccloader.js */
 
 const path = require('path');
@@ -7,87 +9,35 @@ export class Mod {
 	 * 
 	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file 
-	 * @param {string} ccVersion
 	 */
-	constructor(modloader, file, ccVersion){
+	constructor(modloader, file){
 		this.file = file;
 		this.filemanager = modloader.filemanager;
-		this.ccVersion = ccVersion;
+		this.window = modloader._getGameWindow();
 
-		const data = this.filemanager.getResource(file);
-		if(!data) {
-			return;
-		}
-		
-		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
-			this.manifest = JSON.parse(data);
-			if(!this.manifest)
-				return;
-		} catch (e) {
-			console.error('Could not load mod: ' + file, e);
-			return;
-		}
+		this._loadManifest();
+	}
 
-		this.manifest.main = this._normalizeScript(file, this.manifest.main);
-		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
-		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
-		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
-		
-		if(!this.manifest.ccmodDependencies) {
-			this.manifest.ccmodDependencies = this.manifest.dependencies;
-		}
-		
-		if(this.manifest.table){
-			if(!this._isPathAbsolute(this.manifest.table)) {
-				this.manifest.table = this._getBaseName(file) + '/' + this.manifest.table;
-			}
-			this.manifest.table = this._normalizePath(this.manifest.table);
-		}
-		
-		if(!this.manifest.name) {
-			this.manifest.name = this._getModNameFromFile();
-		}
-		
-		this._findAssets(this._getBaseName(file) + '/assets/').then(data => {
-			this.manifest.assets = data;
-			this.loaded = true;
-			if(this.onloaded) {
-				this.onloaded();
-			}
-		});
+	load() {
+		return this._loadStage('main');
+	}
+	loadPrestart() {
+		return this._loadStage('prestart');
+	}
+	loadPostload() {
+		return this._loadStage('postload');
+	}
+	loadPreload() {
+		return this._loadStage('preload');
+	}
+	loadPlugin() {
+		return this._loadPlugin();
 	}
 
 	/**
 	 * @returns {Promise<void>}
 	 */
-	async load() {
-		if(!this.loaded)
-			return;
-
-		if(!this.manifest.main)
-			return;
-
-		return await this.filemanager.loadMod(this.manifest.main, this.module);
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 */
-	async loadPrestart() {
-		if(!this.loaded)
-			return;
-
-		if(!this.manifest.prestart)
-			return;
-
-		return await this.filemanager.loadMod(this.manifest.prestart, this.module);
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 */
-	onload() {
+	async onload() {
 		return new Promise(resolve => {
 			if(this.loaded) {
 				resolve();
@@ -100,13 +50,11 @@ export class Mod {
 	get name() {
 		if(!this.loaded)
 			return undefined;
-		
 		return this.manifest.name;
 	}
 	get description(){
 		if(!this.loaded)
 			return undefined;
-		
 		return this.manifest.description;
 	}
 	get assets(){
@@ -154,13 +102,29 @@ export class Mod {
 			return '';
 		return this.manifest.prestart;
 	}
+	get plugin() {
+		if(!this.load)
+			return '';
+		return this.manifest.plugin;
+	}
+	
+	get isEnabled(){
+		if(!this.loaded || this.disabled)
+			return false;
+		
+		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
+	}
 
+	get baseDirectory(){
+		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
+	}
+	
 	/**
 	 * 
 	 * @param {string} path 
 	 */
 	getAsset(path){
-		if(!this.loaded || !this.manifest.assets)
+		if(!this.loaded)
 			return;
 
 		path = path.replace(/\\/g, '/').trim();
@@ -175,6 +139,7 @@ export class Mod {
 			}
 		}
 	}
+
 	/**
 	 * 
 	 * @param {string} original 
@@ -183,12 +148,178 @@ export class Mod {
 	setAsset(original, newPath){
 		this.runtimeAssets[original] = newPath;
 	}
-	get baseDirectory(){
-		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
+
+
+	async _loadPlugin() {
+		this.window._tmp = this.plugin;
+		const module = await this.window.eval.bind(this)(`
+			import('../../assets/' + window._tmp);
+		`);
+		delete this.window._tmp;
+
+		const plugin = module.default;
+		if (!plugin
+			|| !plugin.prototype
+			|| !(plugin.prototype instanceof Plugin)) {
+			return;
+		}
+
+		/** @type {Plugin} */
+		this.pluginInstance = new plugin(this);
+		return this.pluginInstance;
+	}
+
+	_loadManifest() {
+		const file = this.file;
+		const data = this.filemanager.getResource(file);
+		if(!data) {
+			return;
+		}
+		
+		try {
+			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+			this.manifest = JSON.parse(data);
+			if(!this.manifest)
+				return;
+		} catch (e) {
+			console.error('Could not load mod: ' + file, e);
+			return;
+		}
+
+		this.manifest.main = this._normalizeScript(file, this.manifest.main);
+		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
+		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
+		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
+		this.manifest.plugin = this._normalizeScript(file, this.manifest.plugin);
+		
+		if(!this.manifest.ccmodDependencies) {
+			this.manifest.ccmodDependencies = this.manifest.dependencies;
+		}
+		
+		if(this.manifest.table){
+			if(!this._isPathAbsolute(this.manifest.table)) {
+				this.manifest.table = this._getBaseName(file) + '/' + this.manifest.table;
+			}
+			this.manifest.table = this._normalizePath(this.manifest.table);
+		}
+		
+		if(!this.manifest.name) {
+			this.manifest.name = this._getModNameFromFile();
+		}
+		
+		this._findAssets(this._getBaseName(file) + '/assets/').then(data => {
+			this.manifest.assets = data;
+			this.loaded = true;
+			if(this.onloaded) {
+				this.onloaded();
+			}
+		});
 	}
 
 	/**
+	 * @param {string} name
+	 * @param {boolean} forceModule
+	 * @returns {Promise<void>}
+	 */
+	async _loadStage(name, forceModule) {
+		if(!this.loaded)
+			return;
+
+		if (this.pluginInstance) {
+			await this.pluginInstance[name]();
+		}
+
+		if(!this.manifest[name])
+			return;
+
+		return await this.filemanager.loadMod(this.manifest[name], this.module || forceModule);
+	}
+
+	/**
+	 * 
+	 * @param {string} manifestFile
+	 * @param {string} [input]
+	 * @returns {string | undefined}
+	 */
+	_normalizeScript(manifestFile, input) {
+		if (!input) {
+			return undefined;
+		}
+		if(!this._isPathAbsolute(input)) {
+			return this._normalizePath(this._getBaseName(manifestFile) + '/' + input);
+		}
+		return this._normalizePath(input);
+	}
+	
+	_getModNameFromFile(){
+		if (!this.file.includes('package.json')) {
+			return 'Unknown mod';
+		}
+
+		let name = this.file.match(/\/[^/]*\/package.json/g).pop().replace(/\//g, '');
+		name = name.substr(0, name.length - 6);
+		return name;
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 */
+	_isPathAbsolute(path){
+		return /^(?:\/|[a-z]+:\/\/)/.test(path);
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 */
+	_getBaseName(path){
+		if(path.indexOf('/') >= 0)
+			return path.substring(0, path.lastIndexOf('/'));
+		else if(path.indexOf('\\') >= 0)
+			return path.substring(0, path.lastIndexOf('\\'));
+		else
+			return path;
+	}
+
+	/**
+	 * 
+	 * @param {string} path 
+	 */
+	_normalizePath(path){
+		if(path.replace(/\\/g, '/').indexOf('assets/') == 0)
+			return path.substr(7);
+		else
+			return path;
+	}
+	
+	/**
+	 * 
+	 * @param {string} dir 
+	 */
+	async _findAssets(dir){
+		if(window.isLocal){
+			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
+		} else {
+			const assets = this.manifest.assets;
+			if (!assets) {
+				return [];
+			}
+			const base = this._getBaseName(this.file) + '/';
+
+			const result = [];
+			for(const asset of assets) {
+				result.push(base + asset);
+			}
+			return result;
+		}
+	}
+
+	// -------------- DEPRECATED --------------
+
+	/**
 	 * @param {import('./ccloader').ModLoader} ccloader
+	 * @deprecated
 	 */
 	initializeTable(ccloader){
 		if(!this.loaded || !this.manifest.table)
@@ -225,108 +356,12 @@ export class Mod {
 
 	/**
 	 * @param {ModLoader} ccloader
+	 * @deprecated
 	 */
 	executeTable(ccloader){
 		if(!this.loaded || !this.table)
 			return;
 
 		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
-	}
-
-	get isEnabled(){
-		if(!this.loaded || this.disabled)
-			return false;
-		
-		return localStorage.getItem('modEnabled-' + this.manifest.name.toLowerCase()) !== 'false';
-		/*try {
-			//TODO: Remove ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-			if (!window['frame'].contentWindow.cc) {
-				return true;
-			}
-			const globals = window['frame'].contentWindow.cc.ig.storage[window.frame.contentWindow.cc.ig.varNames.storageGlobals];
-			
-			if(!globals || !globals.options)
-				return true;
-			
-			return globals.options['modEnabled-' + this.manifest.name.toLowerCase()] !== false;
-		} catch (err) {
-			console.error(`An error occured while accessing the games internal storage. Disabling mod "${this.name}"`, err);
-			return false;
-		}*/
-	}
-
-	/**
-	 * 
-	 * @param {string} manifestFile
-	 * @param {string} [input]
-	 * @returns {string | undefined}
-	 */
-	_normalizeScript(manifestFile, input) {
-		if (!input) {
-			return undefined;
-		}
-		if(!this._isPathAbsolute(input)) {
-			return this._normalizePath(this._getBaseName(manifestFile) + '/' + input);
-		}
-		return this._normalizePath(input);
-	}
-	
-	_getModNameFromFile(){
-		if (!this.file.includes('package.json')) {
-			return 'Unknown mod';
-		}
-
-		let name = this.file.match(/\/[^/]*\/package.json/g).pop().replace(/\//g, '');
-		name = name.substr(0, name.length - 6);
-		return name;
-	}
-	/**
-	 * 
-	 * @param {string} path 
-	 */
-	_isPathAbsolute(path){
-		return /^(?:\/|[a-z]+:\/\/)/.test(path);
-	}
-	/**
-	 * 
-	 * @param {string} path 
-	 */
-	_getBaseName(path){
-		if(path.indexOf('/') >= 0)
-			return path.substring(0, path.lastIndexOf('/'));
-		else if(path.indexOf('\\') >= 0)
-			return path.substring(0, path.lastIndexOf('\\'));
-		else
-			return path;
-	}
-	/**
-	 * 
-	 * @param {string} path 
-	 */
-	_normalizePath(path){
-		if(path.replace(/\\/g, '/').indexOf('assets/') == 0)
-			return path.substr(7);
-		else
-			return path;
-	}
-	/**
-	 * 
-	 * @param {string} dir 
-	 */
-	async _findAssets(dir){
-		if(window.isLocal){
-			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
-		} else {
-			if(!this.manifest.assets)
-				return [];
-
-			let dir = this._getBaseName(this.file) + '/';
-
-			const result = [];
-			for(const asset of this.manifest.assets) {
-				result.push(dir + asset);
-			}
-			return result;
-		}
 	}
 }

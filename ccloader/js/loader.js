@@ -5,45 +5,64 @@ export class Loader {
 	 */
 	constructor(filemanager) {
 		this.filemanager = filemanager;
-		this.doc = null; /** @type {Document} */
-		this.preloadPoint = null; /** @type {HTMLElement} */
-		this.postloadPoint = null; /** @type {HTMLElement} */
+		/** @type {Document} */
+		this.doc = null;
+		/** @type {HTMLElement} */
+		this.postloadPoint = null;
+		/** @type {() => void | null} */
+		this._DOMReady = null;
+		this.readyCalled = false;
+		/** @type {HTMLBodyElement} */
+		this.originalBody = undefined;
+		/** @type {HTMLBodyElement} */
+		this.currentBody = undefined;
 	}
 
 	async initialize() {
 		const code = await this._loadEntrypoint();
 		this.doc = this._parseEntrypoint(code);
-		this.preloadPoint = this._insertBase(this._getEntrypointPath());
+		this._insertBase();
 		this.postloadPoint = this._findGame();
 	}
 
-	/**
-	 * Adds a mod script that runs before game scripts are loaded
-	 * @param {string} script 
-	 * @param {boolean} module
-	 */
-	addPreload(script, module) {
-		const next = this._createScript(script, module);
-		this._insertAfter(next, this.preloadPoint);
-		this.preloadPoint = next;
+	getBase() {
+		const base = this.doc.createElement('base');
+		base.href = this._getEntrypointPath();
+		return base;
 	}
 
 	/**
-	 * Adds a mod script that runs after game scripts are loaded
-	 * @param {string} script
-	 * @param {boolean} module
+	 * Returns a promise that resolves when the postload point is reached.
+	 * @param {HTMLIFrameElement} frame 
+	 * @returns {Promise<void>}
 	 */
-	addPostload(script, module) {
-		const next = this._createScript(script, module);
-		this._insertAfter(next, this.postloadPoint);
-		this.postloadPoint = next;
+	startGame(frame) {
+		return new Promise((resolve) => {
+			Object.assign(window, {
+				postload: resolve,
+			});
+	
+			const hook = this._createScript('window.parent.postload()');
+			this._insertAfter(hook, this.postloadPoint);
+			this._hookDOM(frame);
+			this._startGame(frame);
+		});
+	}
+
+	/**
+	 * Returns a promise that resolves when the postload point is reached.
+	 * @param {HTMLIFrameElement} frame 
+	 */
+	continue(frame) {
+		this.currentBody = this.originalBody;
+		frame.contentWindow['ig']['_DOMReady']();
 	}
 
 	/**
 	 * 
 	 * @param {HTMLIFrameElement} frame 
 	 */
-	startGame(frame) {
+	_startGame(frame) {
 		frame.contentDocument.open();
 		frame.contentDocument.write(this.doc.documentElement.outerHTML);
 		frame.contentDocument.close();
@@ -70,15 +89,8 @@ export class Loader {
 		return new DOMParser().parseFromString(code, 'text/html');
 	}
 
-	/**
-	 * 
-	 * @param {string} href
-	 */
-	_insertBase(href) {
-		const base = this.doc.createElement('base');
-		base.href = href;
-		this.doc.head.insertBefore(base, this.doc.head.firstChild);
-		return base;
+	_insertBase() {
+		this.doc.head.insertBefore(this.getBase(), this.doc.head.firstChild);
 	}
 
 	/**
@@ -92,16 +104,37 @@ export class Loader {
 	/**
 	 * 
 	 * @param {string} src 
-	 * @param {boolean} module
 	 */
-	_createScript(src, module) {
+	_createScript(src) {
 		const result = this.doc.createElement('script');
-		result.src = src;
-		result.type = module ? 'module' : 'text/javascript';
+		result.src = 'data:text/javascript,' + src;
+		result.type = 'text/javascript';
 		return result;
 	}
 
+	/**
+	 * 
+	 * @param {HTMLElement} newNode 
+	 * @param {HTMLElement} referenceNode 
+	 */
 	_insertAfter(newNode, referenceNode) {
 		referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+	}
+
+	/**
+	 * 
+	 * @param {HTMLIFrameElement} frame 
+	 */
+	_hookDOM(frame) {
+		this.originalBody = frame.contentDocument.body;
+		this.currentBody = undefined;
+		Object.defineProperty(frame.contentDocument, 'body', {
+			get: () => {
+				return this.currentBody;
+			},
+			set: (value) => {
+				this.currentBody = value;
+			}
+		});
 	}
 }
