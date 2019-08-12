@@ -236,7 +236,13 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					// Run request pre handlers
 					this._callHandlers(settings, true);
 
-					const successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
+					var successArgs;
+					try {
+						successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
+					} catch (errorArgs) {
+						settings.error.apply(settings.context, errorArgs);
+						return;
+					}
 
 					// Done, run final handlers
 					this._callHandlers(settings, false);
@@ -275,9 +281,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					this._restoreSettings(settings, success, error);
 					resolve(sArgs);
 				};
-				settings.error = (_, text) => {
+				settings.error = (...eArgs) => {
 					this._restoreSettings(settings, success, error);
-					reject(text);
+					reject(eArgs);
 				};
 			});
 		}
