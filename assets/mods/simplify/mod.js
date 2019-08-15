@@ -423,7 +423,9 @@
 			this.font.setMapping(ICON_MAPPING);
 		}
 		_initializeOptions(){
-			const mods = window.inactiveMods.concat(window.activeMods);
+			const mods = window.inactiveMods
+				.concat(window.activeMods)
+				.sort((a, b) => ('' + a.name).localeCompare(b.name));
 			
 			const tab = this.options.addTab('mods', 'Mods');
 			for (const mod of mods){
@@ -435,7 +437,7 @@
 				this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 
 				const name = mod.name;
-				const description = mod.description || 'If checked this mod is enabled. \\c[1]Needs a restart!';
+				const description = (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
 
 				ig.lang.labels.sc.gui.options[optionName] = {name, description};
 

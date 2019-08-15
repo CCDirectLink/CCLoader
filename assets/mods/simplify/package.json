@@ -5,7 +5,7 @@
 	"postload": "postload.js",
 	"plugin": "plugin.js",
 	"hidden": true,
-	"version": "2.6.1",
+	"version": "2.7.0",
 	"ccmodDependencies": {
 		"ccloader": "^2.11.0",
 		"crosscode": "^1.0.0"
