@@ -236,11 +236,11 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					// Run request pre handlers
 					this._callHandlers(settings, true);
 
-					var successArgs;
+					let successArgs;
 					try {
 						successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
-					} catch (errorArgs) {
-						settings.error.apply(settings.context, errorArgs);
+					} catch (e) {
+						settings.error.apply(settings.context, e);
 						return;
 					}
 
@@ -281,9 +281,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					this._restoreSettings(settings, success, error);
 					resolve(sArgs);
 				};
-				settings.error = (...eArgs) => {
+				settings.error = (...err) => {
 					this._restoreSettings(settings, success, error);
-					reject(eArgs);
+					reject(err);
 				};
 			});
 		}
@@ -322,11 +322,33 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 				promises.push(this.loadJSON(patch.path));
 
 			// Done making the parallel requests
-			const values = await Promise.all(promises);
-			const successArgs = values[0];
-			for (let i = 0; i < patches.length; i++)
+			const values = await this._awaitAll(promises);
+			if (values[0].status !== 'resolved') {
+				throw values[0].value;
+			}
+
+			const successArgs = values[0].value;
+			for (let i = 0; i < patches.length; i++) {
+				if (values[i + 1].status !== 'resolved') {
+					console.error(`Could not load patch '${patches[i].path}' for '${url}': `, values[i + 1].value);
+					continue;
+				}
+
 				await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
+			}
 			return successArgs;
+		}
+
+		/**
+		 * Awaits all Promises given but does not fail on rejects.
+		 * @param {Promise<any>[]} promises
+		 * @returns {Promise<{status: 'resolved' | 'rejected', value: any}[]>}
+		 */
+		_awaitAll(promises) {
+			return Promise.all(promises.map(p => p
+				.then(value => ({status: 'resolved', value: value}))
+				.catch(err => ({status: 'rejected', value: err}))
+			));
 		}
 	
 		_hookHttpRequest() {
