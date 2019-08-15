@@ -9,11 +9,7 @@ export class Loader {
 		this.doc = null;
 		/** @type {HTMLElement} */
 		this.postloadPoint = null;
-		/** @type {() => void | null} */
-		this._DOMReady = null;
 		this.readyCalled = false;
-		/** @type {HTMLBodyElement} */
-		this.originalBody = undefined;
 		/** @type {HTMLBodyElement} */
 		this.currentBody = undefined;
 	}
@@ -54,8 +50,10 @@ export class Loader {
 	 * @param {HTMLIFrameElement} frame 
 	 */
 	continue(frame) {
-		this.currentBody = this.originalBody;
-		frame.contentWindow['ig']['_DOMReady']();
+		this.currentBody = frame.contentDocument.lastChild.lastChild; //Actual body; bypasses document.body hook
+		if (frame.contentWindow['ig']['_DOMReady']) {
+			frame.contentWindow['ig']['_DOMReady']();
+		}
 	}
 
 	/**
@@ -126,7 +124,6 @@ export class Loader {
 	 * @param {HTMLIFrameElement} frame 
 	 */
 	_hookDOM(frame) {
-		this.originalBody = frame.contentDocument.body;
 		this.currentBody = undefined;
 		Object.defineProperty(frame.contentDocument, 'body', {
 			get: () => {

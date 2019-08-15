@@ -5,7 +5,7 @@ import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 
-const CCLOADER_VERSION = '2.14.1';
+const CCLOADER_VERSION = '2.14.2';
 
 export class ModLoader {
 	constructor() {
