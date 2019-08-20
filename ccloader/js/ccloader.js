@@ -5,7 +5,7 @@ import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 
-const CCLOADER_VERSION = '2.14.2';
+const CCLOADER_VERSION = '2.14.3';
 
 export class ModLoader {
 	constructor() {
@@ -189,6 +189,9 @@ export class ModLoader {
 				inactiveMods.push(mod);
 			}
 		}
+
+		this._getGameWindow().activeMods = Object.freeze(this._getGameWindow().activeMods);
+		this._getGameWindow().inactiveMods = Object.freeze(this._getGameWindow().inactiveMods);
 	}
 
 	/**

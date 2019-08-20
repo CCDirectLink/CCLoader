@@ -5,10 +5,12 @@
  */
 export default class Test extends Plugin {
 	preload() {
+		this._applyArgs();
 		this._hookStart();
 	}
 	
 	postload() {
+		this._applyArgs();
 		return import('./postloadModule.js');
 	}
 
@@ -40,5 +42,24 @@ export default class Test extends Plugin {
 				return true;
 			}
 		});
+	}
+
+	_applyArgs() {
+		const args = this._parseArgs();
+		for (const [name, value] of args) {
+			window[name] = value;
+		}
+	}
+	
+	/**
+	 * 
+	 * @returns {[string, string][]}
+	 */
+	_parseArgs() {
+		if (window.require) {
+			return require('nw.gui').App.argv.map(e => e.split('='));
+		} else {
+			return Array.from(new URL(window.parent.location.href).searchParams.entries())
+		}
 	}
 }
