@@ -334,7 +334,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					continue;
 				}
 
-				await this._applyPatch(successArgs[0], values[i + 1], patches[i].mod.baseDirectory);
+				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i].mod.baseDirectory);
 			}
 			return successArgs;
 		}
