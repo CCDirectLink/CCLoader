@@ -305,8 +305,45 @@ async function applyStep(step, state) {
 	await appliers[step["type"]].call(step, state);
 }
 
+/**
+ * @param {object} obj The object to search and replace the values of
+ * @param {RegExp} keyword The expression to match against
+ * @param {String} value The value the replace the match
+ * @returns {void}
+ * */ 
+function valueInsertion(obj, keyword, value) {
+	for(let key in obj) {
+		if (obj[key].constructor === Object) {
+			valueInsertion(obj[key], value);
+		} else if (obj[key].constructor === Array) {
+			for (const child of obj[key]) {
+				valueInsertion(child, value);
+			}
+		} else if (obj[key].constructor === String) {
+			// search for all instances of value and replace it 
+			const oldValue = obj[key];
+			obj[key] = oldValue.replace(new RegExp(keyword, "g"), value);
+		}
+	}
+}
+
 // -- Step Execution --
 
+
+appliers["FOR-IN"] = async function (state) {
+	const body = this["body"];
+	const values = this["values"];
+	const keyword = this["keyword"];
+	
+	for(let i = 0; i < body.length; i++) {
+		const statement = body[i];
+		const value = values[i];
+		const clone = photocopy(statement);
+		valueInsertion(clone, keyword, value);
+		
+		await applyStep(clone, state);
+	}
+}
 
 
 appliers["ENTER"] = async function (state) {
