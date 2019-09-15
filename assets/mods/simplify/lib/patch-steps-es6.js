@@ -298,10 +298,16 @@ export async function patch(a, steps, loader) {
 		loader: loader
 	};
 	for (let index = 0; index < steps.length; index++)
-		await appliers[steps[index]["type"]].call(steps[index], state);
+		await applyStep(steps[index], state);
+}
+
+async function applyStep(step, state) {
+	await appliers[step["type"]].call(step, state);
 }
 
 // -- Step Execution --
+
+
 
 appliers["ENTER"] = async function (state) {
 	let path = [this["index"]];
