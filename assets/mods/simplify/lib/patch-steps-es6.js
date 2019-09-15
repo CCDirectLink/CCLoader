@@ -335,13 +335,13 @@ appliers["FOR-IN"] = async function (state) {
 	const values = this["values"];
 	const keyword = this["keyword"];
 	
-	for(let i = 0; i < body.length; i++) {
-		const statement = body[i];
-		const value = values[i];
-		const clone = photocopy(statement);
-		valueInsertion(clone, keyword, value);
-		
-		await applyStep(clone, state);
+	for(let i = 0; i < values.length; i++) {
+		for (const statement of body) {2
+			const value = values[i];
+			const clone = photocopy(statement);
+			valueInsertion(clone, keyword, value);
+			await applyStep(clone, state);	
+		}
 	}
 }
 
