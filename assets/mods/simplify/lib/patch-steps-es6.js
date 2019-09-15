@@ -338,8 +338,13 @@ appliers["FOR_IN"] = async function (state) {
 	for(let i = 0; i < values.length; i++) {
 		for (const statement of body) {
 			const value = values[i];
+			const type = statement["type"];
 			const clone = photocopy(statement);
+			
 			valueInsertion(clone, keyword, value);
+			// to preserve type of statement
+			clone.type = type;
+			
 			await applyStep(clone, state);	
 		}
 	}
