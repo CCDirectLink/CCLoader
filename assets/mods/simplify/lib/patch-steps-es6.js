@@ -330,7 +330,7 @@ function valueInsertion(obj, keyword, value) {
 // -- Step Execution --
 
 
-appliers["FOR-IN"] = async function (state) {
+appliers["FOR_IN"] = async function (state) {
 	const body = this["body"];
 	const values = this["values"];
 	const keyword = this["keyword"];
