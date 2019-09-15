@@ -336,7 +336,7 @@ appliers["FOR_IN"] = async function (state) {
 	const keyword = this["keyword"];
 	
 	for(let i = 0; i < values.length; i++) {
-		for (const statement of body) {2
+		for (const statement of body) {
 			const value = values[i];
 			const clone = photocopy(statement);
 			valueInsertion(clone, keyword, value);
