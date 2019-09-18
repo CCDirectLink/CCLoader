@@ -307,23 +307,35 @@ async function applyStep(step, state) {
 
 /**
  * @param {object} obj The object to search and replace the values of
- * @param {RegExp} keyword The expression to match against
- * @param {String} value The value the replace the match
+ * @param {RegExp| {property: RegExp}} keyword The expression to match against
+ * @param {String| {property: String}} value The value the replace the match
  * @returns {void}
  * */ 
 function valueInsertion(obj, keyword, value) {
-	for(let key in obj) {
-		if (obj[key].constructor === Object) {
-			valueInsertion(obj[key], value);
-		} else if (obj[key].constructor === Array) {
-			for (const child of obj[key]) {
-				valueInsertion(child, value);
+	if (typeof obj === "string") {
+		// search for all instances of value and replace it 
+		let oldValue = obj[key];
+		
+		// It's more complex than we thought.
+		if (!Array.isArray(keyword) && typeof keyword === "object") {
+			// go through each and check if it matches anywhere.
+			for(const property in keyword) {
+				obj[key] = oldValue.replace(new RegExp(keyword[property], "g"), value[property]);
+				oldValue = obj[key];
 			}
-		} else if (obj[key].constructor === String) {
-			// search for all instances of value and replace it 
-			const oldValue = obj[key];
-			obj[key] = oldValue.replace(new RegExp(keyword, "g"), value);
+		} else {
+			obj[key] = oldValue.replace(new RegExp(keyword, "g"), value); 
 		}
+	} else if (Array.isArray(obj)) {
+		for (const child of obj[key]) {
+			valueInsertion(child, keyword, value);
+		}
+	} else if (typeof obj === "object") {
+		for(let key in obj) {
+			if (obj[key].constructor === Object) {
+				valueInsertion(obj[key], value);
+			}
+		}	
 	}
 }
 
