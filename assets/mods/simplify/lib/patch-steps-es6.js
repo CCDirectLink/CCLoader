@@ -431,11 +431,16 @@ appliers["PASTE"] = async function(state) {
 	}
 };
 
+
+appliers["COMMENT"] = async function(state) {
+	console.log(this["value"]);
+};
+
 appliers["ENTER"] = async function (state) {
 	if (!this["index"]) {
 		throw Error(`Error: Could not ENTER. Property index must be set.`);
 	}
-	
+
 	let path = [this["index"]];
 	if (this["index"].constructor == Array)
 		path = this["index"];
