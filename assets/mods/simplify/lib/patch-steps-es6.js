@@ -296,14 +296,41 @@ export async function patch(a, steps, loader) {
 		currentValue: a,
 		stack: [],
 		cloneMap: new Map(),
+		callStack: ["BASE"],
 		loader: loader
 	};
-	for (let index = 0; index < steps.length; index++)
-		await applyStep(steps[index], state);
+	for (let index = 0; index < steps.length; index++) {
+		try {
+			state.callStack.push(index);
+			await applyStep(steps[index], state);
+			state.callStack.pop();			
+		} catch(e) {
+			printError(state.callStack, e.message);
+			console.error(e);
+			return;
+		}
+	}
+}
+
+function printError(stack, errorMessage) {
+	let message = errorMessage + '\n';
+	while(stack.length > 0) {
+		const stepIndex = stack.pop();
+		const stepName = stack.pop();
+		message += `\t\t\tat ${stepName} (step: ${stepIndex})\n`;
+	}
+	console.log(message);
+	
 }
 
 async function applyStep(step, state) {
+	state.callStack.push(step["type"]);
+	if (!appliers[step["type"]]) {
+		state.callStack.pop();
+		throw TypeError(`Error: ${step['type']} is not a valid type.`);
+	}
 	await appliers[step["type"]].call(step, state);
+	state.callStack.pop();
 }
 
 /**
@@ -349,7 +376,9 @@ appliers["FOR_IN"] = async function (state) {
 	const keyword = this["keyword"];
 	
 	for(let i = 0; i < values.length; i++) {
-		for (const statement of body) {
+		for (let statement, index = 0; index < body.length; index++) {
+			statement = body[index];
+			state.callStack.push(index);
 			const value = values[i];
 			const type = statement["type"];
 			const clone = photocopy(statement);
@@ -358,7 +387,9 @@ appliers["FOR_IN"] = async function (state) {
 			// to preserve type of statement
 			clone.type = type;
 			
-			await applyStep(clone, state);	
+			await applyStep(clone, state);
+			state.callStack.pop();
+			
 		}
 	}
 };
@@ -401,6 +432,10 @@ appliers["PASTE"] = async function(state) {
 };
 
 appliers["ENTER"] = async function (state) {
+	if (!this["index"]) {
+		throw Error(`Error: Could not ENTER. Property index must be set.`);
+	}
+	
 	let path = [this["index"]];
 	if (this["index"].constructor == Array)
 		path = this["index"];
