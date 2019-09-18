@@ -295,6 +295,7 @@ export async function patch(a, steps, loader) {
 	const state = {
 		currentValue: a,
 		stack: [],
+		cloneMap: new Map(),
 		loader: loader
 	};
 	for (let index = 0; index < steps.length; index++)
@@ -360,8 +361,44 @@ appliers["FOR_IN"] = async function (state) {
 			await applyStep(clone, state);	
 		}
 	}
-}
+};
 
+// copy the value with name
+appliers["COPY"] = async function(state) {
+	if (!this["alias"]) {
+		throw Error("Error: COPY requires 'alias'");
+	}
+	const value = photocopy(state.currentValue);
+	state.cloneMap.set(this["alias"], value);
+};
+
+// paste
+appliers["PASTE"] = async function(state) {
+	if (!this["alias"]) {
+		throw Error("Error: PASTE requires 'alias'");
+	}
+	const value = photocopy(state.cloneMap.get(this["alias"]));
+	if (Array.isArray(state.currentValue)) {
+		const obj = {
+			type: "ADD_ARRAY_ELEMENT",
+			content: value
+		};
+		
+		if (!isNaN(this["index"])) {
+			obj.index = this["index"];
+		}
+		await applyStep(obj, state);		
+		
+	} else if (typeof state.currentValue === "object") {
+		await applyStep({
+			type: "SET_KEY",
+			index: this["index"],
+			content: value
+		}, state);
+	} else {
+		throw `Error: Could not PASTE. Type ${typeof state.currentValue} is not supported.`;
+	}
+};
 
 appliers["ENTER"] = async function (state) {
 	let path = [this["index"]];
