@@ -46,16 +46,22 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @param {string} modbase
 		 * @return {Promise<any>} result
 		 */
-		async _applyPatch(target, patch, modbase) {
+		async _applyPatch(target, patch, modbase, patchPath) {
 			await patchSteps.patch(target, patch, async (fromGame, url) => {
 				if (fromGame) {
 					// Import (game file)
-					return await this.loadJSONPatched(igroot + url);
+					return {
+						path: igroot + url,
+						data: await this.loadJSONPatched(igroot + url)
+					};
 				} else {
 					// Include (mod file)
-					return await this.loadJSON(modbase + url);
+					return {
+						path: modbase + url,
+						data: await this.loadJSON(modbase + url)
+					};
 				}
-			});
+			}, patchPath);
 		}
 	
 		/**
@@ -240,6 +246,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					try {
 						successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
 					} catch (e) {
+						debugger;
 						settings.error.apply(settings.context, e);
 						return;
 					}
@@ -334,7 +341,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					continue;
 				}
 
-				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i].mod.baseDirectory);
+				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i].mod.baseDirectory, patches[i].path);
 			}
 			return successArgs;
 		}
