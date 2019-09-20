@@ -1,6 +1,13 @@
 /*
  * patch-steps-lib - Library for the Patch Steps spec.
- * Written starting in 2019 by 20kdc
+ *
+ * Written starting in 2019.
+ * Version: 1.1.0
+ * (Ideally, this would comply with semver.)
+ * Credits:
+ *  Main code by 20kdc
+ *  URL-style file paths, FOR_IN, COPY, PASTE, error tracking, bughunting by ac2pic
+ *
  * To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
  * You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
@@ -277,17 +284,22 @@ export const appliers = {};
  * @param {any} a The object to modify
  * @param {object|object[]} steps The patch, fresh from the JSON. Can be in legacy or Patch Steps format.
  * @param {(fromGame: boolean, url: string) => Promise<any>} loader The loading function. If fromGame is true, the file is from the game (see IMPORT). If fromGame is not true, the file is from the mod (see INCLUDE).
+ * @param {string} path to the Patch Sequence File.
  * @return {Promise<void>} A Promise
  */
-export async function patch(a, steps, loader) {
+export async function patch(a, steps, loader, filePath) {
 	if (steps.constructor === Object) {
 		// Standardized Mods specification
 		for (let k in steps) {
-			if ((steps[k].constructor === Object) && (a[k] !== void 0)) {
+			// Switched back to a literal translation in 1.0.2 to make it make sense with spec, it's more awkward but simpler.
+			// ac2pic thought up the "check for truthy" regarding steps[k].constructor
+			if (a[k] === void 0) {
+				a[k] = steps[k]; // 1.
+			} else if (steps[k] && (steps[k].constructor === Object)) {
 				// steps[k] is Object, so this won't escape the Standardized Mods version of patching
-				await patch(a[k], steps[k], loader);
+				await patch(a[k], steps[k], loader); // 2.
 			} else {
-				a[k] = steps[k];
+				a[k] = steps[k]; // 3.
 			}
 		}
 		return;
@@ -297,30 +309,35 @@ export async function patch(a, steps, loader) {
 		stack: [],
 		cloneMap: new Map(),
 		callStack: ["BASE"],
-		loader: loader
+		loader: loader,
+		filePath: []
 	};
+	state.filePath = state.filePath.concat(filePath);
 	for (let index = 0; index < steps.length; index++) {
 		try {
 			state.callStack.push(index);
 			await applyStep(steps[index], state);
 			state.callStack.pop();			
 		} catch(e) {
-			printError(state.callStack, e.message);
 			console.error(e);
+			printError(state.callStack, e.message, state.filePath);
 			return;
 		}
 	}
 }
 
-function printError(stack, errorMessage) {
-	let message = errorMessage + '\n';
+function printError(stack, errorMessage, filePaths) {
+	let message = filePaths.map((file) => `File: ${file}`).join('\n') + '\n';
+	message += `${errorMessage}\n`;
+	if (stack.length%2 === 1) {
+		message += `\t\t\tin ${stack.pop()}\n`;
+	}
 	while(stack.length > 0) {
 		const stepIndex = stack.pop();
 		const stepName = stack.pop();
 		message += `\t\t\tat ${stepName} (step: ${stepIndex})\n`;
 	}
-	console.log(message);
-	
+	console.log(message);	
 }
 
 async function applyStep(step, state) {
@@ -333,37 +350,51 @@ async function applyStep(step, state) {
 	state.callStack.pop();
 }
 
+
+function replaceObjectProperty(object, key, keyword, value) {
+	
+	let oldValue = object[key];
+	// It's more complex than we thought.
+	if (!Array.isArray(keyword) && typeof keyword === "object") {
+		// go through each and check if it matches anywhere.
+		for(const property in keyword) {
+			if (keyword[property]) {
+				object[key] = oldValue.replace(new RegExp(keyword[property], "g"), value[property] || "");
+				oldValue = object[key];
+			}
+		}
+	} else {
+		object[key] = oldValue.replace(new RegExp(keyword, "g"), value); 
+	}
+}
+
 /**
  * @param {object} obj The object to search and replace the values of
- * @param {RegExp| {property: RegExp}} keyword The expression to match against
- * @param {String| {property: String}} value The value the replace the match
+ * @param {RegExp| {[replacementId: string]: RegExp}} keyword The expression to match against
+ * @param {String| {[replacementId]: string | number}} value The value the replace the match
  * @returns {void}
  * */ 
 function valueInsertion(obj, keyword, value) {
-	if (typeof obj === "string") {
-		// search for all instances of value and replace it 
-		let oldValue = obj[key];
 		
-		// It's more complex than we thought.
-		if (!Array.isArray(keyword) && typeof keyword === "object") {
-			// go through each and check if it matches anywhere.
-			for(const property in keyword) {
-				obj[key] = oldValue.replace(new RegExp(keyword[property], "g"), value[property]);
-				oldValue = obj[key];
+	if (Array.isArray(obj)) {
+		for (let index = 0; index < obj.length; index++) {
+			const child = obj[index];
+			if (typeof child  === "string") {
+				replaceObjectProperty(obj, index, keyword, value);
+			} else if (typeof child === "object") {
+				valueInsertion(child, keyword, value);
 			}
-		} else {
-			obj[key] = oldValue.replace(new RegExp(keyword, "g"), value); 
-		}
-	} else if (Array.isArray(obj)) {
-		for (const child of obj[key]) {
-			valueInsertion(child, keyword, value);
 		}
 	} else if (typeof obj === "object") {
 		for(let key in obj) {
-			if (obj[key].constructor === Object) {
-				valueInsertion(obj[key], value);
+			if (!obj[key])
+				continue;
+			if (typeof obj[key] === "string") {
+				replaceObjectProperty(obj, key, keyword, value);
+			} else {
+				valueInsertion(obj[key], keyword, value);
 			}
-		}	
+		}
 	}
 }
 
@@ -374,22 +405,29 @@ appliers["FOR_IN"] = async function (state) {
 	const body = this["body"];
 	const values = this["values"];
 	const keyword = this["keyword"];
-	
+
+	if (!Array.isArray(body)) {
+		throw Error('Error: body must be an array.');
+	}
+
+	if (!values) {
+		throw Error('Error: values must be set.');
+	}
+
+	if (!keyword) {
+		throw Error('Error: keyword must be set.');
+	}
+
 	for(let i = 0; i < values.length; i++) {
-		for (let statement, index = 0; index < body.length; index++) {
-			statement = body[index];
+		const cloneBody = photocopy(body);
+		const value = values[i];
+		valueInsertion(cloneBody, keyword, value);
+		for (let index = 0; index < cloneBody.length; index++) {
+			const statement = cloneBody[index];
 			state.callStack.push(index);
-			const value = values[i];
 			const type = statement["type"];
-			const clone = photocopy(statement);
-			
-			valueInsertion(clone, keyword, value);
-			// to preserve type of statement
-			clone.type = type;
-			
-			await applyStep(clone, state);
+			await applyStep(statement, state);
 			state.callStack.pop();
-			
 		}
 	}
 };
@@ -444,9 +482,16 @@ appliers["ENTER"] = async function (state) {
 	let path = [this["index"]];
 	if (this["index"].constructor == Array)
 		path = this["index"];
-	for (let idx of path) {
+	for (let i = 0; i < path.length;i++) {
+		const idx = path[i];
 		state.stack.push(state.currentValue);
+		if (state.currentValue[idx] === undefined) {
+			const subArr = path.slice(0, i + 1);
+			throw Error(`Error: index sequence ${subArr.join(",")} leads to an undefined state.`);
+		}
+		
 		state.currentValue = state.currentValue[idx];
+		
 	}
 };
 
@@ -454,11 +499,20 @@ appliers["EXIT"] = async function (state) {
 	let count = 1;
 	if ("count" in this)
 		count = this["count"];
-	for (let i = 0; i < count; i++)
+	for (let i = 0; i < count; i++) {
+		if (state.stack.length === 0) {
+			throw Error(`Error: EXIT #${count + 1} leads to an undefined state.`);
+		}
 		state.currentValue = state.stack.pop();
+	}
+		
 };
 
 appliers["SET_KEY"] = async function (state) {
+	if (!this["index"]) {
+		throw Error('Error: index must be set.');
+	}
+
 	if ("content" in this) {
 		state.currentValue[this["index"]] = photocopy(this["content"]);
 	} else {
@@ -467,12 +521,22 @@ appliers["SET_KEY"] = async function (state) {
 };
 
 appliers["REMOVE_ARRAY_ELEMENT"] = async function (state) {
-	state.currentValue.splice(this["index"], 1);
+	const index = this["index"]%1;
+	if (isNaN(index)) {
+		throw Error('Error: index must be a finite number.');
+	}
+
+	state.currentValue.splice(index, 1);
 };
 
 appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 	if ("index" in this) {
-		state.currentValue.splice(this["index"], 0, photocopy(this["content"]));
+		const index = this["index"]%1;
+		if (isNaN(index)) {
+			throw Error('Error: index must be a finite number.');
+		}
+
+		state.currentValue.splice(index, 0, photocopy(this["content"]));
 	} else {
 		state.currentValue.push(photocopy(this["content"]));
 	}
@@ -500,16 +564,24 @@ function resolveUrl(url, opts = {}) {
 }
 
 appliers["IMPORT"] = async function (state) {
+	if (!this["src"]) {
+		throw Error('Error: src must be set.');
+	}
+
 	const {fromGame, url} = resolveUrl(this["src"], {
 		fromGame: true
 	});
 	
-	let obj = await state.loader(fromGame, url);
+	let {data: obj} = await state.loader(fromGame, url);
 
-	if ("path" in this)
+	if ("path" in this) {
+		if (!Array.isArray(this["path"])) {
+			throw Error('Error: path must be an array.');
+		}
 		for (let i = 0; i < this["path"].length; i++)
 			obj = obj[this["path"][i]];
-
+	}
+	
 	if ("index" in this) {
 		state.currentValue[this["index"]] = photocopy(obj);
 	} else {
@@ -518,15 +590,23 @@ appliers["IMPORT"] = async function (state) {
 };
 
 appliers["INCLUDE"] = async function (state) {
+	if (!this["src"]) {
+		throw Error('Error: src must be set.');
+	}
+
 	const {fromGame, url} = resolveUrl(this["src"], {
 		fromGame: false
 	});
 
-	const includedSteps = await state.loader(fromGame, url);
-	await patch(state.currentValue, includedSteps, state.loader);
+	const {path, data} = await state.loader(fromGame, url);
+	await patch(state.currentValue, data, state.loader, state.filePath.concat([path]));
 };
 
 appliers["INIT_KEY"] = async function (state) {
+	if (!this["index"]) {
+		throw Error('Error: index must be set.');
+	}
+
 	if (!(this["index"] in state.currentValue))
 		state.currentValue[this["index"]] = photocopy(this["content"]);
 };
