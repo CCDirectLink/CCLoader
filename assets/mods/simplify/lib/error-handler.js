@@ -53,7 +53,7 @@ export default class ErrorHandler {
 			const step = stack[i];
 			switch (step.type) {
 				case 'Error':
-					message += `${line.errorType}: ${line.errorMessage}\n`;
+					message += `${step.errorType}: ${step.errorMessage}\n`;
 				break;
 				case 'Line': {
 					message += '\t\t\tat ';
