@@ -53,28 +53,25 @@ import ErrorHandler from './lib/error-handler.js';
 			await patchSteps.patch(target, patchData, async (url) => {
 				return await this.loadJSONPatched(url);
 			},
-			function(url, opts = {}) {
-				const config = Object.assign({
-					fromGame: false,
-					url
-				}, opts);
+			function(url, fromGame) {
+
 
 				try {
 					const decomposedUrl = new URL(url);
 					const protocol = decomposedUrl.protocol;
-					config.url = decomposedUrl.pathname;
+					url = decomposedUrl.pathname;
 					
 					if (protocol === 'mod:') {
-						config.fromGame = false;
+						fromGame = false;
 					} else if (protocol === 'game:') {
-						config.fromGame = true;
+						fromGame = true;
 					}
 				} catch (e) {}
 				let newUrl;
-				if (config.fromGame) {
-					newUrl = config.url;
+				if (fromGame) {
+					newUrl = url;
 				} else {
-					newUrl = patch.mod.baseDirectory.replace('assets/','') + config.url;
+					newUrl = patch.mod.baseDirectory.replace('assets/','') + url;
 				}
 				
 				return newUrl;

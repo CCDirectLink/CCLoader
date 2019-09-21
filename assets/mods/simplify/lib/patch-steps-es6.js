@@ -545,9 +545,7 @@ appliers["IMPORT"] = async function (state) {
 		state.errorHandler.throwError('ValueError', 'src must be set.');
 	}
 
-	const url = state.pathResolver(this["src"], {
-		fromGame: true
-	});
+	const url = state.pathResolver(this["src"], true);
 	
 	const obj = await state.loader(url);
 
@@ -571,9 +569,7 @@ appliers["INCLUDE"] = async function (state) {
 		state.errorHandler.throwError('ValueError', 'src must be set.');
 	}
 
-	const url = state.pathResolver(this["src"], {
-		fromGame: false
-	});
+	const url = state.pathResolver(this["src"], false);
 
 	const data = await state.loader(url);
 	
