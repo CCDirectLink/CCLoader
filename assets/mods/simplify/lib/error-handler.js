@@ -74,8 +74,6 @@ export default class ErrorHandler {
 		for(let fileIndex = 0; fileIndex < this.fileStack.length; fileIndex++) {
 			this.printFileInfo(this.fileStack[fileIndex]);
 		}
-		
-		
 	}
 }
 
