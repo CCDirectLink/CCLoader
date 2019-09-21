@@ -312,7 +312,8 @@ export async function patch(a, steps, loader, pathResolver, errorDisplayHandler)
 		cloneMap: new Map(),
 		loader: loader,
 		pathResolver: pathResolver,
-		errorDisplayHandler: errorDisplayHandler
+		errorDisplayHandler: errorDisplayHandler,
+		debug: false
 	};
 	for (let index = 0; index < steps.length; index++) {
 		try {
@@ -466,7 +467,9 @@ appliers["PASTE"] = async function(state) {
 
 
 appliers["COMMENT"] = async function(state) {
-	console.log(this["value"]);
+	if (state.debug) {
+		console.log(this["value"]);
+	}
 };
 
 appliers["ENTER"] = async function (state) {
@@ -584,5 +587,10 @@ appliers["INIT_KEY"] = async function (state) {
 
 	if (!(this["index"] in state.currentValue))
 		state.currentValue[this["index"]] = photocopy(this["content"]);
+};
+
+
+appliers["DEBUG"] = async function (state) {
+	state.debug = !!this["value"];
 };
 
