@@ -285,11 +285,11 @@ export const appliers = {};
  * @param {object|object[]} steps The patch, fresh from the JSON. Can be in legacy or Patch Steps format.
  * @param {(url: string) => Promise<any>} loader The loading function. 
  * @param {(url: string, fromGame: boolean) => string} pathResolver If fromGame is true, the file is from the game (see IMPORT). If fromGame is not true, the file is from the mod (see INCLUDE).
- * @param {ErrorHandler} errorHandler 
+ * @param {ErrorDisplayHandler} errorDisplayHandler 
  * @param {string} path to the Patch Sequence File.
  * @return {Promise<void>} A Promise
  */
-export async function patch(a, steps, loader, pathResolver, errorHandler) {
+export async function patch(a, steps, loader, pathResolver, errorDisplayHandler) {
 	if (steps.constructor === Object) {
 		// Standardized Mods specification
 		for (let k in steps) {
@@ -312,16 +312,16 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 		cloneMap: new Map(),
 		loader: loader,
 		pathResolver: pathResolver,
-		errorHandler: errorHandler
+		errorDisplayHandler: errorDisplayHandler
 	};
 	for (let index = 0; index < steps.length; index++) {
 		try {
-			errorHandler.addStep(index);
-			await applyStep(steps[index], state, errorHandler);		
-			errorHandler.removeLastStep();			
+			errorDisplayHandler.addStep(index);
+			await applyStep(steps[index], state, errorDisplayHandler);		
+			errorDisplayHandler.removeLastStep();			
 		} catch(e) {
-			errorHandler.print();	
-			if (e !== errorHandler) {
+			errorDisplayHandler.print();	
+			if (e !== errorDisplayHandler) {
 				console.error(e);
 			}
 			return;
@@ -332,13 +332,13 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 
 
 async function applyStep(step, state) {
-	state.errorHandler.getLastStep().name = step["type"];
+	state.errorDisplayHandler.getLastStep().name = step["type"];
 	if (!appliers[step["type"]]) {
-		state.errorHandler.getLastStep().name = '';
-		state.errorHandler.throwError('TypeError',`${step['type']} is not a valid type.`);
+		state.errorDisplayHandler.getLastStep().name = '';
+		state.errorDisplayHandler.throwError('TypeError',`${step['type']} is not a valid type.`);
 	}
 	await appliers[step["type"]].call(step, state);
-	state.errorHandler.removeLastStep();
+	state.errorDisplayHandler.removeLastStep();
 	
 }
 
@@ -399,38 +399,38 @@ appliers["FOR_IN"] = async function (state) {
 	const keyword = this["keyword"];
 
 	if (!Array.isArray(body)) {
-		state.errorHandler.throwError('ValueError', 'body must be an array.');
+		state.errorDisplayHandler.throwError('ValueError', 'body must be an array.');
 	}
 
 	if (!values) {
-		state.errorHandler.throwError('ValueError', 'values must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'values must be set.');
 	}
 
 	if (!keyword) {
-		state.errorHandler.throwError('ValueError', 'keyword must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'keyword must be set.');
 	}
 
 	for(let i = 0; i < values.length; i++) {
 		const cloneBody = photocopy(body);
 		const value = values[i];
 		valueInsertion(cloneBody, keyword, value);
-		state.errorHandler.addStep(i, 'VALUE_INDEX');
+		state.errorDisplayHandler.addStep(i, 'VALUE_INDEX');
 		for (let index = 0; index < cloneBody.length; index++) {
 			
 			const statement = cloneBody[index];
 			const type = statement["type"];
-			state.errorHandler.addStep(index, type);
+			state.errorDisplayHandler.addStep(index, type);
 			await applyStep(statement, state);
-			state.errorHandler.removeLastStep();
+			state.errorDisplayHandler.removeLastStep();
 		}
-		state.errorHandler.removeLastStep();
+		state.errorDisplayHandler.removeLastStep();
 	}
 };
 
 // copy the value with name
 appliers["COPY"] = async function(state) {
 	if (!this["alias"]) {
-		state.errorHandler.throwError('ValueError', 'alias must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'alias must be set.');
 	}
 	const value = photocopy(state.currentValue);
 	state.cloneMap.set(this["alias"], value);
@@ -439,7 +439,7 @@ appliers["COPY"] = async function(state) {
 // paste
 appliers["PASTE"] = async function(state) {
 	if (!this["alias"]) {
-		state.errorHandler.throwError('ValueError', 'alias must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'alias must be set.');
 	}
 	const value = photocopy(state.cloneMap.get(this["alias"]));
 	if (Array.isArray(state.currentValue)) {
@@ -460,7 +460,7 @@ appliers["PASTE"] = async function(state) {
 			content: value
 		}, state);
 	} else {
-		state.errorHandler.throwError('TypeError', `Type ${typeof state.currentValue} is not supported.`);
+		state.errorDisplayHandler.throwError('TypeError', `Type ${typeof state.currentValue} is not supported.`);
 	}
 };
 
@@ -471,7 +471,7 @@ appliers["COMMENT"] = async function(state) {
 
 appliers["ENTER"] = async function (state) {
 	if (!this["index"]) {
-		state.errorHandler.throwError('Error', 'index must be set.');
+		state.errorDisplayHandler.throwError('Error', 'index must be set.');
 	}
 
 	let path = [this["index"]];
@@ -482,7 +482,7 @@ appliers["ENTER"] = async function (state) {
 		state.stack.push(state.currentValue);
 		if (state.currentValue[idx] === undefined) {
 			const subArr = path.slice(0, i + 1);
-			state.errorHandler.throwError('Error', `index sequence ${subArr.join(",")} leads to an undefined state.`);
+			state.errorDisplayHandler.throwError('Error', `index sequence ${subArr.join(",")} leads to an undefined state.`);
 		}
 		
 		state.currentValue = state.currentValue[idx];
@@ -496,7 +496,7 @@ appliers["EXIT"] = async function (state) {
 		count = this["count"];
 	for (let i = 0; i < count; i++) {
 		if (state.stack.length === 0) {
-			state.errorHandler.throwError('Error', `EXIT #${count + 1} leads to an undefined state.`);
+			state.errorDisplayHandler.throwError('Error', `EXIT #${count + 1} leads to an undefined state.`);
 		}
 		state.currentValue = state.stack.pop();
 	}
@@ -505,7 +505,7 @@ appliers["EXIT"] = async function (state) {
 
 appliers["SET_KEY"] = async function (state) {
 	if (!this["index"]) {
-		state.errorHandler.throwError('Error', 'index must be set.');
+		state.errorDisplayHandler.throwError('Error', 'index must be set.');
 	}
 
 	if ("content" in this) {
@@ -518,7 +518,7 @@ appliers["SET_KEY"] = async function (state) {
 appliers["REMOVE_ARRAY_ELEMENT"] = async function (state) {
 	const index = this["index"]%1;
 	if (isNaN(index)) {
-		state.errorHandler.throwError('ValueError', 'index must be a finite number.');
+		state.errorDisplayHandler.throwError('ValueError', 'index must be a finite number.');
 	}
 
 	state.currentValue.splice(index, 1);
@@ -528,7 +528,7 @@ appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 	if ("index" in this) {
 		const index = this["index"]%1;
 		if (isNaN(index)) {
-			state.errorHandler.throwError('ValueError', 'index must be a finite number.');
+			state.errorDisplayHandler.throwError('ValueError', 'index must be a finite number.');
 		}
 
 		state.currentValue.splice(index, 0, photocopy(this["content"]));
@@ -541,7 +541,7 @@ appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 
 appliers["IMPORT"] = async function (state) {
 	if (!this["src"]) {
-		state.errorHandler.throwError('ValueError', 'src must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'src must be set.');
 	}
 
 	const url = state.pathResolver(this["src"], true);
@@ -550,7 +550,7 @@ appliers["IMPORT"] = async function (state) {
 
 	if ("path" in this) {
 		if (!Array.isArray(this["path"])) {
-			state.errorHandler.throwError('ValueError', 'path must be an array.');
+			state.errorDisplayHandler.throwError('ValueError', 'path must be an array.');
 		}
 		for (let i = 0; i < this["path"].length; i++)
 			obj = obj[this["path"][i]];
@@ -565,21 +565,21 @@ appliers["IMPORT"] = async function (state) {
 
 appliers["INCLUDE"] = async function (state) {
 	if (!this["src"]) {
-		state.errorHandler.throwError('ValueError', 'src must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'src must be set.');
 	}
 
 	const url = state.pathResolver(this["src"], false);
 
 	const data = await state.loader(url);
 	
-	state.errorHandler.addFile(url);
-	await patch(state.currentValue, data, state.loader, state.pathResolver, state.errorHandler);
-	state.errorHandler.removeLastFile();
+	state.errorDisplayHandler.addFile(url);
+	await patch(state.currentValue, data, state.loader, state.pathResolver, state.errorDisplayHandler);
+	state.errorDisplayHandler.removeLastFile();
 };
 
 appliers["INIT_KEY"] = async function (state) {
 	if (!this["index"]) {
-		state.errorHandler.throwError('ValueError', 'index must be set.');
+		state.errorDisplayHandler.throwError('ValueError', 'index must be set.');
 	}
 
 	if (!(this["index"] in state.currentValue))

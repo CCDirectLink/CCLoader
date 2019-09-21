@@ -1,4 +1,4 @@
-export default class ErrorHandler {
+export default class ErrorDisplayHandler {
 	
 	constructor() {
 		this.fileStack = [];

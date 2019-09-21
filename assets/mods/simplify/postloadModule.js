@@ -1,5 +1,5 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
-import ErrorHandler from './lib/error-handler.js';
+import ErrorDisplayHandler from './lib/error-display-handler.js';
 
 (() => {
 	const igroot = window.IG_ROOT || '';
@@ -48,8 +48,8 @@ import ErrorHandler from './lib/error-handler.js';
 		 * @return {Promise<any>} result
 		 */
 		async _applyPatch(target, patchData, patch) {
-			const errorHandler = new ErrorHandler();
-			errorHandler.addFile(patch.path);
+			const errorDisplayHandler = new ErrorDisplayHandler();
+			errorDisplayHandler.addFile(patch.path);
 			await patchSteps.patch(target, patchData, async (url) => {
 				return await this.loadJSONPatched(url);
 			},
@@ -75,7 +75,7 @@ import ErrorHandler from './lib/error-handler.js';
 				}
 				
 				return newUrl;
-			}, errorHandler);
+			}, errorDisplayHandler);
 			
 		}
 	
