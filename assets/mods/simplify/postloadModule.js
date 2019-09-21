@@ -201,7 +201,9 @@ import ErrorHandler from './lib/error-handler.js';
 					success: (val) => {
 						resolve(val);
 					},
-					error: reject
+					error: (xhr) => {
+						reject(`Error ${xhr.status}: Could not load "${path}"`);
+					}
 				});
 			});
 		}
