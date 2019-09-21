@@ -283,7 +283,9 @@ export const appliers = {};
 /*
  * @param {any} a The object to modify
  * @param {object|object[]} steps The patch, fresh from the JSON. Can be in legacy or Patch Steps format.
- * @param {(fromGame: boolean, url: string) => Promise<any>} loader The loading function. If fromGame is true, the file is from the game (see IMPORT). If fromGame is not true, the file is from the mod (see INCLUDE).
+ * @param {(url: string) => Promise<any>} loader The loading function. 
+ * @param {(url: string, fromGame: boolean) => string} pathResolver If fromGame is true, the file is from the game (see IMPORT). If fromGame is not true, the file is from the mod (see INCLUDE).
+ * @param {ErrorHandler} errorHandler 
  * @param {string} path to the Patch Sequence File.
  * @return {Promise<void>} A Promise
  */
@@ -321,7 +323,7 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 			if (e === errorHandler) {
 				errorHandler.print();
 			} else {
-				console.log(e);
+				console.error(e);
 			}
 			return;
 		}
