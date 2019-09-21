@@ -316,9 +316,9 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 	};
 	for (let index = 0; index < steps.length; index++) {
 		try {
-			errorHandler.addLine(index);
+			errorHandler.addStep(index);
 			await applyStep(steps[index], state, errorHandler);		
-			errorHandler.removeLastLine();			
+			errorHandler.removeLastStep();			
 		} catch(e) {
 			errorHandler.print();	
 			if (e !== errorHandler) {
@@ -332,13 +332,13 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 
 
 async function applyStep(step, state) {
-	state.errorHandler.getLastLine().name = step["type"];
+	state.errorHandler.getLastStep().name = step["type"];
 	if (!appliers[step["type"]]) {
-		state.errorHandler.getLastLine().name = '';
+		state.errorHandler.getLastStep().name = '';
 		state.errorHandler.throwError('TypeError',`${step['type']} is not a valid type.`);
 	}
 	await appliers[step["type"]].call(step, state);
-	state.errorHandler.removeLastLine();
+	state.errorHandler.removeLastStep();
 	
 }
 
@@ -414,16 +414,16 @@ appliers["FOR_IN"] = async function (state) {
 		const cloneBody = photocopy(body);
 		const value = values[i];
 		valueInsertion(cloneBody, keyword, value);
-		state.errorHandler.addLine(i, 'VALUE_INDEX');
+		state.errorHandler.addStep(i, 'VALUE_INDEX');
 		for (let index = 0; index < cloneBody.length; index++) {
 			
 			const statement = cloneBody[index];
 			const type = statement["type"];
-			state.errorHandler.addLine(index, type);
+			state.errorHandler.addStep(index, type);
 			await applyStep(statement, state);
-			state.errorHandler.removeLastLine();
+			state.errorHandler.removeLastStep();
 		}
-		state.errorHandler.removeLastLine();
+		state.errorHandler.removeLastStep();
 	}
 };
 

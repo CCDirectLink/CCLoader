@@ -20,18 +20,18 @@ export default class ErrorHandler {
 		return lastFile;
 	}
 	
-	addLine(line, name = "") {
+	addStep(index, name = "") {
 		this.currentFile.stack.push({
 			type: "Line",
-			line,
+			index,
 			name
 		});
 	}
-	removeLastLine() {
+	removeLastStep() {
 		return this.currentFile.stack.pop();
 	}
 	
-	getLastLine() {
+	getLastStep() {
 		const stack = this.currentFile.stack;
 		return stack[stack.length - 1];
 	}
@@ -50,17 +50,17 @@ export default class ErrorHandler {
 		let message = '';
 		const stack = file.stack;
 		for(let i = stack.length - 1; i >= 0; i--) {
-			const line = stack[i];
-			switch (line.type) {
+			const step = stack[i];
+			switch (step.type) {
 				case 'Error':
 					message += `${line.errorType}: ${line.errorMessage}\n`;
 				break;
 				case 'Line': {
-					if (line.name) {
-						message += `\t\t\tat ${line.name} (step: ${line.line})\n`;
-					} else {
-						message += `\t\t\tat (step: ${line.line})\n`;
+					message += '\t\t\tat ';
+					if (step.name) {
+						message += `${step.name} `; 
 					}
+					message += `(step: ${step.index})\n`;
 				}
 				break;
 				default:
