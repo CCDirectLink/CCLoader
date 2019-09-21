@@ -1,4 +1,5 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
+import ErrorHandler from './lib/error-handler.js';
 
 (() => {
 	const igroot = window.IG_ROOT || '';
@@ -46,22 +47,39 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @param {string} modbase
 		 * @return {Promise<any>} result
 		 */
-		async _applyPatch(target, patch, modbase, patchPath) {
-			await patchSteps.patch(target, patch, async (fromGame, url) => {
-				if (fromGame) {
-					// Import (game file)
-					return {
-						path: igroot + url,
-						data: await this.loadJSONPatched(igroot + url)
-					};
+		async _applyPatch(target, patchData, patch) {
+			const errorHandler = new ErrorHandler();
+			errorHandler.addFile(patch.path);
+			await patchSteps.patch(target, patchData, async (url) => {
+				return await this.loadJSONPatched(url);
+			},
+			function(url, opts = {}) {
+				const config = Object.assign({
+					fromGame: false,
+					url
+				}, opts);
+
+				try {
+					const decomposedUrl = new URL(url);
+					const protocol = decomposedUrl.protocol;
+					config.url = decomposedUrl.pathname;
+					
+					if (protocol === 'mod:') {
+						config.fromGame = false;
+					} else if (protocol === 'game:') {
+						config.fromGame = true;
+					}
+				} catch (e) {}
+				let newUrl;
+				if (config.fromGame) {
+					newUrl = config.url;
 				} else {
-					// Include (mod file)
-					return {
-						path: modbase + url,
-						data: await this.loadJSON(modbase + url)
-					};
+					newUrl = patch.mod.baseDirectory.replace('assets/','') + config.url;
 				}
-			}, patchPath);
+				
+				return newUrl;
+			}, errorHandler);
+			
 		}
 	
 		/**
@@ -246,7 +264,6 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					try {
 						successArgs = await this._handleAjaxPatching(originalUrl, this._waitForAjax(settings));
 					} catch (e) {
-						debugger;
 						settings.error.apply(settings.context, e);
 						return;
 					}
@@ -341,7 +358,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					continue;
 				}
 
-				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i].mod.baseDirectory, patches[i].path);
+				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i]);
 			}
 			return successArgs;
 		}
