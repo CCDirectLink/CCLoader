@@ -320,9 +320,8 @@ export async function patch(a, steps, loader, pathResolver, errorHandler) {
 			await applyStep(steps[index], state, errorHandler);		
 			errorHandler.removeLastLine();			
 		} catch(e) {
-			if (e === errorHandler) {
-				errorHandler.print();
-			} else {
+			errorHandler.print();	
+			if (e !== errorHandler) {
 				console.error(e);
 			}
 			return;
