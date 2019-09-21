@@ -22,18 +22,34 @@ export default class ErrorDisplayHandler {
 	
 	addStep(index, name = "") {
 		this.currentFile.stack.push({
-			type: "Line",
+			type: "Step",
 			index,
 			name
 		});
 	}
 	removeLastStep() {
-		return this.currentFile.stack.pop();
+		const stack = this.currentFile.stack;
+		let currentStep = null;
+		for(let index = stack.length - 1; index >= 0; index--) {
+			if (stack[index].type === "Step") {
+				currentStep = stack[index];
+				stack.splice(index,1);
+				index = -1;
+			}
+		}
+		return currentStep;
 	}
 	
 	getLastStep() {
 		const stack = this.currentFile.stack;
-		return stack[stack.length - 1];
+		let currentStep = null;
+		for(let index = stack.length - 1; index >= 0; index--) {
+			if (stack[index].type === "Step") {
+				currentStep = stack[index];
+				index = -1;
+			}
+		}
+		return currentStep;
 	}
 	
 	throwError(type, message) {
@@ -55,7 +71,7 @@ export default class ErrorDisplayHandler {
 				case 'Error':
 					message += `${step.errorType}: ${step.errorMessage}\n`;
 				break;
-				case 'Line': {
+				case 'Step': {
 					message += '\t\t\tat ';
 					if (step.name) {
 						message += `${step.name} `; 
