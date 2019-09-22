@@ -1,5 +1,5 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
-
+import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
 	
@@ -47,7 +47,8 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 * @return {Promise<any>} result
 		 */
 		async _applyPatch(target, patchData, patch) {
-			const debugState = new patchSteps.DebugState();
+			const debugState = new CustomDebugState();
+			debugState.setPatch(patch);
 			debugState.addFile([true, patch.path]);
 			await patchSteps.patch(target, patchData, async (fromGame, url) => {
 				let data = null;
