@@ -1,5 +1,4 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
-import ErrorDisplayHandler from './lib/error-display-handler.js';
 
 (() => {
 	const igroot = window.IG_ROOT || '';
@@ -43,40 +42,29 @@ import ErrorDisplayHandler from './lib/error-display-handler.js';
 		/**
 		 * Generates patches for a pair of given objects or files.
 		 * @param {object} target
-		 * @param {object|array} patch
-		 * @param {string} modbase
+		 * @param {object|array} patchData
+		 * @param {{mod: Mod, path: string}} patch
 		 * @return {Promise<any>} result
 		 */
 		async _applyPatch(target, patchData, patch) {
-			const errorDisplayHandler = new ErrorDisplayHandler();
-			errorDisplayHandler.addFile(patch.path);
-			await patchSteps.patch(target, patchData, async (url) => {
-				return await this.loadJSONPatched(url);
-			},
-			function(url, fromGame) {
-
-
-				try {
-					const decomposedUrl = new URL(url);
-					const protocol = decomposedUrl.protocol;
-					url = decomposedUrl.pathname;
-					
-					if (protocol === 'mod:') {
-						fromGame = false;
-					} else if (protocol === 'game:') {
-						fromGame = true;
+			const debugState = new patchSteps.DebugState();
+			debugState.addFile(patch.path);
+			await patchSteps.patch(target, patchData, async (protocol, url) => {
+				let data = null;
+				switch(protocol) {
+					case 'game:': {
+						data = await this.loadJSONPatched(igroot + url);
 					}
-				} catch (e) {}
-				let newUrl;
-				if (fromGame) {
-					newUrl = url;
-				} else {
-					newUrl = patch.mod.baseDirectory.replace('assets/','') + url;
+					break;
+					case 'mod:' {
+						data = await this.loadJSON(patch.mod.baseDirectory + url);
+					}
+					break;
+					default:
+					break;
 				}
-				
-				return newUrl;
-			}, errorDisplayHandler);
-			
+				return data;
+			}, debugState);
 		}
 	
 		/**
