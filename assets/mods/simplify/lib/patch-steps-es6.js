@@ -276,7 +276,7 @@ function diffInterior(a, b, settings) {
 }
 
 // Error handling for appliers.
-
+// You are expected to subclass this class if you want additional functionality.
 export class DebugState {
 	
 	constructor() {
@@ -284,8 +284,22 @@ export class DebugState {
 		this.currentFile = null;
 	}
 	
+	translateParsedPath(parsedPath) {
+		if (parsedPath === null)
+			return "(unknown file)";
+		// By default, we know nothing.
+		// see: parsePath, loader's definition
+		let protocol = parsedPath[0].toString();
+		if (parsedPath[0] === true) {
+			protocol = "game";
+		} else if (parsedPath[0] === false) {
+			protocol = "mod";
+		}
+		return protocol + ":" + parsedPath[1];
+	}
 	
-	addFile(path) {
+	addFile(parsedPath) {
+		const path = this.translateParsedPath(parsedPath);
 		const fileInfo = {
 			path,
 			stack: []
@@ -381,6 +395,8 @@ export const appliers = {};
  * @param {any} a The object to modify
  * @param {object|object[]} steps The patch, fresh from the JSON. Can be in legacy or Patch Steps format.
  * @param {(fromGame: boolean | string, path: string) => Promise<any>} loader The loading function.
+ *  NOTE! IF CHANGING THIS, KEEP IN MIND DEBUGSTATE translatePath GETS ARGUMENTS ARRAY OF THIS.
+ *  ALSO KEEP IN MIND THE parsePath FUNCTION!
  *  For fromGame: false this gets a file straight from the mod, such as "package.json".
  *  For fromGame: true this gets a file from the game, which is patched by the host if relevant.
  *  If the PatchSteps file passes a protocol that is not understood, then, and only then, will a string be passed (without the ":" at the end)
@@ -392,7 +408,7 @@ export const appliers = {};
 export async function patch(a, steps, loader, debugState) {
 	if (!debugState) {
 		debugState = new DebugState();
-		debugState.addFile("(unknown root)");
+		debugState.addFile(null);
 	}
 	if (steps.constructor === Object) {
 		// Standardized Mods specification
@@ -637,7 +653,7 @@ appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 };
 
 // Reintroduced but simplified version of Emileyah's resolveUrl
-function loaderWrapper(state, url, fromGame) {
+function parsePath(url, fromGame) {
 	try {
 		const decomposedUrl = new URL(url);
 		const protocol = decomposedUrl.protocol;
@@ -653,7 +669,10 @@ function loaderWrapper(state, url, fromGame) {
 		}
 	} catch (e) {
 	}
-	return state.loader(fromGame, url);
+	return [
+		fromGame,
+		url
+	];
 }
 
 appliers["IMPORT"] = async function (state) {
@@ -661,7 +680,8 @@ appliers["IMPORT"] = async function (state) {
 		state.debugState.throwError('ValueError', 'src must be set.');
 	}
 
-	const obj = await loaderWrapper(state, this["src"], true);
+	const srcPath = parsePath(this["src"], true);
+	const obj = await state.loader.apply(state, srcPath);
 
 	if ("path" in this) {
 		if (!Array.isArray(this["path"])) {
@@ -683,9 +703,10 @@ appliers["INCLUDE"] = async function (state) {
 		state.debugState.throwError('ValueError', 'src must be set.');
 	}
 
-	const data = await loaderWrapper(state, this["url"], false);
+	const srcPath = parsePath(this["src"], false);
+	const data = await state.loader.apply(state, srcPath);
 
-	state.debugState.addFile(url);
+	state.debugState.addFile(srcPath);
 	await patch(state.currentValue, data, state.loader, state.debugState);
 	state.debugState.removeLastFile();
 };
