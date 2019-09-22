@@ -12,7 +12,6 @@ export default class CustomDebugState extends DebugState {
 	/**
 	 * Prints current context file stack.
 	 * @param {{path: string, stack: string[]}} file
-	 *  
 	 */
 	printFileInfo(file) {
 		// resolve the urls
