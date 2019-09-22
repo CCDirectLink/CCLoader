@@ -17,7 +17,6 @@ export default class CustomDebugState extends DebugState {
 		// resolve the urls
 		let [protocol, path] = file.path.split(":");
 		const newFile = Object.assign({},file);
-		debugger;
 		if (protocol === "mod") {
 			newFile.path = this.currentPatch.mod.baseDirectory + path;
 		} else if (protocol === "game") {
