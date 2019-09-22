@@ -48,15 +48,21 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		 */
 		async _applyPatch(target, patchData, patch) {
 			const debugState = new patchSteps.DebugState();
-			debugState.addFile(patch.path);
-			await patchSteps.patch(target, patchData, async (protocol, url) => {
+			debugState.addFile([true, patch.path]);
+			await patchSteps.patch(target, patchData, async (fromGame, url) => {
 				let data = null;
+				let protocol = fromGame;
+				if (fromGame === true) {
+					protocol = 'game:';
+				} else if (fromGame === false) {
+					protocol = 'mod:';
+				}
 				switch(protocol) {
 					case 'game:': {
 						data = await this.loadJSONPatched(igroot + url);
 					}
 					break;
-					case 'mod:' {
+					case 'mod:': {
 						data = await this.loadJSON(patch.mod.baseDirectory + url);
 					}
 					break;
