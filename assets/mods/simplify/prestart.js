@@ -3,6 +3,7 @@ ig.module("impact.feature.greenworks.greenworks-fix").requires("impact.feature.g
 		init: function() {
 			this.name = "Greenworks";
 			try {
+				const semver = parent.semver;
 				this.greenworks = parent.makeGreenWork();
 				this.steps.push("loaded");
 	
