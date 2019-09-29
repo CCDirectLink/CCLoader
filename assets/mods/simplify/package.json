@@ -3,6 +3,7 @@
 	"main": "mod.js",
 	"preload": "preload.js",
 	"postload": "postload.js",
+	"prestart": "prestart.js",
 	"plugin": "plugin.js",
 	"hidden": true,
 	"version": "2.8.0",
