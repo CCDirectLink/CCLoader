@@ -5,7 +5,7 @@ ig.module("impact.feature.greenworks.greenworks-fix").requires("impact.feature.g
 			this.greenworks = null;
 			try {
 				const semver = parent.semver;
-				this.greenworks = makeGreenworks();
+				this.greenworks = new Greenworks();
 				this.steps.push("loaded");
 	
 				const version = process.versions["node-webkit"];

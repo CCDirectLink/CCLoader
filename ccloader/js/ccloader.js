@@ -219,9 +219,7 @@ export class ModLoader {
 		Object.assign(this._getGameWindow(), {
 			Plugin,
 			versions,
-			makeGreenworks: () => {
-				return new Greenworks();
-			}
+			Greenworks
 		});
 
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
