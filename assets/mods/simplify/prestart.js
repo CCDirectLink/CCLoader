@@ -2,9 +2,10 @@ ig.module("impact.feature.greenworks.greenworks-fix").requires("impact.feature.g
 	ig.Greenworks.inject({
 		init: function() {
 			this.name = "Greenworks";
+			this.greenworks = null;
 			try {
 				const semver = parent.semver;
-				this.greenworks = parent.makeGreenWork();
+				this.greenworks = makeGreenworks();
 				this.steps.push("loaded");
 	
 				const version = process.versions["node-webkit"];
@@ -18,13 +19,11 @@ ig.module("impact.feature.greenworks.greenworks-fix").requires("impact.feature.g
 			} catch (error) {
 				this.steps.push("error");
 				this.errorMsg = error.toString();
-				this.greenworks = null;
 			}
 
 			if (this.greenworks) {
 				this.steps.push("initialized");
-			}
-			
+			}	
 		}
 	});
 });
