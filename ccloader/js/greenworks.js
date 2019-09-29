@@ -1,4 +1,4 @@
-export class GreenWorks {
+export class Greenworks {
 	constructor() {
 		this._greenworks = null;
 
