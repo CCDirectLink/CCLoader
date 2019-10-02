@@ -51,26 +51,13 @@ import CustomDebugState from './lib/custom-debug-state.js';
 			debugState.setPatch(patch);
 			debugState.addFile([true, patch.path]);
 			await patchSteps.patch(target, patchData, async (fromGame, url) => {
-				let data = null;
-				let protocol = fromGame;
-				if (fromGame === true) {
-					protocol = 'game:';
-				} else if (fromGame === false) {
-					protocol = 'mod:';
+				if (fromGame) {
+					// Import (game file)
+					return await this.loadJSONPatched(igroot + url);
+				} else {
+					// Include (mod file)
+					return await this.loadJSON(patch.mod.baseDirectory + url);
 				}
-				switch(protocol) {
-					case 'game:': {
-						data = await this.loadJSONPatched(igroot + url);
-					}
-					break;
-					case 'mod:': {
-						data = await this.loadJSON(patch.mod.baseDirectory + url);
-					}
-					break;
-					default:
-					break;
-				}
-				return data;
 			}, debugState);
 		}
 	
