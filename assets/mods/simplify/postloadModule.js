@@ -1,5 +1,5 @@
 import * as patchSteps from './lib/patch-steps-es6.js';
-
+import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
 	
@@ -42,20 +42,23 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 		/**
 		 * Generates patches for a pair of given objects or files.
 		 * @param {object} target
-		 * @param {object|array} patch
-		 * @param {string} modbase
+		 * @param {object|array} patchData
+		 * @param {{mod: Mod, path: string}} patch
 		 * @return {Promise<any>} result
 		 */
-		async _applyPatch(target, patch, modbase) {
-			await patchSteps.patch(target, patch, async (fromGame, url) => {
+		async _applyPatch(target, patchData, patch) {
+			const debugState = new CustomDebugState();
+			debugState.setPatch(patch);
+			debugState.addFile([true, patch.path]);
+			await patchSteps.patch(target, patchData, async (fromGame, url) => {
 				if (fromGame) {
 					// Import (game file)
 					return await this.loadJSONPatched(igroot + url);
 				} else {
 					// Include (mod file)
-					return await this.loadJSON(modbase + url);
+					return await this.loadJSON(patch.mod.baseDirectory + url);
 				}
-			});
+			}, debugState);
 		}
 	
 		/**
@@ -180,7 +183,9 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					success: (val) => {
 						resolve(val);
 					},
-					error: reject
+					error: (xhr) => {
+						reject(`Error ${xhr.status}: Could not load "${path}"`);
+					}
 				});
 			});
 		}
@@ -334,7 +339,7 @@ import * as patchSteps from './lib/patch-steps-es6.js';
 					continue;
 				}
 
-				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i].mod.baseDirectory);
+				await this._applyPatch(successArgs[0], values[i + 1].value, patches[i]);
 			}
 			return successArgs;
 		}
