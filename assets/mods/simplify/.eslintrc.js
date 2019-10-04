@@ -17,7 +17,8 @@ module.exports = {
         "cc": true,
         "reloadTables": true,
         "entries": true,
-        "$": true
+        "$": true,
+        "Greenworks": true
     },
     "rules": {
         "indent": [
