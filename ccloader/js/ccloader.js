@@ -4,8 +4,9 @@ import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
+import { Greenworks } from './greenworks.js';
 
-const CCLOADER_VERSION = '2.15.0';
+const CCLOADER_VERSION = '2.15.1';
 
 export class ModLoader {
 	constructor() {
@@ -218,6 +219,7 @@ export class ModLoader {
 		Object.assign(this._getGameWindow(), {
 			Plugin,
 			versions,
+			Greenworks
 		});
 
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
