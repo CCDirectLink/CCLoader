@@ -2,13 +2,6 @@
 
 This file will contain handy things to know about CCLoader and the CrossCode DevTools console.
 
-
-# Files
-
-1.  Download the repository by left clicking on the  `Clone or download`  and left click on  `Download Zip`.
-2.  Unzip the zip file.
-3.  Copy the contents of the folder into your CrossCode installation folder.
-
 ## Difference between Scripts and Console
 
 They are both JavaScript code and have the same effect but scripts are loaded at specific times specified in [https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md](https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md "https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md") . That doc also tells you how the `package.json` file is structured.
@@ -149,6 +142,6 @@ ig.module("name").requires("others").defines(function() {
 ```
 This means that `sc.combat` is an instance of `sc.Combat` and has all of it's variables and functions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwNTI2NzcwNzEsLTE5OTY5ODUyMjksLT
-MzMjQ1NTM2M119
+eyJoaXN0b3J5IjpbLTEzNzg0ODQ4OTYsLTIwNTI2NzcwNzEsLT
+E5OTY5ODUyMjksLTMzMjQ1NTM2M119
 -->
