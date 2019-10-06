@@ -92,7 +92,7 @@ ig.module("name").requires("others").defines(function() {
 ```
 ## Checking Variable Arguments
 
-If you enter `sc.GAME_MOBILITY_BLOCK` you will get a list of 'NONE', 'TELEPORT', 'SAVE', 'CHECKPOINT' and 'NO_MAP_LEAVE'.(edited)
+If you enter `sc.GAME_MOBILITY_BLOCK` you will get a list of 'NONE', 'TELEPORT', 'SAVE', 'CHECKPOINT' and 'NO_MAP_LEAVE'.
 
 Classes are also always found at the root of a module and always look like this:
 
@@ -137,6 +137,6 @@ ig.module("name").requires("others").defines(function() {
 ```
 This means that `sc.combat` is an instance of `sc.Combat` and has all of it's variables and functions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg3Mjc4MTY4NSwtMjA1MjY3NzA3MSwtMT
-k5Njk4NTIyOSwtMzMyNDU1MzYzXX0=
+eyJoaXN0b3J5IjpbMTM3ODk5MjUwOSwxODcyNzgxNjg1LC0yMD
+UyNjc3MDcxLC0xOTk2OTg1MjI5LC0zMzI0NTUzNjNdfQ==
 -->
