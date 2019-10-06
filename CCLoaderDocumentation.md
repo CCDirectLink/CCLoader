@@ -102,11 +102,34 @@ ig.module("name").requires("others").defines(function() {
     //...
 })
 ```
-## Save a file
+## Checking Variable Arguments
 
-You can save any file of the workspace to **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Save on**. Even if a file in the workspace is already synced, you can save it to another location. StackEdit can sync one file with multiple locations and accounts.
+If you enter `sc.GAME_MOBILITY_BLOCK` you will get a list of 'NONE', 'TELEPORT', 'SAVE', 'CHECKPOINT' and 'NO_MAP_LEAVE'.(edited)
 
-## Synchronize a file
+Classes are also always found at the root of a module and always look like this:
+
+```JS
+ig.module("name").requires("others").defines(function() {
+    //...
+
+    ig.Name = ig.Class.extends({
+        variableA: 1,
+        variableB: "asdf",
+        init: function(a, b, c) {
+            //This is the constructor with the args a, b, c
+        },
+        funcA: function() {
+            this.funcB(); //The other func can be called using "this"
+        },
+        funcB: function() {
+            console.log(this.variableB); //Variables can be used using "this"
+        }
+    })
+
+    //...
+})
+```
+## Referencing 
 
 Once your file is linked to a synchronized location, StackEdit will periodically synchronize it by downloading/uploading any modification. A merge will be performed if necessary and conflicts will be resolved.
 
@@ -200,6 +223,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwNzgyNTEzNTYsLTE5OTY5ODUyMjksLT
-MzMjQ1NTM2M119
+eyJoaXN0b3J5IjpbMjYyOTQwMzg5LC0xOTk2OTg1MjI5LC0zMz
+I0NTUzNjNdfQ==
 -->
