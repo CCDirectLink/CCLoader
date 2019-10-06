@@ -53,11 +53,6 @@ About how to find out what variables to use: You first have to understand how Cr
 
 It starts with some utility code and then with modules. Every module starts with module - recognized by `ig.module("name").requires(...).defines(function() { ... })` - has a name requirements and a body. These modules are just groups of related code. You could make a tool that puts it into different files but then you'd end up with 100 files to look through.
 
-## Export a file
-
-You can export the current file by clicking **Export to disk** in the menu. You can choose to export the file as plain Markdown, as HTML using a Handlebars template or as a PDF.
-
-
 ## Important Variables
 
 
@@ -142,6 +137,6 @@ ig.module("name").requires("others").defines(function() {
 ```
 This means that `sc.combat` is an instance of `sc.Combat` and has all of it's variables and functions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzNzg0ODQ4OTYsLTIwNTI2NzcwNzEsLT
-E5OTY5ODUyMjksLTMzMjQ1NTM2M119
+eyJoaXN0b3J5IjpbMTg3Mjc4MTY4NSwtMjA1MjY3NzA3MSwtMT
+k5Njk4NTIyOSwtMzMyNDU1MzYzXX0=
 -->
