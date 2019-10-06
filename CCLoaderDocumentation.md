@@ -5,11 +5,13 @@ This file will contain handy things to know about CCLoader and the CrossCode Dev
 
 # Files
 
-StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
+1.  Download the repository by left clicking on the  `Clone or download`  and left click on  `Download Zip`.
+2.  Unzip the zip file.
+3.  Copy the contents of the folder into your CrossCode installation folder.
 
-## Create files and folders
+## Difference between Scripts and Console
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+They are both JavaScript code and have the same effect but scripts are loaded at specific times specified in [https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md](https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md "https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md") . That doc also tells you how the `package.json` file is structured.
 
 ## Switch to another file
 
@@ -142,5 +144,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5OTY5ODUyMjksLTMzMjQ1NTM2M119
+eyJoaXN0b3J5IjpbLTk4NTkwNjY2MSwtMTk5Njk4NTIyOSwtMz
+MyNDU1MzYzXX0=
 -->
