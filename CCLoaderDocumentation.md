@@ -38,9 +38,10 @@ You can export the current file by clicking **Export to disk** in the menu. You 
 
 All important variables are either in the `sc` or the `ig` object. As far as I can tell they are "prototype" and "runtime" objects respectively but I am not so sure about that.
 
-## Open a file
+## Constant Values
 
-You can open a file from **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Open from**. Once opened in the workspace, any modification in the file will be automatically synced.
+Constant values (and enums) are usually in written in CAPS_WITH_UNDERSCORES, are found at the root of a module and look like this:
+```ig.module("name").requires("others").defines(function() { //... sc.GAME_MOBILITY_BLOCK = { NONE: {}, TELEPORT: { teleportBlock: true }, SAVE: { teleportBlock: true, saveBlock: true }, CHECKPOINT: { teleportBlock: true, saveBlock: true, checkpointBlock: true }, NO_MAP_LEAVE: { teleportBlock: true, saveBlock: true, checkpointBlock: true, mapLeaveBlock: true } }; //... })
 
 ## Save a file
 
@@ -140,6 +141,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExODYzOTcwMDYsLTE5OTY5ODUyMjksLT
+eyJoaXN0b3J5IjpbLTE5Nzg5NjM5MjEsLTE5OTY5ODUyMjksLT
 MzMjQ1NTM2M119
 -->
