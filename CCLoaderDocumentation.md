@@ -1,6 +1,6 @@
 # CCLoader Documentation
 
-This file will contain handy things to know about CCLoader and the CrossCode DevTools console.
+This file will contain handy things to know about CCLoader and the CrossCode game code.
 
 ## Difference between Scripts and Console
 
@@ -137,6 +137,7 @@ ig.module("name").requires("others").defines(function() {
 ```
 This means that `sc.combat` is an instance of `sc.Combat` and has all of it's variables and functions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTM3ODk5MjUwOSwxODcyNzgxNjg1LC0yMD
-UyNjc3MDcxLC0xOTk2OTg1MjI5LC0zMzI0NTUzNjNdfQ==
+eyJoaXN0b3J5IjpbMTIyNDU3OTE5MSwxMzc4OTkyNTA5LDE4Nz
+I3ODE2ODUsLTIwNTI2NzcwNzEsLTE5OTY5ODUyMjksLTMzMjQ1
+NTM2M119
 -->
