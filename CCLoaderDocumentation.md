@@ -22,28 +22,21 @@ There is a new technique used for new mods that replaces the old "stage" entries
 ```
 ## Variables
 
-About how to find out what variables to use: You first have to understand how the CrossCode code (pun intended) is structured. For that you probably want to beautify the code (game.compiled.js) first: [https://beautifier.io/](https://beautifier.io/ "https://beautifier.io/") .
+About how to find out what variables to use: You first have to understand how CrossCode's code is structured. For that you probably want to beautify the code (game.compiled.js) first: [https://beautifier.io/](https://beautifier.io/ "https://beautifier.io/") .
 
-## Delete a file
+## Structure
 
-You can delete the current file by clicking the **Remove** button in the file explorer. The file will be moved into the **Trash** folder and automatically deleted after 7 days of inactivity.
+It starts with some utility code and then with modules. Every module starts with module - recognized by `ig.module("name").requires(...).defines(function() { ... })` - has a name requirements and a body. These modules are just groups of related code. You could make a tool that puts it into different files but then you'd end up with 100 files to look through.
 
 ## Export a file
 
 You can export the current file by clicking **Export to disk** in the menu. You can choose to export the file as plain Markdown, as HTML using a Handlebars template or as a PDF.
 
 
-# Synchronization
+## Important Variables
 
-Synchronization is one of the biggest features of StackEdit. It enables you to synchronize any file in your workspace with other files stored in your **Google Drive**, your **Dropbox** and your **GitHub** accounts. This allows you to keep writing on other devices, collaborate with people you share the file with, integrate easily into your workflow... The synchronization mechanism takes place every minute in the background, downloading, merging, and uploading file modifications.
 
-There are two types of synchronization and they can complement each other:
-
-- The workspace synchronization will sync all your files, folders and settings automatically. This will allow you to fetch your workspace on any other device.
-	> To start syncing your workspace, just sign in with Google in the menu.
-
-- The file synchronization will keep one file of the workspace synced with one or multiple files in **Google Drive**, **Dropbox** or **GitHub**.
-	> Before starting to sync files, you must link an account in the **Synchronize** sub-menu.
+All important variables are either in the `sc` or the `ig` object. As far as I can tell they are "prototype" and "runtime" objects respectively but I am not so sure about that.
 
 ## Open a file
 
@@ -147,6 +140,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTk2NzI0NDMwNCwtMTk5Njk4NTIyOSwtMz
-MyNDU1MzYzXX0=
+eyJoaXN0b3J5IjpbLTExODYzOTcwMDYsLTE5OTY5ODUyMjksLT
+MzMjQ1NTM2M119
 -->
