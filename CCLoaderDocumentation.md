@@ -13,13 +13,16 @@ This file will contain handy things to know about CCLoader and the CrossCode Dev
 
 They are both JavaScript code and have the same effect but scripts are loaded at specific times specified in [https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md](https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md "https://github.com/CCDirectLink/CLS/blob/master/proposals/1/standardized-mod-format.md") . That doc also tells you how the `package.json` file is structured.
 
-## Switch to another file
+## A new technique
 
-All your files and folders are presented as a tree in the file explorer. You can switch from one to another by clicking a file in the tree.
+There is a new technique used for new mods that replaces the old "stage" entries in the package.json that isn't yet in the spec. If you specify a script as "plugin" in the package.json then you can use a exported class that extends "Plugin" to combine multiple stages in a script:
 
-## Rename a file
+```JS
+/// <reference path="../../../ccloader/js/types/plugin.d.ts" />  /** * @extends {ccloader.Plugin} */  export  default  class Test extends Plugin { /** * * @param {ccloader.Mod[]} mods */  constructor(mods) { super(); this.mods = mods; } preload() { console.log('Called in preload'); } postload() { console.log('Called in postload'); } prestart() { console.log('Called in prestart'); } main() { console.log('Called in main'); } }
+```
+## Variables
 
-You can rename the current file by clicking the file name in the navigation bar or by clicking the **Rename** button in the file explorer.
+About how to find out what variables to use: You first have to understand how the CrossCode code (pun intended) is structured. For that you probably want to beautify the code (game.compiled.js) first: [https://beautifier.io/](https://beautifier.io/ "https://beautifier.io/") .
 
 ## Delete a file
 
@@ -144,6 +147,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTk4NTkwNjY2MSwtMTk5Njk4NTIyOSwtMz
+eyJoaXN0b3J5IjpbLTk2NzI0NDMwNCwtMTk5Njk4NTIyOSwtMz
 MyNDU1MzYzXX0=
 -->
