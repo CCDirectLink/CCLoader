@@ -18,7 +18,39 @@ They are both JavaScript code and have the same effect but scripts are loaded at
 There is a new technique used for new mods that replaces the old "stage" entries in the package.json that isn't yet in the spec. If you specify a script as "plugin" in the package.json then you can use a exported class that extends "Plugin" to combine multiple stages in a script:
 
 ```JS
-/// <reference path="../../../ccloader/js/types/plugin.d.ts" />  /** * @extends {ccloader.Plugin} */  export  default  class Test extends Plugin { /** * * @param {ccloader.Mod[]} mods */  constructor(mods) { super(); this.mods = mods; } preload() { console.log('Called in preload'); } postload() { console.log('Called in postload'); } prestart() { console.log('Called in prestart'); } main() { console.log('Called in main'); } }
+/// <reference path="../../../ccloader/js/types/plugin.d.ts" />
+
+/**
+ * @extends {ccloader.Plugin}
+ */
+export default class Test extends Plugin {
+
+    /**
+     * 
+     * @param {ccloader.Mod[]} mods 
+     */
+    constructor(mods) {
+        super();
+
+        this.mods = mods;
+    }
+
+    preload() {
+        console.log('Called in preload');
+    }
+
+    postload() {
+        console.log('Called in postload');
+    }
+
+    prestart() {
+        console.log('Called in prestart');
+    }
+    
+    main() {
+        console.log('Called in main');
+    }
+}
 ```
 ## Variables
 
@@ -41,8 +73,35 @@ All important variables are either in the `sc` or the `ig` object. As far as I c
 ## Constant Values
 
 Constant values (and enums) are usually in written in CAPS_WITH_UNDERSCORES, are found at the root of a module and look like this:
-```ig.module("name").requires("others").defines(function() { //... sc.GAME_MOBILITY_BLOCK = { NONE: {}, TELEPORT: { teleportBlock: true }, SAVE: { teleportBlock: true, saveBlock: true }, CHECKPOINT: { teleportBlock: true, saveBlock: true, checkpointBlock: true }, NO_MAP_LEAVE: { teleportBlock: true, saveBlock: true, checkpointBlock: true, mapLeaveBlock: true } }; //... })
+```JS
+ig.module("name").requires("others").defines(function() {
+    //...
 
+    sc.GAME_MOBILITY_BLOCK = {
+        NONE: {},
+        TELEPORT: {
+            teleportBlock: true
+        },
+        SAVE: {
+            teleportBlock: true,
+            saveBlock: true
+        },
+        CHECKPOINT: {
+            teleportBlock: true,
+            saveBlock: true,
+            checkpointBlock: true
+        },
+        NO_MAP_LEAVE: {
+            teleportBlock: true,
+            saveBlock: true,
+            checkpointBlock: true,
+            mapLeaveBlock: true
+        }
+    };
+
+    //...
+})
+```
 ## Save a file
 
 You can save any file of the workspace to **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Save on**. Even if a file in the workspace is already synced, you can save it to another location. StackEdit can sync one file with multiple locations and accounts.
@@ -141,6 +200,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5Nzg5NjM5MjEsLTE5OTY5ODUyMjksLT
+eyJoaXN0b3J5IjpbLTEwNzgyNTEzNTYsLTE5OTY5ODUyMjksLT
 MzMjQ1NTM2M119
 -->
