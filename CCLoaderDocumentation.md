@@ -129,14 +129,25 @@ ig.module("name").requires("others").defines(function() {
     //...
 })
 ```
-## Referencing 
+## Referencing Variables
 
-Once your file is linked to a synchronized location, StackEdit will periodically synchronize it by downloading/uploading any modification. A merge will be performed if necessary and conflicts will be resolved.
 
-If you just have modified your file and you want to force syncing, click the **Synchronize now** button in the navigation bar.
+You could now reference `ig.Name` in the console but it won't get you much since it is only the class - a template that doesn't actually have runtime values.
 
-> **Note:** The **Synchronize now** button is disabled if you have no file to synchronize.
+The instances of classes are created like usual with "new". However, where the instance is stored can be different every time. It can be in a global variable, inside a class, or not at all. Usually it looks like this:
 
+```JS
+ig.module("name").requires("others").defines(function() {
+    //...
+
+    ig.addGameAddon(function() {
+        return sc.combat = new sc.Combat
+    });
+
+    //...
+})
+```
+This means that `sc.combat` is an instance of `sc.Combat` and has all of it's variables and functions.
 ## Manage file synchronization
 
 Since one file can be synced with multiple locations, you can list and manage synchronized locations by clicking **File synchronization** in the **Synchronize** sub-menu. This allows you to list and remove synchronized locations that are linked to your file.
@@ -223,6 +234,6 @@ B --> D{Rhombus}
 C --> D
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMjYyOTQwMzg5LC0xOTk2OTg1MjI5LC0zMz
+eyJoaXN0b3J5IjpbMjIyMzk0NTc3LC0xOTk2OTg1MjI5LC0zMz
 I0NTUzNjNdfQ==
 -->
