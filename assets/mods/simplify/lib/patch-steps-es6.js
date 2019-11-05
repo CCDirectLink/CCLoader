@@ -681,7 +681,7 @@ appliers["IMPORT"] = async function (state) {
 	}
 
 	const srcPath = parsePath(this["src"], true);
-	const obj = await state.loader.apply(state, srcPath);
+	let obj = await state.loader.apply(state, srcPath);
 
 	if ("path" in this) {
 		if (!Array.isArray(this["path"])) {
