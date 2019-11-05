@@ -47,12 +47,12 @@ export function photomerge(a, b) {
  * @returns {any} copied value
  */
 export function photocopy(o) {
-	if (o === void 0)
-		return o;
-	if (o.constructor === Array)
-		return photomerge([], o);
-	if (o.constructor === Object)
-		return photomerge({}, o);
+	if (o) {
+		if (o.constructor === Array)
+			return photomerge([], o);
+		if (o.constructor === Object)
+			return photomerge({}, o);
+        }
 	return o;
 }
 
