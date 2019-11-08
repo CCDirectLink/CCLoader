@@ -2,11 +2,12 @@
  * patch-steps-lib - Library for the Patch Steps spec.
  *
  * Written starting in 2019.
- * Version: 1.1.0
+ * Version: 1.1.1
  * (Ideally, this would comply with semver.)
  * Credits:
  *  Main code by 20kdc
  *  URL-style file paths, FOR_IN, COPY, PASTE, error tracking, bughunting by ac2pic
+ *  Even more bughunting by ac2pic
  *
  * To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
  * You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
@@ -52,7 +53,7 @@ export function photocopy(o) {
 			return photomerge([], o);
 		if (o.constructor === Object)
 			return photomerge({}, o);
-        }
+	}
 	return o;
 }
 
@@ -363,17 +364,16 @@ export class DebugState {
 			switch (step.type) {
 				case 'Error':
 					message += `${step.errorType}: ${step.errorMessage}\n`;
-				break;
-				case 'Step': {
+					break;
+				case 'Step':
 					message += '\t\t\tat ';
 					if (step.name) {
 						message += `${step.name} `;
 					}
 					message += `(step: ${step.index})\n`;
-				}
-				break;
+					break;
 				default:
-				break;
+					break;
 			}
 		}
 		console.log(message);
@@ -658,21 +658,26 @@ function parsePath(url, fromGame) {
 		const decomposedUrl = new URL(url);
 		const protocol = decomposedUrl.protocol;
 
-		url = decomposedUrl.pathname;
+		const subUrl = decomposedUrl.pathname;
 
+		let urlFromGame;
 		if (protocol === 'mod:') {
-			fromGame = false;
+			urlFromGame = false;
 		} else if (protocol === 'game:') {
-			fromGame = true;
+			urlFromGame = true;
 		} else {
-			fromGame = protocol.substring(0, protocol.length - 1);
+			urlFromGame = protocol.substring(0, protocol.length - 1);
 		}
+		return [
+			urlFromGame,
+			subUrl
+		];
 	} catch (e) {
+		return [
+			fromGame,
+			url
+		];
 	}
-	return [
-		fromGame,
-		url
-	];
 }
 
 appliers["IMPORT"] = async function (state) {
