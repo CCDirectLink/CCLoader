@@ -109,7 +109,7 @@ export class ModLoader {
 			lastCount = this.mods.length;
 			for (let i = this.mods.length - 1; i >= 0; i--) {
 				const mod = this.mods[i];
-				if (!mod.isEnabled || this._canLoad(mod, mods)) {
+				if (this._canLoad(mod, mods)) {
 					if (mod.name !== 'Simplify') {
 						mods.push(mod);
 					} else {
@@ -120,61 +120,105 @@ export class ModLoader {
 			}
 		}
 
-		if (this.mods.length > 0) {
-			console.log(`Could not load mods due to missing dependencies: "${this.mods.map(m => m.name).join('", "')}"`);
-			for (const mod of this.mods) {
-				mod.disabled = true;
-				mods.push(mod);
-			}
+		for (const mod of this.mods) {
+			if (!mod.isEnabled)
+				continue;
+			this._complainMissingDependencies(mod, mods);
+		}
+		for (const mod of this.mods) {
+			mod.disabled = true;
+			mods.push(mod);
 		}
 
 		this.mods = mods;
 	}
 
+	/*
+	 * Complain that dependencies are not satisfied.
+	 */
+	_complainMissingDependencies(mod, mods) {
+		const bad_deps = this._unmetModDependencies(mod, mods);
+		const prefix = `Could not load mod ${mod.name}: `;
+		for (const depName in bad_deps)
+			console.warn(prefix + bad_deps[depName]);
+	}
+
 	/**
-	 * 
-	 * @param {Mod} mod 
-	 * @param {Mod[]} mods 
+	 * Return true if mod can be loaded.
+	 * @param {Mod} mod
+	 * @param {Mod[]} mods
 	 */
 	_canLoad(mod, mods) {
+		if (!mod.isEnabled)
+			return false;
+		return this._unmetModDependencies(mod, mods) === null;
+	}
+
+	/**
+	 * @param {Mod} check dependencies of this mod.
+	 * @param {Mod[]} mods list of available mods.
+	 * @return {Object|null} Object whose keys are dependencies that cannot
+	 * be used and values are error messages explaining why.
+	 */
+	_unmetModDependencies(mod, mods) {
 		const deps = mod.dependencies;
 		if(!deps) {
-			return true;
+			return null;
 		}
+		const ret = {};
 
-		for (const depName in deps){
+		for (const depName in deps) {
 			if(!Object.prototype.hasOwnProperty.call(deps, depName))
 				continue;
 
 			const depRange = semver.validRange(deps[depName]);
-			if(!depRange){
-				console.warn('Invalid dependency version "' + deps[depName] + '" of "' + depName + '" of "' + mod.name + '"');
+			if(!depRange) {
+				ret[depName] = (
+					'Syntax error in version range '
+					+`"${deps[depName]}" for dependency `
+					+ depName);
+				continue;
 			}
-
-			let satisfied = false;
-
-			if(depName == 'ccloader' && semver.satisfies(CCLOADER_VERSION, depRange)) {
-				satisfied = true;
-			}
-			if(depName == 'crosscode' && semver.satisfies(this.ccVersion, depRange)) {
-				satisfied = true;
-			}
-
-			for(let i = 0; i < mods.length && !satisfied; i++){
-				if(mods[i].isEnabled && mods[i].name === depName){
-					if(semver.satisfies(semver.valid(mods[i].version), depRange)){
-						satisfied = true;
-					}
+			let depVersion = null;
+			let enabled = true;
+			let depDesc = depName;
+			let mod;
+			switch (depName) {
+			case 'ccloader':
+				depVersion = CCLOADER_VERSION;
+				break;
+			case 'crosscode':
+				depVersion = this.ccVersion;
+				break;
+			default:
+				depDesc + 'mod ' + depDesc;
+				mod = mods.find(m => m.name === depName);
+				if (mod) {
+					depVersion = mod.version;
+					enabled = mod.isEnabled;
 				}
 			}
-
-			if(!satisfied){
-				return false;
-			}
+			if (depVersion === null)
+				ret[depName] = (
+					`${depDesc} is missing. `
+					+ 'Please install it.');
+			else if (semver.valid(depVersion) === null)
+				ret[depName] = (
+					`${depDesc}'s version "${depVersion}" `
+					+ 'has a syntax error');
+			else if (!semver.satisfies(depVersion, depRange))
+				ret[depName] = (
+					`requires ${depDesc} version `
+					+ `${depRange} but version `
+					+ ` ${depVersion} present`);
+			else if (!enabled)
+				ret[depName] = `${depDesc} is disabled`;
 		}
-		return true;
+		if (Object.keys(ret).length === 0)
+			return null;
+		return ret;
 	}
-	
+
 	/**
 	 * Pushes mods into the game window's inactiveMods and activeMods arrays and registers their versions.
 	 */
