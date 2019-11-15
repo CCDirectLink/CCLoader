@@ -121,7 +121,7 @@ export class ModLoader {
 		}
 
 		for (const mod of this.mods.filter(m => m.isEnabled)) {
-			this._printMissingDependencies(mod, mods);
+			this._printMissingDependencies(mod, this.mods);
 		}
 
 		for (const mod of this.mods) {
@@ -201,14 +201,14 @@ export class ModLoader {
 				}
 			}
 
-			if (depVersion === null) {
-				result[depName] = `${depDesc} is missing. Please install it.`;
+			if (!enabled) {
+				result[depName] = `${depDesc} is disabled`;
+			} else if (depVersion === null) {
+				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {
 				result[depName] = `${depDesc}'s version "${depVersion}" has a syntax error`;
 			} else if (!semver.satisfies(depVersion, depRange)) {
 				result[depName] = `requires ${depDesc} version ${depRange} but version ${depVersion} present`;
-			} else if (!enabled) {
-				result[depName] = `${depDesc} is disabled`;
 			}
 		}
 
