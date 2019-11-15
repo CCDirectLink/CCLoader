@@ -191,7 +191,7 @@ export class ModLoader {
 				depVersion = this.ccVersion;
 				break;
 			default:
-				depDesc + 'mod ' + depDesc;
+				depDesc = 'mod ' + depDesc;
 				mod = mods.find(m => m.name === depName);
 				if (mod) {
 					depVersion = mod.version;
