@@ -1,4 +1,4 @@
-import * as patchSteps from './lib/patch-steps-es6.js';
+import * as patchSteps from './lib/patch-steps-lib/src/patchsteps.js';
 import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';

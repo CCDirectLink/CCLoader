@@ -2,8 +2,7 @@
  * patch-steps-lib - Library for the Patch Steps spec.
  *
  * Written starting in 2019.
- * Version: 1.1.1
- * (Ideally, this would comply with semver.)
+ *
  * Credits:
  *  Main code by 20kdc
  *  URL-style file paths, FOR_IN, COPY, PASTE, error tracking, bughunting by ac2pic
@@ -13,278 +12,46 @@
  * You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
-export const defaultSettings = {
-	arrayTrulyDifferentThreshold: 0.5,
-	trulyDifferentThreshold: 0.5,
-	arrayLookahead: 8,
-	diffAddNewKey: 0,
-	diffAddDelKey: 1,
-	diffMulSameKey: 0.75
-};
+import {photocopy, photomerge} from "./patchsteps-utils.js";
 
-/**
- * A generic merge function.
- * NOTE: This should match Patch Steps specification, specifically how IMPORT merging works.
- * @param {any} a The value to merge into.
- * @param {any} b The value to merge from.
- * @returns {any} a
- */
-export function photomerge(a, b) {
-	if (b.constructor === Object) {
-		for (let k in b)
-			a[photocopy(k)] = photocopy(b[k]);
-	} else if (b.constructor == Array) {
-		for (let i = 0; i < b.length; i++)
-			a.push(photocopy(b[i]));
-	} else {
-		throw new Error("We can't do that! ...Who'd clean up the mess?");
-	}
-	return a;
-}
-
-/**
- * A generic copy function.
- * @param {any} a The value to copy.
- * @returns {any} copied value
- */
-export function photocopy(o) {
-	if (o) {
-		if (o.constructor === Array)
-			return photomerge([], o);
-		if (o.constructor === Object)
-			return photomerge({}, o);
-	}
-	return o;
-}
-
-/**
- * A difference heuristic.
- * @param {any} a The first value to check.
- * @param {any} b The second value to check.
- * @param {any} settings The involved control settings.
- * @returns {number} A difference value from 0 (same) to 1 (different).
- */
-function diffHeuristic(a, b, settings) {
-	if ((a === null) && (b === null))
-		return 0;
-	if ((a === null) || (b === null))
-		return null;
-	if (a.constructor !== b.constructor)
-		return 1;
-
-	if (a.constructor === Array) {
-		let array = diffArrayHeuristic(a, b, settings);
-		if (array.length == 0)
-			return 0;
-		let changes = 0;
-		let ai = 0;
-		let bi = 0;
-		for (let i = 0; i < array.length; i++) {
-			if (array[i] == "POPA") {
-				changes++;
-				ai++;
-			} else if (array[i] == "INSERT") {
-				// Doesn't count
-				bi++;
-			} else if (array[i] == "PATCH") {
-				changes += diffHeuristic(a[ai], b[bi], settings);
-				ai++;
-				bi++;
-			}
-		}
-		return changes / array.length;
-	} else if (a.constructor === Object) {
-		let total = [];
-		for (let k in a)
-			total.push(k);
-		for (let k in b)
-			if (!(k in a))
-				total.push(k);
-		let change = 0;
-		for (let i = 0; i < total.length; i++) {
-			if ((total[i] in a) && !(total[i] in b)) {
-				change += settings.diffAddNewKey;
-			} else if ((total[i] in b) && !(total[i] in a)) {
-				change += settings.diffAddDelKey;
-			} else {
-				change += diffHeuristic(a[total[i]], b[total[i]], settings) * settings.diffMulSameKey;
-			}
-		}
-		if (total.length != 0)
-			return change / total.length;
-		return 0;
-	} else {
-		return a == b ? 0 : 1;
-	}
-}
-
+// The following are definitions used for reference in DebugState.
 /*
- * This is the array heuristic. It's read by the main heuristic and the diff heuristic.
- * The results are a series of operations on an abstract machine building the new array.
- * These results are guaranteed to produce correct results, but aren't guaranteed to produce optimal results.
- * The abstract machine has two input stacks (for a/b), first element at the top.
- * The operations are:
- * "POPA": Pops an element from A, discarding it.
- * "INSERT": Pops an element from B, copying and inserting it verbatim.
- * "PATCH": Pops an element from both A & B, creating a patch from A to B.
- * Valid output from this must always exhaust the A and B stacks and must not stack underflow.
- * Programs that follow that will always generate valid output, as the only way to exhaust the B stack
- *  is to use INSERT and PATCH, both of which output to the resulting array.
+ * ParsedPath is actually any type that translateParsedPath can understand.
+ * And translateParsedPath can be overridden by the user.
+ * But the types declared here are those that will be received no matter what.
+ * declare type ParsedPath = null | [fromGame: true | false | string, url: string];
  *
- * The actual implementation is different to this description, but follows the same rules.
- * Stack A and the output are the same.
+ * declare type FileInfo = {
+ *  path: string;
+ *  stack: StackEntry[];
+ * };
+ *
+ * declare type StackEntry = StackEntryStep | StackEntryError;
+ * declare type StackEntryStep = {
+ *  type: "Step";
+ * };
+ * declare type StackEntryError = {
+ *  type: "Error";
+ *  errorType: string;
+ *  errorMessage: string;
+ * };
  */
-function diffArrayHeuristic(a, b, settings) {
-	const lookahead = settings.arrayLookahead;
-	let sublog = [];
-	let ia = 0;
-	for (let i = 0; i < b.length; i++) {
-		let validDif = 2;
-		let validSrc = null;
-		for (let j = ia; j < Math.min(ia + lookahead, a.length); j++) {
-			let dif = diffHeuristic(a[j], b[i], settings);
-			if (dif < validDif) {
-				validDif = dif;
-				validSrc = j;
-			}
-		}
-		if (validDif > settings.arrayTrulyDifferentThreshold)
-			validSrc = null;
-		if (validSrc != null) {
-			while (ia < validSrc) {
-				sublog.push("POPA");
-				ia++;
-			}
-			sublog.push("PATCH");
-			ia++;
-		} else {
-			if (ia == a.length) {
-				sublog.push("INSERT");
-			} else {
-				sublog.push("PATCH");
-				ia++;
-			}
-		}
-	}
-	while (ia < a.length) {
-		sublog.push("POPA");
-		ia++;
-	}
-	return sublog;
-}
-
-/**
- * Diffs two objects
- * 
- * @param {any} a The original value
- * @param {any} b The target value
- * @param {object} [settings] Optional bunch of settings. May include "comment".
- * @return {object[]|null} Null if unpatchable (this'll never occur for two Objects or two Arrays), Array of JSON-ready Patch Steps otherwise
- */
-export function diff(a, b, settings) {
-	let trueSettings = photocopy(defaultSettings);
-	if (settings !== void 0)
-		photomerge(trueSettings, settings);
-	return diffInterior(a, b, trueSettings);
-}
-
-function diffCommentExpansion(a, b, element, settings) {
-	let bkcomment = settings.comment;
-	if (settings.comment !== void 0)
-		settings.comment = settings.comment + "." + element;
-	let log = diffInterior(a, b, settings);
-	settings.comment = bkcomment;
-	return log;
-}
-
-function diffInterior(a, b, settings) {
-	if ((a === null) && (b === null))
-		return [];
-	if ((a === null) || (b === null))
-		return null;
-	if (a.constructor !== b.constructor)
-		return null;
-	let log = [];
-
-	if (a.constructor === Array) {
-		let array = diffArrayHeuristic(a, b, settings);
-		let ai = 0;
-		let bi = 0;
-		// Advancing ai/bi pops from the respective stack.
-		// Since outputting an element always involves popping from B,
-		//  and vice versa, the 'b' stack position is also the live array position.
-		// At patch time, a[ai + x] for arbitrary 'x' is in the live array at [bi + x]
-		for (let i = 0; i < array.length; i++) {
-			if (array[i] == "POPA") {
-				log.push({"type": "REMOVE_ARRAY_ELEMENT", "index": bi, "comment": settings.comment});
-				ai++;
-			} else if (array[i] == "INSERT") {
-				let insertion = {"type": "ADD_ARRAY_ELEMENT", "index": bi, "content": photocopy(b[bi]), "comment": settings.comment};
-				// Is this a set of elements being inserted at the end?
-				let j;
-				for (j = i + 1; j < array.length; j++)
-					if ((array[j] != "INSERT") && (array[j] != "POPA"))
-						break;
-				// If it is a set of elements being inserted at the end, they are appended
-				if (j == array.length)
-					delete insertion["index"];
-				log.push(insertion);
-				bi++;
-			} else if (array[i] == "PATCH") {
-				let xd = diffCommentExpansion(a[ai], b[bi], bi, settings);
-				if (xd != null) {
-					if (xd.length != 0) {
-						log.push({"type": "ENTER", "index": bi});
-						log = log.concat(xd);
-						log.push({"type": "EXIT"});
-					}
-				} else {
-					log.push({"type": "SET_KEY", "index": bi, "content": photocopy(b[bi]), "comment": settings.comment});
-				}
-				ai++;
-				bi++;
-			}
-		}
-	} else if (a.constructor === Object) {
-		for (let k in a) {
-			if (k in b) {
-				if (diffHeuristic(a[k], b[k], settings) >= settings.trulyDifferentThreshold) {
-					log.push({"type": "SET_KEY", "index": k, "content": photocopy(b[k]), "comment": settings.comment});
-				} else {
-					let xd = diffCommentExpansion(a[k], b[k], k, settings);
-					if (xd != null) {
-						if (xd.length != 0) {
-							log.push({"type": "ENTER", "index": k});
-							log = log.concat(xd);
-							log.push({"type": "EXIT"});
-						}
-					} else {
-						// should it happen? probably not. will it happen? maybe
-						log.push({"type": "SET_KEY", "index": k, "content": photocopy(b[k]), "comment": settings.comment});
-					}
-				}
-			} else {
-				log.push({"type": "SET_KEY", "index": k, "comment": settings.comment});
-			}
-		}
-		for (let k in b)
-			if (!(k in a))
-				log.push({"type": "SET_KEY", "index": k, "content": photocopy(b[k]), "comment": settings.comment});
-	} else if (a != b) {
-		return null;
-	}
-	return log;
-}
 
 // Error handling for appliers.
 // You are expected to subclass this class if you want additional functionality.
 export class DebugState {
-	
+	// The constructor. The default state of a DebugState is invalid; a file must be added (even if null) to make it valid.
 	constructor() {
+		// FileInfo[]
 		this.fileStack = [];
+		// FileInfo
 		this.currentFile = null;
 	}
-	
+
+	/**
+	 * Translates a ParsedPath into a string.
+	 * Overridable.
+	 */
 	translateParsedPath(parsedPath) {
 		if (parsedPath === null)
 			return "(unknown file)";
@@ -298,7 +65,11 @@ export class DebugState {
 		}
 		return protocol + ":" + parsedPath[1];
 	}
-	
+
+	/**
+	 * Enters a file by parsedPath. Do not override.
+	 * @final
+	 */
 	addFile(parsedPath) {
 		const path = this.translateParsedPath(parsedPath);
 		const fileInfo = {
@@ -308,12 +79,21 @@ export class DebugState {
 		this.currentFile = fileInfo;
 		this.fileStack.push(fileInfo);
 	}
+
+	/**
+	 * Removes a pushed file.
+	 * @final
+	 */
 	removeLastFile() {
 		const lastFile = this.fileStack.pop();
 		this.currentFile = this.fileStack[this.fileStack.length - 1];
 		return lastFile;
 	}
 	
+	/**
+	 * Enters a step. Note that calls to this *surround* applyStep as the index is not available to it.
+	 * @final
+	 */
 	addStep(index, name = "") {
 		this.currentFile.stack.push({
 			type: "Step",
@@ -321,6 +101,11 @@ export class DebugState {
 			name
 		});
 	}
+
+	/**
+	 * Leaves a step.
+	 * @final
+	 */
 	removeLastStep() {
 		const stack = this.currentFile.stack;
 		let currentStep = null;
@@ -334,6 +119,10 @@ export class DebugState {
 		return currentStep;
 	}
 	
+	/**
+	 * Gets the last (i.e. current) step.
+	 * @final
+	 */
 	getLastStep() {
 		const stack = this.currentFile.stack;
 		let currentStep = null;
@@ -346,6 +135,10 @@ export class DebugState {
 		return currentStep;
 	}
 	
+	/**
+	 * Throws this instance as an error.
+	 * @final
+	 */
 	throwError(type, message) {
 		this.currentFile.stack.push({
 			type: "Error",
@@ -355,6 +148,10 @@ export class DebugState {
 		throw this;
 	}
 
+	/**
+	 * Prints information about a specific file on the stack.
+	 * Overridable.
+	 */
 	printFileInfo(file) {
 		console.log(`File %c${file.path}`, 'red');
 		let message = '';
@@ -379,10 +176,30 @@ export class DebugState {
 		console.log(message);
 	}
 	
+	/**
+	 * Prints information about the whole stack.
+	 * @final
+	 */
 	print() {
 		for(let fileIndex = 0; fileIndex < this.fileStack.length; fileIndex++) {
 			this.printFileInfo(this.fileStack[fileIndex]);
 		}
+	}
+
+	/**
+	 * Run at the start of applyStep; after the step has been entered formally, but before executing it.
+	 * Overridable.
+	 */
+	async beforeStep() {
+		
+	}
+
+	/**
+	 * Run at the end of applyStep; after executing the step, but before leaving it formally.
+	 * Overridable.
+	 */
+	async afterStep() {
+		
 	}
 }
 
@@ -450,13 +267,14 @@ export async function patch(a, steps, loader, debugState) {
 }
 
 async function applyStep(step, state) {
+	await state.debugState.beforeStep();
 	state.debugState.getLastStep().name = step["type"];
 	if (!appliers[step["type"]]) {
 		state.debugState.getLastStep().name = '';
 		state.debugState.throwError('TypeError',`${step['type']} is not a valid type.`);
 	}
 	await appliers[step["type"]].call(step, state);
-	state.debugState.removeLastStep();
+	await state.debugState.afterStep();
 }
 
 function replaceObjectProperty(object, key, keyword, value) {
@@ -541,7 +359,7 @@ appliers["FOR_IN"] = async function (state) {
 
 // copy the value with name
 appliers["COPY"] = async function(state) {
-	if (!this["alias"]) {
+	if (!("alias" in this)) {
 		state.debugState.throwError('ValueError', 'alias must be set.');
 	}
 	const value = photocopy(state.currentValue);
@@ -550,7 +368,7 @@ appliers["COPY"] = async function(state) {
 
 // paste
 appliers["PASTE"] = async function(state) {
-	if (!this["alias"]) {
+	if (!("alias" in this)) {
 		state.debugState.throwError('ValueError', 'alias must be set.');
 	}
 	// Add into spec later?
@@ -587,7 +405,7 @@ appliers["COMMENT"] = async function(state) {
 };
 
 appliers["ENTER"] = async function (state) {
-	if (!this["index"]) {
+	if (!("index" in this)) {
 		state.debugState.throwError('Error', 'index must be set.');
 	}
 
@@ -619,7 +437,7 @@ appliers["EXIT"] = async function (state) {
 };
 
 appliers["SET_KEY"] = async function (state) {
-	if (!this["index"]) {
+	if (!("index" in this)) {
 		state.debugState.throwError('Error', 'index must be set.');
 	}
 
@@ -631,22 +449,12 @@ appliers["SET_KEY"] = async function (state) {
 };
 
 appliers["REMOVE_ARRAY_ELEMENT"] = async function (state) {
-	const index = this["index"]%1;
-	if (isNaN(index)) {
-		state.debugState.throwError('ValueError', 'index must be a finite number.');
-	}
-
-	state.currentValue.splice(index, 1);
+	state.currentValue.splice(this["index"], 1);
 };
 
 appliers["ADD_ARRAY_ELEMENT"] = async function (state) {
 	if ("index" in this) {
-		const index = this["index"]%1;
-		if (isNaN(index)) {
-			state.debugState.throwError('ValueError', 'index must be a finite number.');
-		}
-
-		state.currentValue.splice(index, 0, photocopy(this["content"]));
+		state.currentValue.splice(this["index"], 0, photocopy(this["content"]));
 	} else {
 		state.currentValue.push(photocopy(this["content"]));
 	}
@@ -681,7 +489,7 @@ function parsePath(url, fromGame) {
 }
 
 appliers["IMPORT"] = async function (state) {
-	if (!this["src"]) {
+	if (!("src" in this)) {
 		state.debugState.throwError('ValueError', 'src must be set.');
 	}
 
@@ -704,7 +512,7 @@ appliers["IMPORT"] = async function (state) {
 };
 
 appliers["INCLUDE"] = async function (state) {
-	if (!this["src"]) {
+	if (!("src" in this)) {
 		state.debugState.throwError('ValueError', 'src must be set.');
 	}
 
@@ -717,7 +525,7 @@ appliers["INCLUDE"] = async function (state) {
 };
 
 appliers["INIT_KEY"] = async function (state) {
-	if (!this["index"]) {
+	if (!("index" in this)) {
 		state.debugState.throwError('ValueError', 'index must be set.');
 	}
 
@@ -728,3 +536,4 @@ appliers["INIT_KEY"] = async function (state) {
 appliers["DEBUG"] = async function (state) {
 	state.debug = !!this["value"];
 };
+
