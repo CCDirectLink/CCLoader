@@ -1,4 +1,4 @@
-import {DebugState} from './patch-steps-es6.js';
+import {DebugState} from './patch-steps-lib/src/patchsteps.js';
 
 export default class CustomDebugState extends DebugState {
 	/**
