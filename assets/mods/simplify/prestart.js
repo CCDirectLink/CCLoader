@@ -18,8 +18,10 @@ ig.module('impact.feature.greenworks.greenworks-fix').requires('impact.feature.g
 					} else {
 						if (semver.lt(version, '0.30.0')) {
 							this.greenworks = new Greenworks('0.5.3');
-						} else {
+						} else if (semver.lt(version, '0.35.0')) {
 							this.greenworks = new Greenworks('0.13.0');
+						} else {
+							this.greenworks = new Greenworks('nw-0.35');
 						}
 						this.greenworks.init();	
 					}
