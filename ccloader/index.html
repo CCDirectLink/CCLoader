@@ -1,9 +1,22 @@
 <html>
 	<head>
-		<script>!function(){var e="CCLOADER_OVERRIDE_MAIN_URL";window.process&&process.env&&process.env[e]&&window.location.replace(process.env[e])}();</script>
+		<script type="text/javascript">
+			(function(){
+				if (window.process) {
+					var envVar = process.env.CCLOADER_OVERRIDE_MAIN_URL;
+					if (envVar) window.location.replace(envVar);
+				}
+			})();
+		</script>
 		<title>CrossCode - CCLoader</title>
 		<link rel="stylesheet" href="index.css">
-		<script type="text/javascript">try{eval('() => {const x=0}')}catch(e){alert('Please use the "nwjs_new" version of CrossCode to use CCLoader!')}</script>
+		<script type="text/javascript">
+			try {
+				eval('()=>{const x=0}');
+			} catch (e) {
+				alert('Please use the "nwjs_new" version of CrossCode to use CCLoader!')
+			}
+		</script>
 		<script type="text/javascript" src="js/lib/2.5.3-crypto-md5.js"></script>
 		<script type="text/javascript" src="js/lib/semver.browser.js"></script>
 		<script type="text/javascript" src="js/normalize.js"></script>
