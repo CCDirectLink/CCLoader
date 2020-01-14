@@ -14,8 +14,6 @@ export class Mod {
 		this.file = file;
 		this.filemanager = modloader.filemanager;
 		this.window = modloader._getGameWindow();
-
-		this._loadManifest();
 	}
 
 	load() {
@@ -169,9 +167,9 @@ export class Mod {
 		return this.pluginInstance;
 	}
 
-	_loadManifest() {
+	async loadManifest() {
 		const file = this.file;
-		const data = this.filemanager.getResource(file);
+		const data = await this.filemanager.getResourceAsync(file);
 		if(!data) {
 			return;
 		}
