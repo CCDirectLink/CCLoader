@@ -16,6 +16,7 @@ export class Loader {
 
 	async initialize() {
 		const code = await this._loadEntrypoint();
+		const result = await frame.contentWindow.navigator.serviceWorker.register('sw.js');
 		this.doc = this._parseEntrypoint(code);
 		this._insertBase();
 		this.postloadPoint = this._findGame();
@@ -40,6 +41,14 @@ export class Loader {
 	
 			const hook = this._createScript('window.parent.postload()');
 			this._insertAfter(hook, this.postloadPoint);
+			/*const hook2 = this._createScript(`
+				window.onload = () => {
+					console.log('Hijacked!');
+					
+					
+				};
+			`);
+			this.doc.body.appendChild(hook2);*/
 			this._hookDOM(frame);
 			this._startGame(frame);
 		});
