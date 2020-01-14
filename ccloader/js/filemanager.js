@@ -81,17 +81,7 @@ export class Filemanager {
 					}
 				});
 			} else {
-				const req = new XMLHttpRequest();
-				req.open('GET', '/' + resource, true);
-
-				req.onerror = err => reject(err);
-				req.onreadystatechange = () => {
-					if (req.readyState === req.DONE && req.status === 200) {
-						resolve(req.responseText);
-					}
-				};
-
-				req.send(null);
+				frame.contentWindow.fetch(`/${resource}`).then(data => data.text()).then(resolve).catch(reject)
 			}
 		});
 	}
