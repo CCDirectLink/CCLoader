@@ -37,8 +37,8 @@ export class Filemanager {
 	 * 
 	 * @param {string} folder 
 	 */
-	getAllModsFiles(folder){
-		return this._getResources(folder, path.sep + 'package.json');
+	async getAllModsFiles(folder){
+		return await this._getResources(folder, path.sep + 'package.json');
 	}
 
 	/**
@@ -132,7 +132,7 @@ export class Filemanager {
 	 * @param {string?} folder 
 	 * @param {string?} ending 
 	 */
-	_getResources(folder, ending){
+	async _getResources(folder, ending){
 		if(!folder)
 			folder = 'assets/mods/';
 		
@@ -141,7 +141,7 @@ export class Filemanager {
 		else {
 			var results = [];
 			for(var i in this.modList){
-				if(this._resourceExists('assets/mods/' + this.modList[i] + ending)){
+				if(await this._resourceExistsAsync('assets/mods/' + this.modList[i] + ending)){
 					results.push('assets/mods/' + this.modList[i] + ending);
 				}
 			}
@@ -209,7 +209,7 @@ export class Filemanager {
 	 * 
 	 * @param {string} resource 
 	 */
-	_resourceExists(resource){
+	/*_resourceExists(resource){
 		if(isLocal){
 			try{
 				fs.statSync(resource);
@@ -227,6 +227,33 @@ export class Filemanager {
 				return false;
 			}
 		}
+	}*/
+
+	/**
+	 * Async version of _resourceExists
+	 * @param {string} resource
+	 * @returns {Promise<boolean>}  
+	 */
+	async _resourceExistsAsync(resource) {
+		let response;
+		try {
+			response = await frame.contentWindow.fetch(`/${resource}`);	
+		} catch (e) {
+			// some issue with network
+			throw e;
+		}
+		
+		if (response.ok) {
+			return true;
+		}
+
+		if (response.status == 404) {
+			return false;
+		}
+
+		// some issue we can't control
+		throw Error(response.statusText);
+
 	}
 
 	/**

@@ -89,7 +89,7 @@ export class ModLoader {
 	 * Searches for mods and stores them in this.mods
 	 */
 	async _getModPackages() {
-		const modFiles = this.filemanager.getAllModsFiles();
+		const modFiles = await this.filemanager.getAllModsFiles();
 		/** @type {Mod[]} */
 		const mods = [];
 		for (const modFile of modFiles) {
