@@ -1,19 +1,15 @@
-const http = require('http');
+import {ZipHandler} from "./ziphandler.js";
 
 export class PackedModServer {
     constructor() {
         this.server = null;
-        this.zip = null;
+        this.zipHandler = null;
     }
 
     async initialize() {   
-        if (!window.isBrowser) {
-            if (this.zip === null) {
-                this.zip = new JSZip();
-            }
-
+        if (typeof window !== "undefined" && !window.isBrowser) {
             if (this.server === null) {
-                const server = this.server = http.createServer();
+                const server = this.server = require('http').createServer();
                 server.on('request', async (req, res) => await this.onRequest(req,res));
     
                 window.addEventListener('onbeforeunload', function(){
@@ -23,15 +19,12 @@ export class PackedModServer {
     
                 server.listen(3000);
             }
-
+            if (this.zipHandler === null) {
+                this.zipHandler = new ZipHandler(new JSZip);
+            }
         }
-    }
 
-    _createFolders(root, folderArr) {
-        for (const folder of folderArr) {
-            root = root.folder(folder);
-        }
-        return root;
+
     }
 
     async onRequest(req, res)  {
@@ -56,6 +49,9 @@ export class PackedModServer {
                 const relativePath = url.searchParams.get('relativePath');
                 const assetArrayBuffer = await this.getAsset(basePath, relativePath);
                 const asset = new Buffer(assetArrayBuffer, "binary");
+                res.writeHead(200, 'OK', {
+                    'Content-Type': getFileMime(relativePath)
+                });
                 res.end(asset);
             }
 
@@ -72,103 +68,69 @@ export class PackedModServer {
 
 
     /** Event Handlers */
+
     async preload(zipPath) {
         const folderPath = zipPath + '/';
-        console.log('Folder', this.zip.files[folderPath]);
-        if (!this.zip.files[folderPath]) {
-            const root = this._createFolders(this.zip, zipPath.split('/'));
+        
+        if (!this.zipHandler.hasPath(folderPath)) {
+            
             const blob = await fetch('../'+ zipPath).then((res) => res.blob());
-            await root.loadAsync(blob, {createFolders: true});
+            await this.zipHandler.loadZip(zipPath, blob);
         }
     }
 
+
     async getAssets(zipPath) {
         const folderPath = zipPath + '/';
-        if (!this.zip.files[folderPath]) {
+        if (!this.zipHandler.hasPath(folderPath)) {
             throw {
                 status: 404,
                 statusText: 'File Not Found'
             };
         }
-
-
-        const filePaths = [];
+        
         const pathToAssets = folderPath + 'assets/';
-        if (!this.zip.files[pathToAssets]) {
-            return filePaths;
+        if (!this.zipHandler.hasPath(pathToAssets)) {
+            return [];
         }
-        const folderEntry = this._createFolders(this.zip, [...zipPath.split('/'), 'assets']);
-        folderEntry.forEach((relativePath, file) => {
-            if (!file.dir) {
-                filePaths.push(pathToAssets + relativePath);
-            }
-        });
-
-
-        return filePaths;
-
+        return this.zipHandler.listFiles(pathToAssets);
     }
 
 
     async getAsset(zipPath, relativePath) {
         const folderPath = zipPath + '/';
-        if (!this.zip.files[folderPath]) {
+        if (!this.zipHandler.hasPath(folderPath)) {
             throw {
                 status: 404,
                 statusText: 'Zip File Not Found'
             };
         }
 
-        const resource = this.zip.files[folderPath + relativePath];
-
-        if (!resource) {
+        
+        const pathToAsset = folderPath + relativePath;
+        // 
+        if (!this.zipHandler.hasPath(pathToAsset)) {
             throw {
                 status: 404,
                 statusText: 'File Not Found'
             };
         }
 
-        return resource.async('arraybuffer');
+        return this.zipHandler.getAsset(pathToAsset, 'arraybuffer');
     }
-
-    /*async getBlob(zipEntry) {
-        return new Promise((resolve, reject) => {
-            const extension = zipEntry.name.split('.').pop();
-            zipEntry.getBlob(getFileMime(extension), (data) => {
-                resolve(data)
-            }, function() {
-                console.log('progress', arguments)
-            }, (err) => {
-                console.log('An error has occured while attempting to get blob', err);
-                reject(err)
-            });
-        });
-    }*/
-
-    /*getAllDirectories(rootPath, zipEntry, allEntries = []) {
-        if (zipEntry.directory) {
-            const newRootPath = rootPath + zipEntry.name + '/';
-            zipEntry.children.forEach((childEntry) => {
-                this.getAllDirectories(newRootPath, childEntry, allEntries);
-            });
-        } else {
-            allEntries.push(rootPath + zipEntry.name);
-        }
-        return allEntries;
-    }*/
-
 }
 
-function getFileMime(extension) {
-    if (extension === 'png') {
+
+function getFileMime(fileName) {
+    if (fileName.endsWith('png')) {
         return 'image/png';
-    } else if (extension === 'jpg' || extension === 'jpeg') {
+    } else if (fileName.endsWith('jpg') || fileName.endsWith('jpeg')) {
         return 'image/jpeg';
-    } else if (extension === 'ogg') {
+    } else if (fileName.endsWith('ogg')) {
         return 'audio/ogg';
-    } else if (extension === 'json') {
+    } else if (fileName.endsWith('json')) {
         return 'application/json';
-    } else if (extension === 'js') {
+    } else if (fileName.endsWith('js')) {
         return 'application/javascript';
     }
 }
