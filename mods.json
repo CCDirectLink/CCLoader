@@ -1,3 +1,7 @@
 [
-	"simplify"
+	{
+		"name": "simplify",
+		"path": "assets/mods/simplify",
+		"packed": false
+	}
 ]
