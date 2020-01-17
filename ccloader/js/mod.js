@@ -8,7 +8,7 @@ export class Mod {
 	/**
 	 * 
 	 * @param {import('./ccloader').ModLoader} modloader
-	 * @param {string} file 
+	 * @param {string} file path to manifest
 	 */
 	constructor(modloader, file){
 		this.file = file;
@@ -43,6 +43,10 @@ export class Mod {
 				this.onloaded = () => resolve();
 			}
 		});
+	}
+
+	get packed() {
+		return false;
 	}
 
 	get name() {
@@ -116,6 +120,20 @@ export class Mod {
 	get baseDirectory(){
 		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 	}
+
+	/**
+	 * 
+	 * @param {string} relativePath to resource with mod folder as base
+	 * @returns {any} 
+	 */
+	async getResource(relativePath) {
+		if (!this.loaded) {
+			throw Error(`Mod ${this.manifest.name} is not loaded.`);
+		}
+
+		const fullRelativePath = path.join(this.file, relativePath)
+		return await this.filemanager.getResource(fullRelativePath);
+	}
 	
 	/**
 	 * 
@@ -167,9 +185,9 @@ export class Mod {
 		return this.pluginInstance;
 	}
 
-	async loadManifest() {
+	async loadManifest(forceNetwork = false) {
 		const file = this.file;
-		const data = await this.filemanager.getResourceAsync(file);
+		const data = await this.filemanager.getResourceAsync(file, forceNetwork);
 		if(!data) {
 			return;
 		}
