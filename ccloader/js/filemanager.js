@@ -70,9 +70,9 @@ export class Filemanager {
 	 * @param {string} resource 
 	 * @returns {Promise<string>}
 	 */
-	getResourceAsync(resource){
+	getResourceAsync(resource, forceNetwork = false){
 		return new Promise((resolve, reject) => {
-			if(isLocal) {
+			if(isLocal && forceNetwork === false) {
 				fs.readFile(resource, 'utf-8', (err, result) => {
 					if (err) {
 						reject(err);
