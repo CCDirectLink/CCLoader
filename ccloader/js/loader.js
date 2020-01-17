@@ -16,7 +16,7 @@ export class Loader {
 
 	async initialize() {
 		const code = await this._loadEntrypoint();
-		const result = await frame.contentWindow.navigator.serviceWorker.register('sw.js');
+		await frame.contentWindow.navigator.serviceWorker.register('sw.js');
 		this.doc = this._parseEntrypoint(code);
 		this._insertBase();
 		this.postloadPoint = this._findGame();
