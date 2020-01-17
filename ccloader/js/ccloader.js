@@ -5,12 +5,15 @@ import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
-
+import { ModManager } from './modmanager.js';
+import { PackedModServer } from './packedmodserver.js';
 const CCLOADER_VERSION = '2.16.0';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
+		this.modManager = new ModManager(this.filemanager);
+		this.pkdModServer = new PackedModServer;
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		this.loader = new Loader(this.filemanager);
@@ -33,7 +36,9 @@ export class ModLoader {
 	 * Loads and starts the game. It then loads the definitions and mods
 	 */
 	async startGame() {
+		await this.pkdModServer.initialize();
 		await this.loader.initialize();
+		await this.modManager.initialize();
 
 		await this._loadModPackages();
 		this._orderCheckMods();
@@ -81,24 +86,10 @@ export class ModLoader {
 	 * @returns {Promise<void>}
 	 */
 	async _loadModPackages() {
-		this.mods = await this._getModPackages();
+		this.mods = await this.modManager.getAllMods(this);
 		return await Promise.all(this.mods.map((mod) => mod.onload(this.mods)));
 	}
 
-	/**
-	 * Searches for mods and stores them in this.mods
-	 */
-	async _getModPackages() {
-		const modFiles = await this.filemanager.getAllModsFiles();
-		/** @type {Mod[]} */
-		const mods = [];
-		for (const modFile of modFiles) {
-			const mod = new Mod(this, modFile, false);
-			await mod.loadManifest();
-			mods.push(mod);
-		}
-		return mods;
-	}
 
 	/**
 	 * Orders mods and checks their dependencies. Simplify is always loaded first.
