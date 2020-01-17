@@ -8,9 +8,16 @@ if (window.process) {
 	}
 }
 
-window.onload = () => {
-	const modloader = window.modloader = new ModLoader();
+const modloader = window.modloader = new ModLoader();
+
+function reloadGame() {
+	console.log('Game loaded');
 	modloader.startGame()
 		.then()
 		.catch(err => console.error('Something went wrong while loading the game', err));
-};
+}
+
+
+window.onload = function() {
+	reloadGame();
+}
