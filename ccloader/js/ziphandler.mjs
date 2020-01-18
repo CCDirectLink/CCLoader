@@ -11,10 +11,10 @@ export class ZipHandler {
 
     listFiles(zipPath) {
         const filePaths = [];
-        const folderEntry = this._createFolders(this.zip, [...zipPath.split('/'), 'assets']);
+        const folderEntry = this._createFolders(this.zip, zipPath.split('/'));
         folderEntry.forEach((relativePath, file) => {
             if (!file.dir) {
-                filePaths.push(pathToAssets + relativePath);
+                filePaths.push(zipPath + relativePath);
             }
         });
         return filePaths;
