@@ -1,9 +1,13 @@
-import {ZipHandler} from "./ziphandler.js";
+import {ZipHandler} from "./ziphandler.mjs";
 
 export class PackedModServer {
-    constructor() {
+    constructor(jsZip) {
         this.server = null;
-        this.zipHandler = null;
+        this.zipHandler = new ZipHandler(jsZip);
+    }
+
+    setFetch(newFetch) {
+        this.fetch = newFetch;
     }
 
     async initialize() {   
@@ -19,23 +23,19 @@ export class PackedModServer {
     
                 server.listen(3000);
             }
-            if (this.zipHandler === null) {
-                this.zipHandler = new ZipHandler(new JSZip);
-            }
         }
 
 
     }
 
     async onRequest(req, res)  {
-        console.log('I sent this', req);
         const fullUrl = `http://${req.headers.host + req.url}`;
 
         const url = new URL(fullUrl);
 
         try {
             if (url.pathname === '/mods/api/preload') {
-                await this.preload(url.searchParams.get('path'))
+                await this.preload(url.searchParams.get('path'), req)
                 res.writeHead(200, 'OK');
                 res.end(null);
             } else if (url.pathname === '/mods/api/get-assets') {
@@ -48,7 +48,7 @@ export class PackedModServer {
                 const basePath = url.searchParams.get('path');
                 const relativePath = url.searchParams.get('relativePath');
                 const assetArrayBuffer = await this.getAsset(basePath, relativePath);
-                const asset = new Buffer(assetArrayBuffer, "binary");
+                const asset = Buffer.from(assetArrayBuffer, "binary");
                 res.writeHead(200, 'OK', {
                     'Content-Type': getFileMime(relativePath)
                 });
@@ -69,12 +69,21 @@ export class PackedModServer {
 
     /** Event Handlers */
 
-    async preload(zipPath) {
+    async preload(zipPath, req) {
         const folderPath = zipPath + '/';
         
         if (!this.zipHandler.hasPath(folderPath)) {
-            
-            const blob = await fetch('../'+ zipPath).then((res) => res.blob());
+            let fetch;
+            let fullPath;
+            if (this.fetch) {
+                fetch = this.fetch;
+                fullPath = 'http://' + req.get('host') + '/' + zipPath;
+            } else if (typeof window !== "undefined") {
+                fetch = window.fetch;
+                fullPath = `../${zipPath}`;
+            }           
+
+            const blob = await fetch(fullPath).then((res) => res.arrayBuffer());
             await this.zipHandler.loadZip(zipPath, blob);
         }
     }

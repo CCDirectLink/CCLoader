@@ -6,14 +6,14 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { ModManager } from './modmanager.js';
-import { PackedModServer } from './packedmodserver.js';
+import { PackedModServer } from './packedmodserver.mjs';
 const CCLOADER_VERSION = '2.16.0';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
 		this.modManager = new ModManager(this.filemanager);
-		this.pkdModServer = new PackedModServer;
+		this.pkdModServer = new PackedModServer(new JSZip);
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		this.loader = new Loader(this.filemanager);
