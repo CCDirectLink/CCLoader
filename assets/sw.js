@@ -25,7 +25,8 @@ self.addEventListener('fetch', function(event) {
             event.respondWith(fetch(`http://localhost:3000/mods/api/preload?path=${basePath}`));           
         } else if (url.pathname.includes("mods/api/get-assets")) {
             const basePath = url.searchParams.get('path');
-            event.respondWith(fetch(`http://localhost:3000/mods/api/get-assets?path=${basePath}`));
+            const type = url.searchParams.get('type') || '';
+            event.respondWith(fetch(`http://localhost:3000/mods/api/get-assets?path=${basePath}&type=${type}`));
         } else if (url.pathname.match(/mods\/[^\/]+.ccmod/)) {
             const {basePath, relativePath} = splitPackedUrl(event.request.url);
             event.respondWith(fetch(`http://localhost:3000/mods/api/get-asset?path=${basePath}&relativePath=${relativePath}`));
