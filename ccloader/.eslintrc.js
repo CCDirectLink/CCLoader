@@ -6,7 +6,8 @@ module.exports = {
         "node": true
     },
     "globals": {
-        "semver": true
+        "semver": true,
+        "JSZip": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {

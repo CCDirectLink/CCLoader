@@ -169,10 +169,13 @@ export class Mod {
 		return this.pluginInstance;
 	}
 
-	_loadManifest() {
+	async _loadManifest() {
 		const file = this.file;
-		const data = this.filemanager.getResource(file);
-		if(!data) {
+		let data;
+		try {
+			data = await this.filemanager.getResourceAsync(file);
+		} catch (e) {
+			console.error(e);
 			return;
 		}
 		
@@ -207,13 +210,12 @@ export class Mod {
 			this.manifest.name = this._getModNameFromFile();
 		}
 		
-		this._findAssets(this._getBaseName(file) + '/assets/').then(data => {
-			this.manifest.assets = data;
-			this.loaded = true;
-			if(this.onloaded) {
-				this.onloaded();
-			}
-		});
+		const assets = await this._findAssets(this._getBaseName(file) + '/assets/');
+		this.manifest.assets = assets;
+		this.loaded = true;
+		if(this.onloaded) {
+			this.onloaded();
+		}
 	}
 
 	/**
@@ -321,29 +323,29 @@ export class Mod {
 	 * @param {import('./ccloader').ModLoader} ccloader
 	 * @deprecated
 	 */
-	initializeTable(ccloader){
+	async initializeTable(ccloader){
 		if(!this.loaded || !this.manifest.table)
 			return;
 		
-		const hash = this.filemanager.getModDefintionHash(this.manifest.table);
+		const hash = await this.filemanager.getModDefintionHash(this.manifest.table);
 		const tablePath = path.join(this._getBaseName(this.file), hash);
 			
-		this.table = this.filemanager.loadTable(tablePath, hash);
+		this.table = await this.filemanager.loadTable(tablePath, hash);
 		if(!this.table){
 			console.log('[' + this.manifest.name + '] Creating mod definition database..');
 			if(ccloader.acorn.needsParsing) {
 				console.log('[' + this.manifest.name + '] Parsing...');
-				const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
+				const jscode = await this.filemanager.getResourceAsync('assets/js/game.compiled.js');
 				ccloader.acorn.parse(jscode);
 			}
 
 			try {
-				const dbtext = this.filemanager.getResource('assets/' + this.manifest.table);
+				const dbtext = await this.filemanager.getResourceAsync('assets/' + this.manifest.table);
 				const dbdef = JSON.parse(dbtext);
 				console.log('[' + this.manifest.name + '] Analysing...');
 				this.table = ccloader.acorn.analyse(dbdef);
 				console.log('[' + this.manifest.name + '] Writing...');
-				this.filemanager.saveTable(tablePath, this.table, hash);
+				await this.filemanager.saveTable(tablePath, this.table, hash);
 				console.log('[' + this.manifest.name + '] Finished!');
 			} catch (e) {
 				console.error(`Could not load definitions of mod ${this.manifest.name}. Disabling.`, e);

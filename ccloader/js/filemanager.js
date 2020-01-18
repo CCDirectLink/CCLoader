@@ -16,12 +16,22 @@ export class Filemanager {
 
 		if (isBrowser) {
 			try {
-				this.modList = JSON.parse(this.getResource('mods.json'));
+				this.getResourceAsync('mods.json').then((text) => {
+					this.modList = JSON.parse(text);
+				});
 			} catch (e) {
 				console.error('Could not load mod list. Proceeding to load without any mods. ', e);
 				this.modList = [];
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param {string[]} names 
+	 */
+	setPackedMods(names) {
+		this._packed = names;
 	}
 
 	/**
@@ -43,26 +53,10 @@ export class Filemanager {
 
 	/**
 	 * 
-	 * @param {string} resource 
+	 * @param {string} folder 
 	 */
-	getResource(resource){
-		try {
-			if(isLocal)
-				return fs.readFileSync(resource, 'utf-8');
-			else {
-				const req = new XMLHttpRequest();
-				req.open('GET', '/' + resource, false);
-				req.send(null);
-
-				if(req.readyState === req.DONE && req.status === 200) {
-					return req.responseText;
-				} else {
-					return undefined;
-				}
-			}
-		} catch(e){
-			return undefined;
-		}
+	getAllModPackages(folder) {
+		return this._getResources(folder, '.ccmod');
 	}
 	
 	/**
@@ -70,30 +64,14 @@ export class Filemanager {
 	 * @param {string} resource 
 	 * @returns {Promise<string>}
 	 */
-	getResourceAsync(resource){
-		return new Promise((resolve, reject) => {
-			if(isLocal) {
-				fs.readFile(resource, 'utf-8', (err, result) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(result);
-					}
-				});
-			} else {
-				const req = new XMLHttpRequest();
-				req.open('GET', '/' + resource, true);
+	async getResourceAsync(resource){
+		resource = resource.replace(/\\/g, '/');
+		if (resource.startsWith('assets/') || resource.startsWith('ccloader/')) {
+			resource = '/' + resource;
+		}
 
-				req.onerror = err => reject(err);
-				req.onreadystatechange = () => {
-					if (req.readyState === req.DONE && req.status === 200) {
-						resolve(req.responseText);
-					}
-				};
-
-				req.send(null);
-			}
-		});
+		const resp = await fetch(resource);
+		return await resp.text();
 	}
 
 	/**
@@ -135,8 +113,29 @@ export class Filemanager {
 			result.src = path;
 		});
 	}
-	
 
+	/**
+	 * 
+	 * @param {string} path 
+	 * @param {window} window
+	 * @returns {Promise<ServiceWorker>}
+	 */
+	async loadServiceWorker(path, window) {
+		const reg = await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		await reg.update();
+		if (!reg.waiting && !reg.installing) {
+			return reg.active;
+		}
+
+		return new Promise((resolve) => {
+			reg.addEventListener('updatefound', () => {
+				if (!reg.waiting && !reg.installing) {
+					resolve(reg.active);
+				}
+			});
+		});
+	}
+	
 	/**
 	 * Returns all files with the given ending in the folder
 	 * @param {string?} folder 
@@ -237,6 +236,16 @@ export class Filemanager {
 				return false;
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param {string} file 
+	 * @returns {Promise<Blob>}
+	 */
+	async _getBlob(file) {
+		const resp = await fetch(file);
+		return resp.blob();
 	}
 
 	/**
@@ -385,9 +394,9 @@ export class Filemanager {
 	 * @returns {void}
 	 * @deprecated
 	 */
-	saveTable(tableName, table, hash){
+	async saveTable(tableName, table, hash){
 		if(!hash){
-			return this.saveTable(tableName, table, this.getDefintionHash());
+			return await this.saveTable(tableName, table, await this.getDefintionHash());
 		}
 		
 		if(isLocal) {
@@ -406,8 +415,8 @@ export class Filemanager {
 	 * @returns {Db | undefined}
 	 * @deprecated
 	 */
-	loadTable(tableName, hash){
-		const text = this.getResource('ccloader/data/' + tableName);
+	async loadTable(tableName, hash){
+		const text = await this.getResourceAsync('ccloader/data/' + tableName);
 		if(!text) {
 			return undefined;
 		}
@@ -435,7 +444,7 @@ export class Filemanager {
 	 * @returns {string}
 	 * @deprecated
 	 */
-	_getHash(file) {
-		return Crypto.MD5(this.getResource(file)) + '.table';
+	async _getHash(file) {
+		return Crypto.MD5(this.getResourceAsync(file)) + '.table';
 	}
 }
