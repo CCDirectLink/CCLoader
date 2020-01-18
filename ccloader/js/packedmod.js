@@ -34,15 +34,4 @@ export class PackedMod extends Mod {
 		const response = await frame.contentWindow.fetch(`mods/api/get-assets?path=assets/${this._resolvePath("")}`);
 		return await response.json();
 	}
-
-    _resolvePath(relativePath) {
-		const basePath = this._getBaseName(this.file);
-        if (!relativePath) {
-            return this._normalizePath(basePath);
-        }
-		// get name 
-        return this._normalizePath(basePath + '/' + relativePath);
-	}
-	
-
 }

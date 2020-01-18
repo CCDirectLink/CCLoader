@@ -131,8 +131,8 @@ export class Mod {
 			throw Error(`Mod ${this.manifest.name} is not loaded.`);
 		}
 
-		const fullRelativePath = path.join(this.file, relativePath)
-		return await this.filemanager.getResource(fullRelativePath);
+		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
+		return await this.filemanager.getResourceAsync(fullRelativePath);
 	}
 	
 	/**
@@ -309,6 +309,15 @@ export class Mod {
 			return path;
 	}
 	
+	_resolvePath(relativePath) {
+		const basePath = this._getBaseName(this.file);
+        if (!relativePath) {
+            return this._normalizePath(basePath);
+        }
+		// get name 
+        return this._normalizePath(basePath + '/' + relativePath);
+	}
+
 	/**
 	 * 
 	 * @param {string} dir 
@@ -319,7 +328,8 @@ export class Mod {
 		} else {
 			const assets = this.manifest.assets;
 			if (!assets) {
-				return [];
+				let response = await frame.contentWindow.fetch(`mods/api/get-assets?path=assets/${this._resolvePath("")}&type=unpacked`);
+				return response.json();
 			}
 			const base = this._getBaseName(this.file) + '/';
 
