@@ -9,10 +9,7 @@ export class UnpackedServer {
     }
 
 
-    async onRequest(req, res) {
-        const fullUrl = `http://${req.headers.host + req.url}`;
-
-        const url = new URL(fullUrl);
+    async onRequest(req, res, url) {
 
         if (url.pathname === '/mods/api/get-assets') {
             const assetsPath = url.searchParams.get('path') + '/assets/';

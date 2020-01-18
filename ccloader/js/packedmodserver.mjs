@@ -28,11 +28,7 @@ export class PackedModServer {
 
     }
 
-    async onRequest(req, res)  {
-        const fullUrl = `http://${req.headers.host + req.url}`;
-
-        const url = new URL(fullUrl);
-
+    async onRequest(req, res, url)  {
         try {
             if (url.pathname === '/mods/api/preload') {
                 await this.preload(url.searchParams.get('path'), req)

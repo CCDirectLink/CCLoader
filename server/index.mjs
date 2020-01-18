@@ -19,9 +19,9 @@ app.get('/mods/api/*', async function(req, res) {
 
     const url = new URL(fullUrl);
     if (url.searchParams.get('type') === 'unpacked') {
-        await unpackedServer.onRequest(req, res);
+        await unpackedServer.onRequest(req, res, url);
     } else {
-        await packedServer.onRequest(req, res);
+        await packedServer.onRequest(req, res, url);
     }
 });
 
