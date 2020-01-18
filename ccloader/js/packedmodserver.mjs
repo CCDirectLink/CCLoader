@@ -14,7 +14,12 @@ export class PackedModServer {
         if (typeof window !== "undefined" && !window.isBrowser) {
             if (this.server === null) {
                 const server = this.server = require('http').createServer();
-                server.on('request', async (req, res) => await this.onRequest(req,res));
+                server.on('request', async (req, res) => {
+                    const fullUrl = `http://${req.headers.host + req.url}`;
+
+                    const url = new URL(fullUrl);
+                    await this.onRequest(req,res, url);
+                });
     
                 window.addEventListener('onbeforeunload', function(){
                     console.log('Closing server');
