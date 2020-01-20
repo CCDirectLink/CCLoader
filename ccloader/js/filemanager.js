@@ -203,7 +203,7 @@ export class Filemanager {
 		try {
 			const stats = await this._getStats(filePath);
 			if(stats && stats.isDirectory()){
-				return await this.findFiles(filePath);
+				return await this.findFiles(filePath, endings);
 			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
 				return [path.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
 			}
