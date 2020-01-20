@@ -207,6 +207,7 @@ export class Filemanager {
 			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
 				return [path.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
 			}
+			return [];
 		} catch (e) {
 			return [];
 		}
