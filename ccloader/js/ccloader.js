@@ -71,6 +71,7 @@ export class ModLoader {
 		const names = packedMods.map((m) => m.substring(12, m.length - 6));
 		
 		this._sendPackedModNames(names);
+		this.filemanager.setPackedMods(names);
 		return packedMods;
 	}
 

@@ -13,6 +13,9 @@ export class Filemanager {
 	 */
 	constructor(modloader) {
 		this.modloader = modloader;
+		this.packed = [];
+		// eslint-disable-next-line no-undef
+		this._packedManager = new PackedManager();
 
 		if (isBrowser) {
 			this.getResourceAsync('mods.json').then((text) => {
@@ -29,7 +32,7 @@ export class Filemanager {
 	 * @param {string[]} names 
 	 */
 	setPackedMods(names) {
-		this._packed = names;
+		this.packed = names;
 	}
 
 	/**
@@ -161,7 +164,15 @@ export class Filemanager {
 	 * @param {string} dir
 	 * @returns {Promise<string[]>}
 	 */
-	_getFiles(dir) {
+	async _getFiles(dir) {
+		if (this.packed.includes(this._packedManager.packedName(dir))) {
+			return (await fetch(dir, {
+				headers: {
+					'X-Cmd': 'getFiles'
+				}
+			})).json();
+		}
+
 		return new Promise((resolve, reject) => {
 			fs.readdir(dir, (err, files) => {
 				if (err) {
@@ -192,6 +203,24 @@ export class Filemanager {
 
 	/**
 	 * 
+	 * @param {string} file
+	 * @returns {Promise<boolean>}
+	 */
+	async _isDirectoryAsync(file) {
+		if (this.packed.includes(this._packedManager.packedName(file))) {
+			return (await fetch(file, {
+				headers: {
+					'X-Cmd': 'isDirectory'
+				}
+			})).json();
+		}
+
+		const stats = await this._getStats(file);
+		return stats && stats.isDirectory();
+	}
+
+	/**
+	 * 
 	 * @param {string} dir 
 	 * @param {string} file 
 	 * @param {string[]} [endings]
@@ -201,8 +230,7 @@ export class Filemanager {
 		const filePath = path.resolve(dir, file);
 
 		try {
-			const stats = await this._getStats(filePath);
-			if(stats && stats.isDirectory()){
+			if(await this._isDirectoryAsync(filePath)){
 				return await this.findFiles(filePath, endings);
 			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
 				return [path.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];

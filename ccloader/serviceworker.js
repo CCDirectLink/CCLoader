@@ -12,13 +12,35 @@ self.addEventListener('install', () => {
 	self.skipWaiting();
 });
 
+self.addEventListener('activate', () => {
+	self.clients.claim();
+});
+
 self.addEventListener('message', (event) => {
 	packedMods.splice(0);
 	packedMods.push(...event.data);
 });
 
 self.addEventListener('fetch', (event) => {
-	const path = new URL(event.request.url).pathname;
+	/** @type {Request} */
+	const request = event.request;
+	const path = new URL(request.url).pathname;
+
+	if (request.headers.has('X-Cmd')) {
+		switch (request.headers.get('X-Cmd')) {
+		case 'getFiles':
+			event.respondWith((async () => new Response(JSON.stringify(
+				await packedManger.getFiles(path)),
+			{status: 200}))());
+			break;
+		case 'isDirectory':
+			event.respondWith((async () => new Response(JSON.stringify(
+				await packedManger.isDirectory(path)),
+			{status: 200}))());
+			break;
+		}
+	}
+
 	if (path.startsWith('/assets/mods/') && packedMods.includes(packedManger.packedName(path))) {
 		console.log('Handling fetch event for', packedManger.packedName(path), '(', packedManger._zipPath(path), '): ', packedManger._assetPath(path));
         
