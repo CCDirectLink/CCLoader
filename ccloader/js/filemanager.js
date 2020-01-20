@@ -15,14 +15,12 @@ export class Filemanager {
 		this.modloader = modloader;
 
 		if (isBrowser) {
-			try {
-				this.getResourceAsync('mods.json').then((text) => {
-					this.modList = JSON.parse(text);
-				});
-			} catch (e) {
+			this.getResourceAsync('mods.json').then((text) => {
+				this.modList = JSON.parse(text);
+			}).catch((e) => {
 				console.error('Could not load mod list. Proceeding to load without any mods. ', e);
 				this.modList = [];
-			}
+			});
 		}
 	}
 
