@@ -300,7 +300,7 @@ export class Mod {
 	 * @param {string} dir 
 	 */
 	async _findAssets(dir){
-		if(window.isLocal){
+		if(window.isLocal || this.filemanager.isPacked(dir)){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
 			const assets = this.manifest.assets;
