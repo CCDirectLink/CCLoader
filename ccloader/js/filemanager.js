@@ -225,13 +225,13 @@ export class Filemanager {
 	 * @returns {Promise<string[]>} 
 	 */
 	async _checkFileForAsset(dir, file, endings) {
-		const filePath = path.resolve(dir, file);
+		const filePath = path.join(dir, file);
 
 		try {
 			if(await this._isDirectoryAsync(filePath)){
 				return await this.findFiles(filePath, endings);
 			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
-				return [path.relative(process.cwd() + '/assets/', filePath).replace(/\\/g, '/')];
+				return [filePath.substr(7).replace(/\\/g, '/')];
 			}
 			return [];
 		} catch (e) {
