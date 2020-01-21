@@ -127,7 +127,7 @@ class PackedManager {
 	 * @param {string} url 
 	 */
 	_normalize(url) {
-		url = url.replace(/\\/g, '/');
+		url = url.replace(/\\/g, '/').replace(/\/\//, '/');
 		//TODO: resolve absolute paths
 		if (!url.startsWith('/')) {
 			url = '/' + url;
