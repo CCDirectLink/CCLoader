@@ -18,7 +18,7 @@ export class Filemanager {
 		this._packedManager = new PackedManager();
 
 		if (isBrowser) {
-			this.getResourceAsync('mods.json').then((text) => {
+			this.getResourceAsync('../mods.json').then((text) => {
 				this.modList = JSON.parse(text);
 			}).catch((e) => {
 				console.error('Could not load mod list. Proceeding to load without any mods. ', e);
