@@ -124,17 +124,9 @@ export class Filemanager {
 	async loadServiceWorker(path, window) {
 		const reg = await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
 		await reg.update();
-		if (!reg.waiting && !reg.installing) {
-			return reg.active;
-		}
+		return reg.active;
+	}
 
-		return new Promise((resolve) => {
-			reg.addEventListener('updatefound', () => {
-				if (!reg.waiting && !reg.installing) {
-					resolve(reg.active);
-				}
-			});
-		});
 	}
 	
 	/**
