@@ -127,8 +127,14 @@ export class Filemanager {
 		return reg.active;
 	}
 
+	/**
+	 * 
+	 * @param {string} path 
+	 */
+	isPacked(path) {
+		return this.packed.includes(this._packedManager.packedName(path));
 	}
-	
+
 	/**
 	 * Returns all files with the given ending in the folder
 	 * @param {string?} folder 
@@ -157,7 +163,7 @@ export class Filemanager {
 	 * @returns {Promise<string[]>}
 	 */
 	async _getFiles(dir) {
-		if (this.packed.includes(this._packedManager.packedName(dir))) {
+		if (this.isPacked(dir)) {
 			return (await fetch(dir, {
 				headers: {
 					'X-Cmd': 'getFiles'
@@ -199,7 +205,7 @@ export class Filemanager {
 	 * @returns {Promise<boolean>}
 	 */
 	async _isDirectoryAsync(file) {
-		if (this.packed.includes(this._packedManager.packedName(file))) {
+		if (this.isPacked(file)) {
 			return (await fetch(file, {
 				headers: {
 					'X-Cmd': 'isDirectory'
