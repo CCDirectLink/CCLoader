@@ -83,27 +83,27 @@ export class Mod {
 		return !!this.manifest.hidden;
 	}
 	get main() {
-		if(!this.load)
+		if(!this.loaded)
 			return '';
 		return this.manifest.main;
 	}
 	get preload() {
-		if(!this.load)
+		if(!this.loaded)
 			return '';
 		return this.manifest.preload;
 	}
 	get postload() {
-		if(!this.load)
+		if(!this.loaded)
 			return '';
 		return this.manifest.postload;
 	}
 	get prestart() {
-		if(!this.load)
+		if(!this.loaded)
 			return '';
 		return this.manifest.prestart;
 	}
 	get plugin() {
-		if(!this.load)
+		if(!this.loaded)
 			return '';
 		return this.manifest.plugin;
 	}
