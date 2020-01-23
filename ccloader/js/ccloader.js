@@ -68,7 +68,7 @@ export class ModLoader {
 
 	_loadPackedMods() {
 		const packedMods = this.filemanager.getAllModPackages();
-		const names = packedMods.map((m) => m.substring(12, m.length - 6));
+		const names = packedMods.map((m) => m.substring(12, m.length));
 		
 		this._sendPackedModNames(names);
 		this.filemanager.setPackedMods(names);
@@ -112,7 +112,7 @@ export class ModLoader {
 
 		const packedMods = this._loadPackedMods();
 		for (const packed of packedMods) {
-			modFiles.push(packed.substring(0, packed.length - 6) + '/package.json');
+			modFiles.push(packed.substring(0, packed.length) + '/package.json');
 		}
 
 		/** @type {Mod[]} */

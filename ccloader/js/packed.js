@@ -70,7 +70,7 @@ class PackedManager {
      */
 	packedName(url) {
 		url = this._normalize(url);
-		return decodeURIComponent(url.substr(ASSETS_MODS_LENGTH, url.indexOf('/', ASSETS_MODS_LENGTH) - ASSETS_MODS_LENGTH));
+		return decodeURIComponent(url.substring(ASSETS_MODS_LENGTH, url.indexOf('/', ASSETS_MODS_LENGTH)));
 	}
 
 	/**
@@ -110,7 +110,7 @@ class PackedManager {
      */
 	_zipPath(url) {
 		url = this._normalize(url);
-		return url.substr(0, url.indexOf('/', ASSETS_MODS_LENGTH)) + '.ccmod';
+		return url.substr(0, url.indexOf('/', ASSETS_MODS_LENGTH));
 	}
 
 	/**
