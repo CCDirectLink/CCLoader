@@ -1,5 +1,5 @@
-import * as acorn from '../../node_modules/acorn/dist/acorn.es.js';
-import * as walker from '../../node_modules/acorn/dist/walk.es.js';
+import * as acorn from '../node_modules/acorn/dist/acorn.es.js';
+import * as walker from '../node_modules/acorn/dist/walk.es.js';
 
 import { Db, DbTree } from './db.js';
 
