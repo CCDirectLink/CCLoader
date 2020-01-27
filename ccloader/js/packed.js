@@ -22,7 +22,8 @@ class PackedManager {
 		const file = zip.file(this._assetPath(url));
 		if (file === null) {
 			return new Response(new Blob(), {
-				status: 404
+				status: 404,
+				statusText: 'not found'
 			});
 		}
 		
