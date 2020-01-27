@@ -6,7 +6,7 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 
-const CCLOADER_VERSION = '2.16.1';
+const CCLOADER_VERSION = '2.17.0';
 
 export class ModLoader {
 	constructor() {
@@ -25,15 +25,17 @@ export class ModLoader {
 		/** @type {{[name: string]: string}} */
 		this.versions = {};
 		
-		this._buildCrosscodeVersion();
-		this._initializeLegacy();
 	}
 
 	/**
 	 * Loads and starts the game. It then loads the definitions and mods
 	 */
 	async startGame() {
+		await this._buildCrosscodeVersion();
+		await this._initializeLegacy();
+
 		await this.loader.initialize();
+		await this._initializeServiceWorker();
 
 		await this._loadModPackages();
 		this._orderCheckMods();
@@ -52,17 +54,34 @@ export class ModLoader {
 		this.loader.continue(this.frame);
 		await this._waitForGame();
 
-		this._executeLegacy();
+		await this._executeLegacy();
 		await this._executeMain();
 
 
 		this._fireLoadEvent();
 		this._removeOverlay();
 	}
+
+	async _initializeServiceWorker() {
+		this._serviceWorker = await this.filemanager.loadServiceWorker('serviceworker.js', this._getGameWindow());
+	}
+
+	_loadPackedMods() {
+		const packedMods = this.filemanager.getAllModPackages();
+		const names = packedMods.map((m) => m.substring(12, m.length));
+		
+		this._sendPackedModNames(names);
+		this.filemanager.setPackedMods(names);
+		return packedMods;
+	}
+
+	_sendPackedModNames(names) {
+		this._serviceWorker.postMessage(names);
+	}
 	
-	_buildCrosscodeVersion(){
+	async _buildCrosscodeVersion(){
 		try {
-			const {changelog} = JSON.parse(this.filemanager.getResource('./assets/data/changelog.json'));
+			const {changelog} = JSON.parse(await this.filemanager.getResourceAsync('assets/data/changelog.json'));
 			this.ccVersion = changelog[0].version;
 		} catch (e) {
 			let ccVersion = localStorage.getItem('cc.version');
@@ -90,6 +109,12 @@ export class ModLoader {
 	 */
 	_getModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
+
+		const packedMods = this._loadPackedMods();
+		for (const packed of packedMods) {
+			modFiles.push(packed.substring(0, packed.length) + '/package.json');
+		}
+
 		/** @type {Mod[]} */
 		const mods = [];
 		for (const modFile of modFiles) {
@@ -369,12 +394,12 @@ export class ModLoader {
 	}
 
 	_initializeLegacy() {
-		this._initializeTable();
+		return this._initializeTable();
 	}
 
 	_executeLegacy() {
 		this._executeMainDb();
-		this._executeDb();
+		return this._executeDb();
 	}
 
 	/**
@@ -394,9 +419,9 @@ export class ModLoader {
 	 * Reloads all definitions
 	 * @deprecated
 	 */
-	reloadTables() {
+	async reloadTables() {
 		this.modTables = {};
-		this._createTable(this.filemanager.getTableName());
+		this._createTable(await this.filemanager.getTableName());
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 		for (const mod of this.mods) {
 			mod.executeTable(this);
@@ -407,16 +432,16 @@ export class ModLoader {
 	 * Loads a cached table if available and creates a new one otherwise
 	 * @deprecated
 	 */
-	_initializeTable() {
+	async _initializeTable() {
 		if (this._isLegacy()) {
-			const tableName = this.filemanager.getTableName();
+			const tableName = await this.filemanager.getTableName();
 			if (this.filemanager.tableExists(tableName)) {
-				this._loadTable(tableName);
+				await this._loadTable(tableName);
 			} else {
-				this._createTable(tableName);
+				await this._createTable(tableName);
 			}
 		} else {
-			this._loadTable('final.table');
+			await this._loadTable('final.table');
 		}
 	}
 
@@ -425,11 +450,11 @@ export class ModLoader {
 	 * @param {string} tableName 
 	 * @deprecated
 	 */
-	_createTable(tableName) {
+	async _createTable(tableName) {
 		this._setStatus('Initializing Mapping');
 		console.log('Reading files...');
-		const jscode = this.filemanager.getResource('assets/js/game.compiled.js');
-		const dbtext = this.filemanager.getResource('ccloader/data/definitions.db');
+		const jscode = await this.filemanager.getResourceAsync('assets/js/game.compiled.js');
+		const dbtext = await this.filemanager.getResourceAsync('ccloader/data/definitions.db');
 		
 		try {
 			const dbdef = JSON.parse(dbtext);
@@ -438,7 +463,7 @@ export class ModLoader {
 			console.log('Analysing...');
 			this.table = this.acorn.analyse(dbdef);
 			console.log('Writing...');
-			this.filemanager.saveTable(tableName, this.table);
+			await this.filemanager.saveTable(tableName, this.table);
 			console.log('Finished!');
 		} catch (e) {
 			console.error('Could not load definitions.', e);
@@ -450,9 +475,9 @@ export class ModLoader {
 	 * @param {string} tableName 
 	 * @deprecated
 	 */
-	_loadTable(tableName) {
-		const hash = this._isLegacy() ? this.filemanager.getDefintionHash() : 'final';
-		this.table = this.filemanager.loadTable(tableName, hash);
+	async _loadTable(tableName) {
+		const hash = this._isLegacy() ? await this.filemanager.getDefintionHash() : 'final';
+		this.table = await this.filemanager.loadTable(tableName, hash);
 		if(!this.table) {
 			this._createTable(tableName);
 		}
@@ -463,11 +488,11 @@ export class ModLoader {
 	 * Applies all definitions and loads the mods
 	 * @deprecated
 	 */
-	_executeDb() {
+	async _executeDb() {
 		const entries = Object.assign({}, this.table.entries);
 
 		try {
-			this._executeModTables(entries);
+			await this._executeModTables(entries);
 			this._finalizeEntries(entries);
 		} catch (err) {
 			console.error('An error occured while loading mod tables', err);
@@ -479,10 +504,10 @@ export class ModLoader {
 	 * @param {{[key: string]: string}} entries
 	 * @deprecated
 	 */
-	_executeModTables(entries) {
+	async _executeModTables(entries) {
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
-				const table = mod.initializeTable(this);
+				const table = await mod.initializeTable(this);
 				if (table) {
 					Object.assign(entries, table.entries);
 					mod.executeTable(this);
