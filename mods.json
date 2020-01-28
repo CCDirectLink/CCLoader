@@ -1,4 +1,5 @@
 [
 	"simplify",
-	"ccloader-version-display"
+	"ccloader-version-display",
+	"openDevTools"
 ]
