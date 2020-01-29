@@ -347,7 +347,7 @@ export class ModLoader {
 			try {
 				await mod.loadPostload();
 			} catch (e) {
-				console.error(`Could not run preload of mod '${mod.name}': `, e);
+				console.error(`Could not run postload of mod '${mod.name}': `, e);
 			}
 		}
 	}
