@@ -149,6 +149,11 @@ export class Mod {
 		this.runtimeAssets[original] = newPath;
 	}
 
+	/**
+	 * Returns the full path to a resource
+	 * @param {string} relativePath to resource with mod folder as base
+	 * @returns {string} 
+	 */
 	resolvePath(relativePath) {
 		const basePath = this._getBaseName(this.file);
         if (!relativePath) {
