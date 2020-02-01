@@ -149,6 +149,14 @@ export class Mod {
 		this.runtimeAssets[original] = newPath;
 	}
 
+	resolvePath(relativePath) {
+		const basePath = this._getBaseName(this.file);
+        if (!relativePath) {
+            return this._normalizePath(basePath);
+        }
+        return this._normalizePath(basePath + '/' + relativePath);
+	}
+
 
 	async _loadPlugin() {
 		this.window._tmp = this.plugin;
