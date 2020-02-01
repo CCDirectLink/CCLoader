@@ -157,6 +157,20 @@ export class Mod {
         return this._normalizePath(basePath + '/' + relativePath);
 	}
 
+	/**
+	 * 
+	 * @param {string} relativePath to resource with mod folder as base
+	 * @returns {any} 
+	 */
+	async getResource(relativePath) {
+		if (!this.loaded) {
+			throw Error(`Mod ${this.manifest.name} is not loaded.`);
+		}
+
+		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
+		return await this.filemanager.getResourceAsync(fullRelativePath);
+	}
+
 
 	async _loadPlugin() {
 		this.window._tmp = this.plugin;
