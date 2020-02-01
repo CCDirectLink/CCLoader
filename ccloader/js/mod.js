@@ -157,6 +157,24 @@ export class Mod {
         return this._normalizePath(basePath + '/' + relativePath);
 	}
 
+
+	/**
+	 * 
+	 * @param {string} relativePath to resource with mod folder as base
+	 * @returns {boolean} 
+	 */
+	hasResource(relativePath) {
+
+		if (!this.loaded) {
+			for (const asset of this.assets) {
+				if (asset.endsWith(relativePath)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * 
 	 * @param {string} relativePath to resource with mod folder as base
