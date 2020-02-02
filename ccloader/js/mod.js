@@ -2,7 +2,7 @@ import { Plugin } from './plugin.js';
 
 /** @typedef Modloader import ccloader.js */
 
-const path = require('path');
+const {posix: path} = require('path');
 
 export class Mod {
 	/**
@@ -145,7 +145,7 @@ export class Mod {
 		}
 
 		const basePath = this._getBaseName(this.file);
-		const files = await this.filemanager.findFiles(basePath + '/', fileExtensions);
+		const files = await this.filemanager.findFiles(path.join(basePath, '/'), fileExtensions);
 		if (files.length) {
 			files.push(...this.manifest.assets);
 			const uniqueFilePaths = new Set(files);
@@ -194,9 +194,9 @@ export class Mod {
 	resolvePath(relativePath) {
 		const basePath = this._getBaseName(this.file); 
 		if (!relativePath) {
-			return this._normalizePath(basePath);
+			return path.normalize(this._normalizePath(basePath));
 		}
-		return this._normalizePath(basePath + '/' + relativePath);
+		return path.normalize(this._normalizePath(basePath + '/' + relativePath));
 	}
 
 

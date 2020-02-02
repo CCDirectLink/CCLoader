@@ -1,7 +1,7 @@
 import { Db } from './db.js';
 
 const fs = require('fs');
-const path = require('path');
+const {posix: path} = require('path');
 
 const isBrowser = window.isBrowser;
 const isLocal = !isBrowser;
