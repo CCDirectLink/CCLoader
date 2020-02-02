@@ -137,7 +137,7 @@ export class Mod {
 				const basePath = this._getBaseName(this.file);
 				const files = await this.filemanager.findFiles(basePath + '/', fileExtensions);
 				if (files.length) {
-					files.push(...this.manifest.assets)
+					files.push(...this.manifest.assets);
 					const uniqueFilePaths = new Set(files);
 					this.manifest.assets = Array.from(uniqueFilePaths);
 				}
