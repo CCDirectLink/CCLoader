@@ -131,11 +131,11 @@ export class Mod {
 
 	/**
 	 * Dynamically add file paths by extensions.
-	 * @param {string} relativePath to limit search in
 	 * @param {string[]} fileExtensions
+	 * @param {string} [relativePath = ''] to limit search in
 	 * @returns {Promise<boolean>} true if mod is ready and mod is running l, otherwise false
 	 */
-	async addAssetsByExtensions(relativePath = '', fileExtensions) {
+	async addAssetsByExtensions(fileExtensions, relativePath = '') {
 		if (!this.ready) {
 			return false;
 		}
