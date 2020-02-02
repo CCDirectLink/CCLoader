@@ -170,7 +170,7 @@ export class Mod {
 	 */
 	hasResource(relativePath) {
 
-		if (!this.loaded) {
+		if (this.loaded) {
 			for (const asset of this.assets) {
 				if (asset.endsWith(relativePath)) {
 					return true;
