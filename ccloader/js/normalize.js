@@ -9,10 +9,12 @@ if (!window.require) {
 				sep: '/',
 				normalize: function (path) {
 
-					// convert all \ to / and remove all duplicate //
+					if (path.length === 0) {
+						return '.';
+					}  else if (!path.includes(this.sep)) {
+						return path;
+					}
 
-					path = path.replace(/\\/g, this.sep).replace(/\/\//g, this.sep);
-					
 					// split by the path separator 
 					let pieces = path.split(this.sep);
 
@@ -21,7 +23,8 @@ if (!window.require) {
 					for (let pieceIndex = 0; pieceIndex < pieces.length; pieceIndex++) {
 						const currPiece = pieces[pieceIndex];
 						
-						if (currPiece === '.' || (currPiece === '..' && pieceIndex === 0)) {
+						if (currPiece === '.' || (currPiece === '..' && pieceIndex === 0) 
+							|| currPiece.trim() === '') {
 							// remove the current entry
 							pieces.splice(pieceIndex, 1);
 							pieceIndex--;
@@ -31,7 +34,8 @@ if (!window.require) {
 							pieceIndex -= 1;
 						}
 					}
-					return pieces.join(this.sep);
+					
+					return this.sep + pieces.join(this.sep);
 
 				},
 				join: function(...args) {
