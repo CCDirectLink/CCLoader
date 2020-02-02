@@ -115,6 +115,10 @@ export class Mod {
 		return this.manifest.plugin;
 	}
 	
+	get ready() {
+		return this.loaded && !this.disabled;
+	}
+
 	get isEnabled(){
 		if(!this.loaded || this.disabled)
 			return false;
@@ -129,22 +133,25 @@ export class Mod {
 	/**
 	 * Dynamically add file paths by extensions.
 	 * @param {string[]} fileExtensions
-	 * @returns {Promise<boolean>} true if packed or not in browser, otherwise false
+	 * @returns {Promise<boolean>} true if mod is ready and mod is running l, otherwise false
 	 */
 	async addAssetsByExtensions(fileExtensions) {
-		if (this.loaded && !this.disabled) {
-			if (window.isLocal || this.packed) {
-				const basePath = this._getBaseName(this.file);
-				const files = await this.filemanager.findFiles(basePath + '/', fileExtensions);
-				if (files.length) {
-					files.push(...this.manifest.assets);
-					const uniqueFilePaths = new Set(files);
-					this.manifest.assets = Array.from(uniqueFilePaths);
-				}
-				return true;
-			}
+		if (!this.ready) {
+			return false;
 		}
-		return false;
+
+		if (!(window.isLocal || this.packed)) {
+			return false;
+		}
+
+		const basePath = this._getBaseName(this.file);
+		const files = await this.filemanager.findFiles(basePath + '/', fileExtensions);
+		if (files.length) {
+			files.push(...this.manifest.assets);
+			const uniqueFilePaths = new Set(files);
+			this.manifest.assets = Array.from(uniqueFilePaths);
+		}
+		return true;
 	}
 
 
@@ -199,11 +206,13 @@ export class Mod {
 	 * @returns {boolean} 
 	 */
 	hasResource(relativePath) {
-		if (this.loaded) {
-			for (const asset of this.assets) {
-				if (asset.endsWith(relativePath)) {
-					return true;
-				}
+		if (!this.ready) {
+			return false;
+		}
+
+		for (const asset of this.assets) {
+			if (asset.endsWith(relativePath)) {
+				return true;
 			}
 		}
 		return false;
@@ -215,8 +224,8 @@ export class Mod {
 	 * @returns {any} 
 	 */
 	async getResource(relativePath) {
-		if (!this.loaded) {
-			throw Error(`Mod ${this.manifest.name} is not loaded.`);
+		if (!this.ready) {
+			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod is not ready.`);
 		}
 
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
@@ -441,3 +450,4 @@ export class Mod {
 		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
 	}
 	
+}
