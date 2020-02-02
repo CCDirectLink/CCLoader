@@ -50,8 +50,7 @@ export class Mod {
 	get packed() {
 		if (!this.loaded)
 			return false;
-		const basePath = this._getBaseName(this.file);
-		return this.filemanager.isPacked(basePath);
+		return this.filemanager.isPacked(this.file);
 	}
 
 	get name() {
