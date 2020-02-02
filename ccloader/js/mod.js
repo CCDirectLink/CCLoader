@@ -125,7 +125,30 @@ export class Mod {
 	get baseDirectory(){
 		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 	}
-	
+
+	/**
+	 * Dynamically add file paths by extensions.
+	 * @param {string[]} fileExtensions
+	 * @returns {Promise<boolean>} true if packed or not in browser, otherwise false
+	 */
+	async addAssetsByExtensions(fileExtensions) {
+		if (this.loaded && !this.disabled) {
+			if (window.isLocal || this.packed) {
+				const basePath = this._getBaseName(this.file);
+				const files = await this.filemanager.findFiles(basePath + '/', fileExtensions);
+				if (files.length) {
+					files.push(...this.manifest.assets)
+					const uniqueFilePaths = new Set(files);
+					this.manifest.assets = Array.from(uniqueFilePaths);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
 	/**
 	 * 
 	 * @param {string} path 
