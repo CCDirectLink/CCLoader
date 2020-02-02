@@ -6,7 +6,6 @@ if (!window.require) {
 	window.require = name => {
 		if (name === 'path') {
 			const path = {
-				posix: path,
 				sep: '/',
 				normalize: function (path) {
 
@@ -39,6 +38,7 @@ if (!window.require) {
 					return this.normalize(args.join(this.sep));
 				}
 			};
+			path.posix = path;
 			return path;
 		}
 		return undefined;
