@@ -185,11 +185,11 @@ export class Mod {
 	 * @returns {string} 
 	 */
 	resolvePath(relativePath) {
-		const basePath = this._getBaseName(this.file);
-        if (!relativePath) {
-            return this._normalizePath(basePath);
-        }
-        return this._normalizePath(basePath + '/' + relativePath);
+		const basePath = this._getBaseName(this.file); 
+		if (!relativePath) {
+			return this._normalizePath(basePath);
+		}
+		return this._normalizePath(basePath + '/' + relativePath);
 	}
 
 
@@ -199,7 +199,6 @@ export class Mod {
 	 * @returns {boolean} 
 	 */
 	hasResource(relativePath) {
-
 		if (this.loaded) {
 			for (const asset of this.assets) {
 				if (asset.endsWith(relativePath)) {
@@ -441,4 +440,4 @@ export class Mod {
 
 		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
 	}
-}
+	
