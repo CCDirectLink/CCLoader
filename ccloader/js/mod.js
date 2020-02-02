@@ -47,6 +47,12 @@ export class Mod {
 		});
 	}
 
+	get packed() {
+		if (!this.loaded)
+			return false;
+		return this.filemanager.isPacked(dir);
+	}
+
 	get name() {
 		if(!this.loaded)
 			return undefined;
@@ -345,7 +351,7 @@ export class Mod {
 	 * @param {string} dir 
 	 */
 	async _findAssets(dir){
-		if(window.isLocal || this.filemanager.isPacked(dir)){
+		if(window.isLocal || this.packed){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
 			const assets = this.manifest.assets;
