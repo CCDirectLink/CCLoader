@@ -194,9 +194,17 @@ export class Mod {
 	resolvePath(relativePath) {
 		const basePath = this._getBaseName(this.file); 
 		if (!relativePath) {
-			return path.normalize(this._normalizePath(basePath));
+			return this._normalizePath(basePath);
 		}
-		return path.normalize(this._normalizePath(basePath + '/' + relativePath));
+
+		if (navigator.platform === "Win32") {
+			// convert all \ to / and remove all duplicate //
+			relativePath = relativePath.replace(/\\/g, path.sep).replace(/\/\//g, path.sep);
+		}
+
+		// should protect against escaping mod directory
+		relativePath = path.normalize('/' + relativePath);
+		return this._normalizePath(basePath + relativePath);
 	}
 
 
@@ -226,6 +234,11 @@ export class Mod {
 	async getResource(relativePath) {
 		if (!this.ready) {
 			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod is not ready.`);
+		}
+
+		// prevents attempts to get resources they don't have
+		if (!this.hasResource(relativePath)) {
+			return undefined;
 		}
 
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
@@ -390,11 +403,10 @@ export class Mod {
 			if (!assets) {
 				return [];
 			}
-			const base = this._getBaseName(this.file) + '/';
-
+			
 			const result = [];
 			for(const asset of assets) {
-				result.push(base + asset);
+				result.push(this.resolvePath(asset));
 			}
 			return result;
 		}
