@@ -131,10 +131,11 @@ export class Mod {
 
 	/**
 	 * Dynamically add file paths by extensions.
+	 * @param {string} relativePath to limit search in
 	 * @param {string[]} fileExtensions
 	 * @returns {Promise<boolean>} true if mod is ready and mod is running l, otherwise false
 	 */
-	async addAssetsByExtensions(fileExtensions) {
+	async addAssetsByExtensions(relativePath = '', fileExtensions) {
 		if (!this.ready) {
 			return false;
 		}
@@ -143,8 +144,8 @@ export class Mod {
 			return false;
 		}
 
-		const basePath = this._getBaseName(this.file);
-		const files = await this.filemanager.findFiles(path.join(basePath, '/'), fileExtensions);
+		const basePath = this._getBaseName(this.file) + '/';
+		const files = await this.filemanager.findFiles(path.join(basePath, relativePath), fileExtensions);
 		if (files.length) {
 			files.push(...this.manifest.assets);
 			const uniqueFilePaths = new Set(files);
