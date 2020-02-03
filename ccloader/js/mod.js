@@ -197,7 +197,7 @@ export class Mod {
 			return this._normalizePath(basePath);
 		}
 
-		if (navigator.platform === "Win32") {
+		if (navigator.platform === 'Win32') {
 			// convert all \ to / and remove all duplicate //
 			relativePath = relativePath.replace(/\\/g, path.sep).replace(/\/\//g, path.sep);
 		}
