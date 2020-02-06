@@ -133,7 +133,7 @@ export class Mod {
 	 * Dynamically add file paths by extensions.
 	 * @param {string[]} fileExtensions
 	 * @param {string} [relativePath = ''] to limit search in
-	 * @returns {Promise<boolean>} true if mod is ready and mod is running l, otherwise false
+	 * @returns {Promise<boolean>} true if mod is ready and mod is running, otherwise false
 	 */
 	async addAssetsByExtensions(fileExtensions, relativePath = '') {
 		if (!this.ready) {
@@ -144,18 +144,41 @@ export class Mod {
 			return false;
 		}
 
+		await this._addFilesToAssets(relativePath, fileExtensions);
+		
+		return true;
+	}
+
+
+	/**
+	 *  Adds all files in folder to path
+	 * @param {string} relativePath to folder
+	 * @returns {Promise<boolean>} true if mod is ready and mod is running, otherwise false
+	 */
+	async addAssetsInFolder(relativePath) {
+		if (!this.ready) {
+			return false;
+		}
+
+		if (!(window.isLocal || this.packed)) {
+			return false;
+		}
+		
+		await this._addFilesToAssets(relativePath);
+
+		return true;
+	}
+
+	async _addFilesToAssets(relativePath, fileExtensions) {
 		const basePath = this._getBaseName(this.file) + '/';
-		const files = await this.filemanager.findFiles(path.join(basePath, relativePath), fileExtensions);
+		const fullPath = path.join(basePath, relativePath);
+		const files = await this.filemanager.findFiles(fullPath, fileExtensions);
 		if (files.length) {
 			files.push(...this.manifest.assets);
 			const uniqueFilePaths = new Set(files);
 			this.manifest.assets = Array.from(uniqueFilePaths);
 		}
-		return true;
 	}
-
-
-
 	/**
 	 * 
 	 * @param {string} path 
