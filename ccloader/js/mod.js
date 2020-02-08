@@ -249,7 +249,7 @@ export class Mod {
 				status: 404,
 				url: fullUrl
 			});
-			return response;
+			return await Promise.resolve(response);
 		}
 
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
