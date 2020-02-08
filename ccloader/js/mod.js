@@ -12,6 +12,7 @@ export class Mod {
 	 */
 	constructor(modloader, file){
 		this.file = file;
+		this.path = location.origin + '/' + this._getBaseName(file);
 		this.filemanager = modloader.filemanager;
 		this.window = modloader._getGameWindow();
 
@@ -234,7 +235,21 @@ export class Mod {
 
 		// prevents attempts to get resources they don't have
 		if (!this.hasResource(relativePath)) {
-			return undefined;
+			const fullUrl = this.path + path.normalize('/' + relativePath);
+			
+			if (location.href.startsWith('chrome')) {
+				console.error(`GET ${fullUrl} net::ERR_FILE_NOT_FOUND`);
+				const err = new TypeError('Failed to fetch');
+				err.stack = err.name + ': ' + err.message;
+				return await Promise.reject(err);
+			} 
+
+			console.error(`GET ${fullUrl} 404`);
+			const response = new Response(null, {
+				status: 404,
+				url: fullUrl
+			});
+			return response;
 		}
 
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
