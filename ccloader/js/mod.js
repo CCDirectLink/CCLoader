@@ -130,46 +130,19 @@ export class Mod {
 	}
 
 	/**
-	 * Dynamically add file paths by extensions.
-	 * @param {string[]} fileExtensions
-	 * @param {string} [relativePath = ''] to limit search in
+	 *  Adds all files in folder to path. Optionally limit by file extensions.
+	 * @param {string} relativePath to limit search in
+	 * @param {string[] | undefined} fileExtensions 
 	 * @returns {Promise<boolean>} true if mod is ready and mod is running, otherwise false
 	 */
-	async addAssetsByExtensions(fileExtensions, relativePath = '') {
+	async addAssets(relativePath, fileExtensions) {
 		if (!this.ready) {
 			return false;
 		}
 
-		if (!(window.isLocal || this.packed)) {
+		if (!window.isLocal && !this.packed) {
 			return false;
 		}
-
-		await this._addFilesToAssets(relativePath, fileExtensions);
-		
-		return true;
-	}
-
-
-	/**
-	 *  Adds all files in folder to path
-	 * @param {string} relativePath to folder
-	 * @returns {Promise<boolean>} true if mod is ready and mod is running, otherwise false
-	 */
-	async addAssetsInFolder(relativePath) {
-		if (!this.ready) {
-			return false;
-		}
-
-		if (!(window.isLocal || this.packed)) {
-			return false;
-		}
-		
-		await this._addFilesToAssets(relativePath);
-
-		return true;
-	}
-
-	async _addFilesToAssets(relativePath, fileExtensions) {
 		const basePath = this._getBaseName(this.file) + '/';
 		const fullPath = path.join(basePath, relativePath);
 		const files = await this.filemanager.findFiles(fullPath, fileExtensions);
