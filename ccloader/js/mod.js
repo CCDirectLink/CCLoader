@@ -188,7 +188,7 @@ export class Mod {
 	 * @param {string} relativePath to resource with mod folder as base
 	 * @returns {string} 
 	 */
-	resolvePath(relativePath) {
+	absolutePath(relativePath) {
 		const basePath = this._getBaseName(this.file); 
 		if (!relativePath) {
 			return this._normalizePath(basePath);
@@ -417,7 +417,7 @@ export class Mod {
 			
 			const result = [];
 			for(const asset of assets) {
-				result.push(this.resolvePath(asset));
+				result.push(this.absolutePath(asset));
 			}
 			return result;
 		}
