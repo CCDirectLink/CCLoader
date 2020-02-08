@@ -22,7 +22,7 @@ if (!window.require) {
 					}
 
 					// split by the path separator 
-					let pieces = path.split(this.sep);
+					const pieces = path.split(this.sep);
 
 					// resolve all .. and .
 
