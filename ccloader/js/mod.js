@@ -134,24 +134,26 @@ export class Mod {
 	 *  Adds all files in folder to path. Optionally limit by file extensions.
 	 * @param {string} relativePath to limit search in
 	 * @param {string[] | undefined} fileExtensions 
-	 * @returns {Promise<boolean>} true if mod is ready and mod is running, otherwise false
+	 * @returns {Promise<string[]>} returns added assets paths
 	 */
 	async addAssets(relativePath, fileExtensions) {
+		let newFiles = [];
 		if (!this.ready) {
-			return false;
+			return newFiles;
 		}
 
 		if (!window.isLocal && !this.packed) {
-			return false;
+			return newFiles;
 		}
 		const basePath = this._getBaseName(this.file) + '/';
 		const fullPath = path.join(basePath, relativePath);
 		const files = await this.filemanager.findFiles(fullPath, fileExtensions);
+		
 		if (files.length) {
-			files.push(...this.manifest.assets);
-			const uniqueFilePaths = new Set(files);
-			this.manifest.assets = Array.from(uniqueFilePaths);
+			newFiles = files.filter(path => this.manifest.assets.includes(path));
+			this.manifest.assets.push(...newFiles);
 		}
+		return newFiles;
 	}
 	/**
 	 * 
