@@ -243,7 +243,7 @@ export class Mod {
 				console.error(`GET ${fullUrl} net::ERR_FILE_NOT_FOUND`);
 				const err = new TypeError('Failed to fetch');
 				err.stack = err.name + ': ' + err.message;
-				return await Promise.reject(err);
+				throw err;
 			} 
 
 			console.error(`GET ${fullUrl} 404`);
@@ -251,7 +251,7 @@ export class Mod {
 				status: 404,
 				url: fullUrl
 			});
-			return await Promise.resolve(response);
+			throw response;
 		}
 
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
