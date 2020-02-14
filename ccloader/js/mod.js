@@ -12,7 +12,7 @@ export class Mod {
 	 */
 	constructor(modloader, file){
 		this.file = file;
-		this.path = location.origin + '/' + this._getBaseName(file);
+		this.path = this._getBaseName(file);
 		this.filemanager = modloader.filemanager;
 		this.window = modloader._getGameWindow();
 
@@ -229,13 +229,16 @@ export class Mod {
 	 * @returns {any} 
 	 */
 	async getResource(relativePath) {
-		if (!this.ready) {
-			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod is not ready.`);
+		if (!this.disabled) {
+			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod is disabled.`);
+		} else if (!this.loaded) {
+			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod has not loaded yet.`);
 		}
 
 		// prevents attempts to get resources they don't have
 		if (!this.hasResource(relativePath)) {
-			const fullUrl = this.path + path.normalize('/' + relativePath);
+			const basePath = location.origin + '/' + this.path;
+			const fullUrl = basePath + path.normalize('/' + relativePath);
 			
 			if (location.href.startsWith('chrome')) {
 				console.error(`GET ${fullUrl} net::ERR_FILE_NOT_FOUND`);
@@ -251,10 +254,11 @@ export class Mod {
 			});
 			throw response;
 		}
-
+		
 		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
 		return await this.filemanager.getResourceAsync(fullRelativePath);
 	}
+
 
 
 	async _loadPlugin() {
