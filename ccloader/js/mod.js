@@ -225,20 +225,24 @@ export class Mod {
 
 	/**
 	 * 
-	 * @param {string} relativePath to resource with mod folder as base
+	 * @param {string} resourcePath can be relative to /assets/ or mod base directory
 	 * @returns {any} 
 	 */
-	async getResource(relativePath) {
+	async getResource(resourcePath) {
 		if (!this.disabled) {
 			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod is disabled.`);
 		} else if (!this.loaded) {
 			throw Error(`Cannot get resource from Mod "${this.manifest.name}". Mod has not loaded yet.`);
 		}
 
+		if (resourcePath.startsWith(this.path)) {
+			resourcePath = resourcePath.replace(this.path, '');
+		}
+
 		// prevents attempts to get resources they don't have
-		if (!this.hasResource(relativePath)) {
+		if (!this.hasResource(resourcePath)) {
 			const basePath = location.origin + '/' + this.path;
-			const fullUrl = basePath + path.normalize('/' + relativePath);
+			const fullUrl = basePath + path.normalize('/' + resourcePath);
 			
 			if (location.href.startsWith('chrome')) {
 				console.error(`GET ${fullUrl} net::ERR_FILE_NOT_FOUND`);
@@ -255,7 +259,7 @@ export class Mod {
 			throw response;
 		}
 		
-		const fullRelativePath = `assets/${this._normalizeScript(this.file, relativePath)}`;
+		const fullRelativePath = 'assets/' + this.absolutePath(resourcePath);
 		return await this.filemanager.getResourceAsync(fullRelativePath);
 	}
 
