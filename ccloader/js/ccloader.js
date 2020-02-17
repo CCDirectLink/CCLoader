@@ -265,6 +265,12 @@ export class ModLoader {
 			Greenworks
 		});
 
+		if (typeof chrome !== 'undefined') {
+			Object.assign(this._getGameWindow(), {
+				chrome
+			})
+		}
+
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	}
