@@ -265,10 +265,12 @@ export class ModLoader {
 			Greenworks
 		});
 
+		if (typeof nw !== 'undefined') {
+			Object.assign(this._getGameWindow(), { nw })
+		}
+
 		if (typeof chrome !== 'undefined') {
-			Object.assign(this._getGameWindow(), {
-				chrome
-			})
+			Object.assign(this._getGameWindow(), { chrome })
 		}
 
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
