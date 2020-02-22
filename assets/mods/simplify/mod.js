@@ -14,7 +14,6 @@
 
 			this._initializeGameMain();
 			this._initializeCombat();
-			this._initializeGUI();
 			this._initializeEvents();
 
 			this.font = new SimplifyFont();
@@ -394,14 +393,6 @@
 				if(sc[key] instanceof cc.sc.Combat) {
 					cc.sc.combat = sc[key];
 					break;
-				}
-			}
-		}
-		_initializeGUI() {
-			for (const obj in cc.ig.GUI) {
-				if (cc.ig.GUI[obj] && cc.ig.GUI[obj].length === 21) {
-					cc.ig.GUI.menues = cc.ig.GUI[obj];
-					return;
 				}
 			}
 		}
