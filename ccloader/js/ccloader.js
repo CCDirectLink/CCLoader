@@ -6,7 +6,7 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 
-const CCLOADER_VERSION = '2.17.0';
+const CCLOADER_VERSION = '2.17.1';
 
 export class ModLoader {
 	constructor() {
@@ -276,9 +276,7 @@ export class ModLoader {
 	 */
 	_setupGamewindow() {
 		this.ui.applyBindings(this._getGameWindow().console);
-		this._enableNode();
-
-
+		
 		const versions = Object.assign(this.versions, {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
@@ -292,21 +290,6 @@ export class ModLoader {
 
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
-	}
-
-	/**
-	 * Enables node bindings on the game window if they exist in the current context. Only useful for edgecases in other environments.
-	 */
-	_enableNode() {
-		if (typeof global !== 'undefined') {
-			Object.assign(this._getGameWindow(), {
-				require,
-				process,
-				global,
-				Buffer,
-				root: global.root
-			});
-		}
 	}
 	
 	/**
