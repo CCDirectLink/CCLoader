@@ -427,7 +427,7 @@
 				const optionName = 'modEnabled-' + mod.name.toLowerCase();
 				this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 
-				const name = mod.name;
+				const name = mod.displayName || mod.name;
 				const description = (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
 
 				ig.lang.labels.sc.gui.options[optionName] = {name, description};
