@@ -52,6 +52,11 @@ export class Mod {
 			return undefined;
 		return this.manifest.name;
 	}
+	get displayedName() {
+		if(!this.loaded)
+			return undefined;
+		return this.manifest.ccmodHumanName;
+	}
 	get description(){
 		if(!this.loaded)
 			return undefined;
@@ -180,7 +185,7 @@ export class Mod {
 		}
 		
 		try {
-			/** @type {{name: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;

@@ -15,6 +15,7 @@ declare namespace ccloader {
 	    onload(): Promise<void>;
 
         get name(): string | undefined;
+        get displayedName(): string | undefined;
         get description(): string | undefined;
         get assets(): string[] | undefined;
         get dependencies(): {[name: stirng]: string} | undefined;
