@@ -49,7 +49,8 @@ export class Filemanager {
 	 * @param {string} folder 
 	 */
 	getAllModsFiles(folder){
-		return this._getResources(folder, path.sep + 'package.json');
+		const subs = this._getLocalFolders(folder || 'assets/mods/');
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
 	}
 
 	/**
@@ -57,7 +58,7 @@ export class Filemanager {
 	 * @param {string} folder 
 	 */
 	getAllModPackages(folder) {
-		return this._getResources(folder, '.ccmod');
+		return this._getResourcesInFolder(folder, '.ccmod');
 	}
 	
 	/**
@@ -140,13 +141,13 @@ export class Filemanager {
 	 * @param {string?} folder 
 	 * @param {string?} ending 
 	 */
-	_getResources(folder, ending){
+	_getResourcesInFolder(folder, ending){
 		if(!folder)
 			folder = 'assets/mods/';
 		
-		if(isLocal)
-			return this._getResourcesLocal(folder, ending);
-		else {
+		if(isLocal) {
+			return this._getResoucesInLocalFolder(folder, ending);
+		} else {
 			var results = [];
 			for(var i in this.modList){
 				if(this._resourceExists('assets/mods/' + this.modList[i] + ending)){
@@ -300,7 +301,7 @@ export class Filemanager {
 	 * @param {string} folder 
 	 * @param {string?} ending 
 	 */
-	_getResourcesLocal(folder, ending){
+	_getResoucesInLocalFolder(folder, ending) {
 		/** @type {string[]} */
 		let results = [];
 		
@@ -310,16 +311,30 @@ export class Filemanager {
 					try {
 						file = path.join(folder, file);
 						
-						if (this._isDirectory(file)) {
-							if (!file.includes('node_modules')) {
-								const innerResults = this._getResourcesLocal(file, ending);
-								results = results.concat(innerResults);
-							}
-						} else if(file.endsWith(ending)){
+						if (!this._isDirectory(file) && file.endsWith(ending)) {
 							results.push(file);
 						}
 					} catch(e) { }
 				});
+			} catch(e) { }
+		}
+		
+		return results;
+	}
+
+	/**
+	 * Returns all files with the given ending in the folder
+	 * @param {string} folder 
+	 */
+	_getLocalFolders(folder) {
+		/** @type {string[]} */
+		let results = [];
+		
+		if(isLocal) {
+			try{
+				return fs.readdirSync(folder)
+					.map(file => path.join(folder, file))
+					.filter(file => this._isDirectory(file));
 			} catch(e) { }
 		}
 		
