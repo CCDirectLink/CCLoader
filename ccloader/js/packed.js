@@ -10,6 +10,11 @@ const CONTENT_TYPES = {
 	'htm': 'text/html'
 };
 
+/**
+ *  @type {Map<string, JSZip>}
+ */
+const jszipCache = new Map();
+
 //Not exported because serviceworkers can't use es6 modules
 // eslint-disable-next-line no-unused-vars
 class PackedManager {
@@ -85,6 +90,10 @@ class PackedManager {
 	 */
 	async _openZip(url) {
 		const zip = this._zipPath(url);
+		const cached = jszipCache.get(zip);
+		if (cached) {
+			return cached;
+		}
 
 		const request = new Request('http://' + location.hostname + '.cc' + zip);
 		const cache = await caches.open('zips');
@@ -93,7 +102,10 @@ class PackedManager {
 			response = await fetch(zip);
 			cache.put(request, response.clone());
 		}
-		return await JSZip.loadAsync(response.blob());
+
+		const result = await JSZip.loadAsync(response.blob());
+		jszipCache.set(zip, result);
+		return result;
 	}
 
 	/**
