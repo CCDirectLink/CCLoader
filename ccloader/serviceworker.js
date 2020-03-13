@@ -27,17 +27,21 @@ self.addEventListener('fetch', (event) => {
 	const path = new URL(request.url).pathname;
 
 	if (request.headers.has('X-Cmd')) {
-		switch (request.headers.get('X-Cmd')) {
-		case 'getFiles':
-			event.respondWith((async () => new Response(JSON.stringify(
-				await packedManger.getFiles(path)),
-			{status: 200}))());
-			break;
-		case 'isDirectory':
-			event.respondWith((async () => new Response(JSON.stringify(
-				await packedManger.isDirectory(path)),
-			{status: 200}))());
-			break;
+		try {
+			switch (request.headers.get('X-Cmd')) {
+			case 'getFiles':
+				event.respondWith((async () => new Response(JSON.stringify(
+					await packedManger.getFiles(path)),
+				{status: 200}))());
+				break;
+			case 'isDirectory':
+				event.respondWith((async () => new Response(JSON.stringify(
+					await packedManger.isDirectory(path)),
+				{status: 200}))());
+				break;
+			}
+		} catch (e) {
+			console.error('An error occured while inspecting a packed mod', e);
 		}
 	}
 

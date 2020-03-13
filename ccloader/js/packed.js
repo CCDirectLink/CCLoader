@@ -18,22 +18,27 @@ class PackedManager {
      * @param {string} url 
      */
 	async get(url) {
-		const zip = await this._openZip(url);
-		const file = zip.file(this._assetPath(url));
-		if (file === null) {
-			return new Response(new Blob(), {
-				status: 404,
-				statusText: 'not found'
+		try {
+			const zip = await this._openZip(url);
+			const file = zip.file(this._assetPath(url));
+			if (file === null) {
+				return new Response(new Blob(), {
+					status: 404,
+					statusText: 'not found'
+				});
+			}
+			
+			return new Response(await file.async('blob'), {
+				headers: {
+					'Content-Type': this._contentType(url)
+				},
+				status: 200,
+				statusText: 'ok'
 			});
+		} catch (e) {
+			console.error('An error occured while reading a packed mod', e);
+			return e;
 		}
-		
-		return new Response(await file.async('blob'), {
-			headers: {
-				'Content-Type': this._contentType(url)
-			},
-			status: 200,
-			statusText: 'ok'
-		});
 	}
 
 	/**
