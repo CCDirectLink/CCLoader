@@ -123,9 +123,17 @@ export class Filemanager {
 	 * @returns {Promise<ServiceWorker>}
 	 */
 	async loadServiceWorker(path, window) {
-		const reg = await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
-		await reg.update();
-		return reg.active;
+		await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		
+		if (!window.navigator.serviceWorker.controller || window.navigator.serviceWorker.controller.state !== 'activated') {
+			window.location.reload();
+			window.location.href = window.location.toString();
+			history.go(0);
+
+			throw new Error('(╯°□°）╯︵ ┻━┻');
+		}
+
+		return window.navigator.serviceWorker.controller;
 	}
 
 	/**
