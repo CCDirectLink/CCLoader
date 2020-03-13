@@ -19,6 +19,11 @@ self.addEventListener('activate', () => {
 self.addEventListener('message', (event) => {
 	packedMods.splice(0);
 	packedMods.push(...event.data);
+
+	event.waitUntil((async () => {
+		const keys = await caches.keys();
+		await Promise.all(keys.map(name => caches.delete(name)));
+	})());
 });
 
 self.addEventListener('fetch', (event) => {

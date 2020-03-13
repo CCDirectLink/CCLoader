@@ -84,8 +84,16 @@ class PackedManager {
 	 * @param {string} url 
 	 */
 	async _openZip(url) {
-		const resp = await fetch(this._zipPath(url));
-		return await JSZip.loadAsync(resp.blob());
+		const zip = this._zipPath(url);
+
+		const request = new Request('http://' + location.hostname + '.cc' + zip);
+		const cache = await caches.open('zips');
+		let response = await cache.match(request);
+		if (!response) {
+			response = await fetch(zip);
+			cache.put(request, response.clone());
+		}
+		return await JSZip.loadAsync(response.blob());
 	}
 
 	/**
