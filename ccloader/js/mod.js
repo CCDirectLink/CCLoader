@@ -8,8 +8,8 @@ export class Mod {
 	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file
 	 */
-	constructor(modloader, file){
-		this.file = file;
+	constructor(modloader, baseDirectory){
+		this.baseDirectory = baseDirectory.replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 		this.filemanager = modloader.filemanager;
 		this.window = modloader._getGameWindow();
 
@@ -118,10 +118,6 @@ export class Mod {
 		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
 	}
 
-	get baseDirectory(){
-		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
-	}
-
 	/**
 	 *
 	 * @param {string} path
@@ -173,13 +169,20 @@ export class Mod {
 	}
 
 	async _loadManifest() {
-		const file = this.file;
+		let file;
 		let data;
 		try {
+			file = this.baseDirectory + 'ccmod.json'
 			data = await this.filemanager.getResourceAsync(file);
-		} catch (e) {
-			console.error(e);
-			return;
+		} catch (e1) {
+			try {
+				file = this.baseDirectory + 'package.json'
+				data = await this.filemanager.getResourceAsync(file);
+			} catch (_e2) {
+				console.error(e1);
+				console.error(e2);
+				return;
+			}
 		}
 
 		try {
@@ -192,21 +195,21 @@ export class Mod {
 			return;
 		}
 
-		this.manifest.main = this._normalizeScript(file, this.manifest.main);
-		this.manifest.preload = this._normalizeScript(file, this.manifest.preload);
-		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
-		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
-		this.manifest.plugin = this._normalizeScript(file, this.manifest.plugin);
+		this.manifest.main = this._normalizeScript(this.manifest.main);
+		this.manifest.preload = this._normalizeScript(this.manifest.preload);
+		this.manifest.postload = this._normalizeScript(this.manifest.postload);
+		this.manifest.prestart = this._normalizeScript(this.manifest.prestart);
+		this.manifest.plugin = this._normalizeScript(this.manifest.plugin);
 
 		if(!this.manifest.ccmodDependencies) {
 			this.manifest.ccmodDependencies = this.manifest.dependencies;
 		}
 
 		if(!this.manifest.name) {
-			this.manifest.name = this._getModNameFromFile();
+			this.manifest.name = this._getBaseName(this.baseDirectory);
 		}
 
-		const assets = await this._findAssets(this._getBaseName(file) + '/assets/');
+		const assets = await this._findAssets(this.baseDirectory + 'assets/');
 		this.manifest.assets = assets;
 		this.loaded = true;
 		if(this.onloaded) {
@@ -235,27 +238,23 @@ export class Mod {
 
 	/**
 	 *
-	 * @param {string} manifestFile
 	 * @param {string} [input]
 	 * @returns {string | undefined}
 	 */
-	_normalizeScript(manifestFile, input) {
+	_normalizeScript(input) {
 		if (!input) {
 			return undefined;
 		}
 		if(!this._isPathAbsolute(input)) {
-			return this._normalizePath(this._getBaseName(manifestFile) + '/' + input);
+			return this._normalizePath(this.baseDirectory + input);
 		}
 		return this._normalizePath(input);
 	}
 
 	_getModNameFromFile(){
-		if (!this.file.includes('package.json')) {
-			return 'Unknown mod';
-		}
-
-		let name = this.file.match(/\/[^/]*\/package.json/g).pop().replace(/\//g, '');
-		name = name.substr(0, name.length - 6);
+		let name = this.baseDirectory.replace(/\/+$/, '');
+		let index = name.lastIndexOf('/');
+		if (index >= 0) name = name.substring(index + 1);
 		return name;
 	}
 
@@ -265,19 +264,6 @@ export class Mod {
 	 */
 	_isPathAbsolute(path){
 		return /^(?:\/|[a-z]+:\/\/)/.test(path);
-	}
-
-	/**
-	 *
-	 * @param {string} path
-	 */
-	_getBaseName(path){
-		if(path.indexOf('/') >= 0)
-			return path.substring(0, path.lastIndexOf('/'));
-		else if(path.indexOf('\\') >= 0)
-			return path.substring(0, path.lastIndexOf('\\'));
-		else
-			return path;
 	}
 
 	/**
@@ -303,11 +289,10 @@ export class Mod {
 			if (!assets) {
 				return [];
 			}
-			const base = this._getBaseName(this.file) + '/';
 
 			const result = [];
 			for(const asset of assets) {
-				result.push(base + asset);
+				result.push(this.baseDirectory + asset);
 			}
 			return result;
 		}

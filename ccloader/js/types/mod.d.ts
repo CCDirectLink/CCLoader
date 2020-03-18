@@ -4,6 +4,7 @@ declare namespace ccloader {
      */
     export class Mod {
         readonly file: string;
+        readonly baseDirectory: string;
 
         private constructor(modloader, file, plugin);
 
@@ -28,7 +29,6 @@ declare namespace ccloader {
         get prestart(): string | undefined;
         get plugin(): string | undefined;
 
-        get baseDirectory(): string;
         get isEnabled(): boolean;
 
 	    getAsset(path: string): string | undefined;

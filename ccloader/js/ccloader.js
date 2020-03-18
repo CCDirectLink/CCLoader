@@ -101,24 +101,24 @@ export class ModLoader {
 	}
 
 	/**
-	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available.
+	 * Loads the manifests of the mods. This makes sure all necessary data needed for loading the mod is available.
 	 * @returns {Promise<void>}
 	 */
 	async _loadModPackages() {
-		const modFiles = this.filemanager.getAllModsFiles();
+		const modDirs = this.filemanager.getAllModsFiles();
 		const packedMods = this.filemanager.getAllModPackages();
 
 		if (packedMods.length > 0) {
 			await this._initializeServiceWorker();
 			this._loadPackedMods(packedMods);
 			for (const packed of packedMods) {
-				modFiles.push(packed.substring(0, packed.length) + '/package.json');
+				modDirs.push(packed);
 			}
 		}
 
 		this.mods = [];
-		for (const modFile of modFiles) {
-			this.mods.push(new Mod(this, modFile, false));
+		for (const modDir of modDirs) {
+			this.mods.push(new Mod(this, modDir));
 		}
 
 		return Promise.all(this.mods.map((mod) => mod.onload(this.mods)));

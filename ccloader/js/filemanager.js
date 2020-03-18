@@ -50,7 +50,12 @@ export class Filemanager {
 	 */
 	getAllModsFiles(folder){
 		const subs = this._getLocalFolders(folder || 'assets/mods/');
-		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
+		return subs.filter(sub => {
+			let foundManifestName = ['ccmod.json', 'package.json'].find(
+				manifestName => this._getResourcesInFolder(sub, path.sep + manifestName).length > 0
+			);
+			return foundManifestName != null;
+		});
 	}
 
 	/**
