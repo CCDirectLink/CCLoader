@@ -65,12 +65,21 @@ export class ModLoader {
 		this._serviceWorker = await this.filemanager.loadServiceWorker('serviceworker.js', this._getGameWindow());
 	}
 
+	/**
+	 * Notifies filemanager and the serviceworker about existing packed mods.
+	 * @param {string[]} packedMods 
+	 */
 	_loadPackedMods(packedMods) {
 		const names = packedMods.map((m) => m.substring(12, m.length));
 		this._sendPackedModNames(names);
 		this.filemanager.setPackedMods(names);
 	}
-
+	
+	/**
+	 * 
+	 * Notifies the serviceworker about existing packed mods.
+	 * @param {string[]} names 
+	 */
 	_sendPackedModNames(names) {
 		this._serviceWorker.postMessage(names);
 	}
