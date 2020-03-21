@@ -6,7 +6,7 @@ declare namespace ccloader {
         readonly file: string;
         readonly baseDirectory: string;
 
-        private constructor(modloader, file, plugin);
+        private constructor(modloader, baseDirectory: string);
 
 	    load(): Promise<void>;
     	loadPrestart(): Promise<void>;

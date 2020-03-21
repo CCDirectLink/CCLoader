@@ -1,4 +1,5 @@
 import { Plugin } from './plugin.js';
+import { validateManifest, convertLegacyManifest } from './manifest.js';
 
 /** @typedef Modloader import ccloader.js */
 
@@ -14,6 +15,7 @@ export class Mod {
 		this.window = modloader._getGameWindow();
 
 		this._loadManifest();
+		this._loadManifest2().then(manifest => console.log(baseDirectory, manifest));
 	}
 
 	load() {
@@ -171,19 +173,19 @@ export class Mod {
 	async _loadManifest() {
 		let file;
 		let data;
-		try {
-			file = this.baseDirectory + 'ccmod.json'
-			data = await this.filemanager.getResourceAsync(file);
-		} catch (e1) {
+		// try {
+		// 	file = this.baseDirectory + 'ccmod.json'
+		// 	data = await this.filemanager.getResourceAsync(file);
+		// } catch (e1) {
 			try {
 				file = this.baseDirectory + 'package.json'
 				data = await this.filemanager.getResourceAsync(file);
 			} catch (_e2) {
-				console.error(e1);
+				// console.error(e1);
 				console.error(e2);
 				return;
 			}
-		}
+		// }
 
 		try {
 			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
@@ -215,6 +217,38 @@ export class Mod {
 		if(this.onloaded) {
 			this.onloaded();
 		}
+	}
+
+	async _loadManifest2() {
+		let file;
+		let text;
+		let legacy = false;
+		try {
+			file = this.baseDirectory + 'ccmod.json';
+			text = await this.filemanager.getResourceAsync(file);
+		} catch (e1) {
+			try {
+				legacy = true;
+				file = this.baseDirectory + 'package.json';
+				text = await this.filemanager.getResourceAsync(file);
+			} catch (e2) {
+				console.warn(e1);
+				console.warn(e2);
+				return;
+			}
+		}
+
+		let data = JSON.parse(text);
+		if (legacy) data = convertLegacyManifest(data);
+		let errors = validateManifest(data, legacy);
+		if (errors.length > 0) {
+			throw new Error([
+				`invalid mod manifest in file '${file}':`,
+				...errors.map(err => `- ${err}`)
+			].join('\n'));
+		}
+
+		return data;
 	}
 
 	/**
@@ -264,6 +298,17 @@ export class Mod {
 	 */
 	_isPathAbsolute(path){
 		return /^(?:\/|[a-z]+:\/\/)/.test(path);
+	}
+
+	/**
+	 *
+	 * @param {string} path
+	 */
+	_getBaseName(path){
+		path = path.replace(/\/+$/, '');
+		if(path.indexOf('/') >= 0)
+			path = path.substring(path.lastIndexOf('/') + 1);
+		return path;
 	}
 
 	/**
