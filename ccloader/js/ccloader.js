@@ -14,17 +14,17 @@ export class ModLoader {
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		this.loader = new Loader(this.filemanager);
-		
+
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
-		
+
 		this.modsLoaded = 0;
 		/** @type {Mod[]} */
 		this.mods = [];
 		/** @type {{[name: string]: string}} */
 		this.versions = {};
-		
+
 	}
 
 	/**
@@ -67,23 +67,23 @@ export class ModLoader {
 
 	/**
 	 * Notifies filemanager and the serviceworker about existing packed mods.
-	 * @param {string[]} packedMods 
+	 * @param {string[]} packedMods
 	 */
 	_loadPackedMods(packedMods) {
 		const names = packedMods.map((m) => m.substring(12, m.length));
 		this._sendPackedModNames(names);
 		this.filemanager.setPackedMods(names);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Notifies the serviceworker about existing packed mods.
-	 * @param {string[]} names 
+	 * @param {string[]} names
 	 */
 	_sendPackedModNames(names) {
 		this._serviceWorker.postMessage(names);
 	}
-	
+
 	async _buildCrosscodeVersion(){
 		try {
 			const {changelog} = JSON.parse(await this.filemanager.getResourceAsync('assets/data/changelog.json'));
@@ -92,7 +92,7 @@ export class ModLoader {
 			let ccVersion = localStorage.getItem('cc.version');
 			if (ccVersion) {
 				const json = JSON.parse(ccVersion);
-				this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;	
+				this.ccVersion = json.major + '.' + json.minor + '.' + json.patch;
 			} else {
 				console.error('Could not find crosscode version. Assuming "0.0.0".', e);
 				this.ccVersion = '0.0.0';
@@ -250,7 +250,7 @@ export class ModLoader {
 	_registerMods() {
 		const inactiveMods = this._getGameWindow().inactiveMods = [];
 		const activeMods = this._getGameWindow().activeMods = [];
-		
+
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
 				activeMods.push(mod);
@@ -265,7 +265,7 @@ export class ModLoader {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {window}
 	 */
 	_getGameWindow() {
@@ -277,7 +277,7 @@ export class ModLoader {
 	 */
 	_setupGamewindow() {
 		this.ui.applyBindings(this._getGameWindow().console);
-		
+
 		const versions = Object.assign(this.versions, {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
@@ -292,7 +292,7 @@ export class ModLoader {
 		this._getGameWindow().document.head.appendChild(this.loader.getBase());
 		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
 	}
-	
+
 	/**
 	 * Initializes the plugin constructors.
 	 */
@@ -317,15 +317,15 @@ export class ModLoader {
 	}
 
 	/**
-	 * 
-	 * @param {string} text 
+	 *
+	 * @param {string} text
 	 */
 	_setStatus(text) {
 		if (this.status && this.status.isConnected) {
 			this.status.innerHTML = text;
 		}
 	}
-	
+
 	async _executePostload() {
 		for (const mod of this.mods.filter(m => m.isEnabled)) {
 			try {
@@ -349,7 +349,7 @@ export class ModLoader {
 				}}, 1000);
 		});
 	}
-	
+
 	async _executeMain() {
 		for (const mod of this.mods.filter(m => m.isEnabled)) {
 			try {
@@ -393,12 +393,12 @@ export class ModLoader {
 		Object.assign(this._getGameWindow(), {
 			reloadTables: () => this.reloadTables(),
 			getEntry: name => this._getGameWindow().entries[name],
-			getEntryName: value => 
+			getEntryName: value =>
 				Object.keys(this._getGameWindow().entries)
 					.find(key => this._getGameWindow().entries[key] === value)
 		});
 	}
-	
+
 	/**
 	 * Reloads all definitions
 	 * @deprecated
@@ -411,7 +411,7 @@ export class ModLoader {
 			mod.executeTable(this);
 		}
 	}
-	
+
 	/**
 	 * Loads a cached table if available and creates a new one otherwise
 	 * @deprecated
@@ -431,7 +431,7 @@ export class ModLoader {
 
 	/**
 	 * Creates the table from the definitions.db. It will also generate a cached table if possible.
-	 * @param {string} tableName 
+	 * @param {string} tableName
 	 * @deprecated
 	 */
 	async _createTable(tableName) {
@@ -439,7 +439,7 @@ export class ModLoader {
 		console.log('Reading files...');
 		const jscode = await this.filemanager.getResourceAsync('assets/js/game.compiled.js');
 		const dbtext = await this.filemanager.getResourceAsync('ccloader/data/definitions.db');
-		
+
 		try {
 			const dbdef = JSON.parse(dbtext);
 			console.log('Parsing...');
@@ -456,7 +456,7 @@ export class ModLoader {
 
 	/**
 	 * Loads the cached table
-	 * @param {string} tableName 
+	 * @param {string} tableName
 	 * @deprecated
 	 */
 	async _loadTable(tableName) {
@@ -466,7 +466,7 @@ export class ModLoader {
 			this._createTable(tableName);
 		}
 	}
-	
+
 
 	/**
 	 * Applies all definitions and loads the mods
@@ -518,4 +518,3 @@ export class ModLoader {
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
 	}
 }
-

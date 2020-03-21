@@ -1,7 +1,7 @@
 export class Greenworks {
 
 	/**
-	 * 
+	 *
 	 * @param {string} version Version number of greenworks to load
 	 */
 	constructor(version) {
@@ -16,11 +16,11 @@ export class Greenworks {
 	initAPI() {
 		return this._greenworks.initAPI();
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} steamId 
-	 * @param {function} [callback = () => {}] 
+	 *
+	 * @param {string} steamId
+	 * @param {function} [callback = () => {}]
 	 */
 	clearAchievement(steamId, callback = () => {}) {
 		this._greenworks.clearAchievement(steamId, function() {
@@ -29,9 +29,9 @@ export class Greenworks {
 	}
 
 	/**
-	 * 
-	 * @param {string} steamId 
-	 * @param {function} [callback = () => {}] 
+	 *
+	 * @param {string} steamId
+	 * @param {function} [callback = () => {}]
 	 */
 	activateAchievement(steamId, callback = () => {}) {
 		this._greenworks.activateAchievement(steamId, function() {

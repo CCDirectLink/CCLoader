@@ -27,7 +27,7 @@ declare namespace ccloader {
         get postload(): string | undefined;
         get prestart(): string | undefined;
         get plugin(): string | undefined;
-        
+
         get baseDirectory(): string;
         get isEnabled(): boolean;
 

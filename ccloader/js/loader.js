@@ -1,7 +1,7 @@
 export class Loader {
 	/**
-	 * 
-	 * @param {import('./filemanager.js').Filemanager} filemanager 
+	 *
+	 * @param {import('./filemanager.js').Filemanager} filemanager
 	 */
 	constructor(filemanager) {
 		this.filemanager = filemanager;
@@ -29,7 +29,7 @@ export class Loader {
 
 	/**
 	 * Returns a promise that resolves when the postload point is reached.
-	 * @param {HTMLIFrameElement} frame 
+	 * @param {HTMLIFrameElement} frame
 	 * @returns {Promise<void>}
 	 */
 	startGame(frame) {
@@ -37,7 +37,7 @@ export class Loader {
 			Object.assign(window, {
 				postload: resolve,
 			});
-	
+
 			const hook = this._createScript('window.parent.postload()');
 			this._insertAfter(hook, this.postloadPoint);
 			this._hookDOM(frame);
@@ -47,7 +47,7 @@ export class Loader {
 
 	/**
 	 * Returns a promise that resolves when the postload point is reached.
-	 * @param {HTMLIFrameElement} frame 
+	 * @param {HTMLIFrameElement} frame
 	 */
 	continue(frame) {
 		this.currentBody = frame.contentDocument.lastChild.lastChild; //Actual body; bypasses document.body hook
@@ -57,8 +57,8 @@ export class Loader {
 	}
 
 	/**
-	 * 
-	 * @param {HTMLIFrameElement} frame 
+	 *
+	 * @param {HTMLIFrameElement} frame
 	 */
 	_startGame(frame) {
 		frame.contentDocument.open();
@@ -80,7 +80,7 @@ export class Loader {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} code
 	 */
 	_parseEntrypoint(code) {
@@ -92,7 +92,7 @@ export class Loader {
 	}
 
 	/**
-	 * 
+	 *
 	 * @returns {HTMLDivElement}
 	 */
 	_findGame() {
@@ -100,8 +100,8 @@ export class Loader {
 	}
 
 	/**
-	 * 
-	 * @param {string} src 
+	 *
+	 * @param {string} src
 	 */
 	_createScript(src) {
 		const result = this.doc.createElement('script');
@@ -111,17 +111,17 @@ export class Loader {
 	}
 
 	/**
-	 * 
-	 * @param {HTMLElement} newNode 
-	 * @param {HTMLElement} referenceNode 
+	 *
+	 * @param {HTMLElement} newNode
+	 * @param {HTMLElement} referenceNode
 	 */
 	_insertAfter(newNode, referenceNode) {
 		referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 	}
 
 	/**
-	 * 
-	 * @param {HTMLIFrameElement} frame 
+	 *
+	 * @param {HTMLIFrameElement} frame
 	 */
 	_hookDOM(frame) {
 		this.currentBody = undefined;

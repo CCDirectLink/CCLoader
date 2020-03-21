@@ -8,8 +8,8 @@ const isLocal = !isBrowser;
 
 export class Filemanager {
 	/**
-	 * 
-	 * @param {import('./ccloader').ModLoader} modloader 
+	 *
+	 * @param {import('./ccloader').ModLoader} modloader
 	 */
 	constructor(modloader) {
 		this.modloader = modloader;
@@ -28,25 +28,25 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string[]} names 
+	 *
+	 * @param {string[]} names
 	 */
 	setPackedMods(names) {
 		this.packed = names;
 	}
 
 	/**
-	 * 
-	 * @param {string} file 
-	 * @param {boolean} isModule 
+	 *
+	 * @param {string} file
+	 * @param {boolean} isModule
 	 */
 	loadMod(file, isModule){
 		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
 
 	/**
-	 * 
-	 * @param {string} folder 
+	 *
+	 * @param {string} folder
 	 */
 	getAllModsFiles(folder){
 		const subs = this._getLocalFolders(folder || 'assets/mods/');
@@ -54,16 +54,16 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} folder 
+	 *
+	 * @param {string} folder
 	 */
 	getAllModPackages(folder) {
 		return this._getResourcesInFolder(folder, '.ccmod');
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} resource 
+	 *
+	 * @param {string} resource
 	 * @returns {Promise<string>}
 	 */
 	async getResourceAsync(resource){
@@ -77,7 +77,7 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} dir
 	 * @param {string[]} [endings]
 	 * @returns {Promise<string[]>}
@@ -88,13 +88,13 @@ export class Filemanager {
 			if (files.length === 0) {
 				return [];
 			}
-	
+
 			const promises = [];
 			for (const file of files){
 				promises.push(this._checkFileForAsset(dir, file, endings));
 			}
 			const results = await Promise.all(promises);
-	
+
 			return [].concat(...results); //Flattens the arrays
 		} catch (e) {
 			return [];
@@ -103,8 +103,8 @@ export class Filemanager {
 
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 * @returns {Promise<Image>}
 	 */
 	loadImage(path) {
@@ -117,14 +117,14 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 * @param {window} window
 	 * @returns {Promise<ServiceWorker>}
 	 */
 	async loadServiceWorker(path, window) {
 		await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
-		
+
 		if (!window.navigator.serviceWorker.controller || window.navigator.serviceWorker.controller.state !== 'activated') {
 			window.location.reload();
 			window.location.href = window.location.toString();
@@ -137,8 +137,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 */
 	isPacked(path) {
 		return this.packed.includes(this._packedManager.packedName(path));
@@ -146,13 +146,13 @@ export class Filemanager {
 
 	/**
 	 * Returns all files with the given ending in the folder
-	 * @param {string?} folder 
-	 * @param {string?} ending 
+	 * @param {string?} folder
+	 * @param {string?} ending
 	 */
 	_getResourcesInFolder(folder, ending){
 		if(!folder)
 			folder = 'assets/mods/';
-		
+
 		if(isLocal) {
 			return this._getResoucesInLocalFolder(folder, ending);
 		} else {
@@ -167,7 +167,7 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} dir
 	 * @returns {Promise<string[]>}
 	 */
@@ -192,7 +192,7 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} file
 	 * @returns {Promise<fs.Stats>}
 	 */
@@ -209,7 +209,7 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} file
 	 * @returns {Promise<boolean>}
 	 */
@@ -227,11 +227,11 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} dir 
-	 * @param {string} file 
+	 *
+	 * @param {string} dir
+	 * @param {string} file
 	 * @param {string[]} [endings]
-	 * @returns {Promise<string[]>} 
+	 * @returns {Promise<string[]>}
 	 */
 	async _checkFileForAsset(dir, file, endings) {
 		const filePath = path.join(dir, file);
@@ -249,8 +249,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} resource 
+	 *
+	 * @param {string} resource
 	 */
 	_resourceExists(resource){
 		if(isLocal){
@@ -273,8 +273,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} file 
+	 *
+	 * @param {string} file
 	 * @returns {Promise<Blob>}
 	 */
 	async _getBlob(file) {
@@ -283,10 +283,10 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} url 
+	 *
+	 * @param {string} url
 	 * @param {document} doc
-	 * @param {string} type 
+	 * @param {string} type
 	 * @returns {Promise<void>}
 	 */
 	_loadScript(url, doc, type){
@@ -306,19 +306,19 @@ export class Filemanager {
 
 	/**
 	 * Returns all files with the given ending in the folder
-	 * @param {string} folder 
-	 * @param {string?} ending 
+	 * @param {string} folder
+	 * @param {string?} ending
 	 */
 	_getResoucesInLocalFolder(folder, ending) {
 		/** @type {string[]} */
 		let results = [];
-		
+
 		if(isLocal) {
 			try{
 				fs.readdirSync(folder).forEach(file => {
 					try {
 						file = path.join(folder, file);
-						
+
 						if (!this._isDirectory(file) && file.endsWith(ending)) {
 							results.push(file);
 						}
@@ -326,18 +326,18 @@ export class Filemanager {
 				});
 			} catch(e) { }
 		}
-		
+
 		return results;
 	}
 
 	/**
 	 * Returns all files with the given ending in the folder
-	 * @param {string} folder 
+	 * @param {string} folder
 	 */
 	_getLocalFolders(folder) {
 		/** @type {string[]} */
 		let results = [];
-		
+
 		if(isLocal) {
 			try{
 				return fs.readdirSync(folder)
@@ -345,12 +345,12 @@ export class Filemanager {
 					.filter(file => this._isDirectory(file));
 			} catch(e) { }
 		}
-		
+
 		return results;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} file
 	 * @returns {boolean}
 	 */
@@ -364,27 +364,27 @@ export class Filemanager {
 			this._createDirectory('ccloader/data/assets/mods');
 		}
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} dir 
+	 *
+	 * @param {string} dir
 	 */
 	_createDirectory(dir){
 		if (isBrowser) {
 			return;
 		}
-		
+
 		if(fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
 			return;
 		}
-		
+
 		const parent = path.join(dir, '..');
 		this._createDirectory(parent);
 
 		fs.mkdirSync(dir);
 	}
 
-	
+
 	// -------------- DEPRECATED --------------
 
 	/**
@@ -402,8 +402,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} def 
+	 *
+	 * @param {string} def
 	 * @deprecated
 	 */
 	getModDefintionHash(def){
@@ -411,33 +411,33 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} table 
+	 *
+	 * @param {string} table
 	 * @deprecated
 	 */
 	tableExists(table){
 		if(!table)
 			return false;
-		
+
 		return this._resourceExists('ccloader/data/' + table);
 	}
 
 	/**
-	 * 
-	 * @param {string} table 
+	 *
+	 * @param {string} table
 	 * @deprecated
 	 */
 	modTableExists(table){
 		if(!table)
 			return false;
-		
+
 		return this._resourceExists('ccloader/data/assets/' + table);
 	}
 
 	/**
-	 * 
-	 * @param {string} tableName 
-	 * @param {Db} table 
+	 *
+	 * @param {string} tableName
+	 * @param {Db} table
 	 * @param {string?} hash
 	 * @returns {void}
 	 * @deprecated
@@ -446,7 +446,7 @@ export class Filemanager {
 		if(!hash){
 			return await this.saveTable(tableName, table, await this.getDefintionHash());
 		}
-		
+
 		if(isLocal) {
 			try {
 				this._createDirectory(path.dirname('ccloader/data/' + tableName));
@@ -457,8 +457,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} tableName 
+	 *
+	 * @param {string} tableName
 	 * @param {string} hash
 	 * @returns {Db | undefined}
 	 * @deprecated
@@ -468,17 +468,17 @@ export class Filemanager {
 		if(!text) {
 			return undefined;
 		}
-		
+
 		try {
 			const json = JSON.parse(text);
 			const table = new Db();
-			
+
 			if(!json || !json.hash)
 				return undefined;
-			
+
 			if(hash && hash != json.hash)
 				return undefined;
-			
+
 			table.load(json);
 			return table;
 		} catch (e) {
@@ -487,8 +487,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * 
-	 * @param {string} file 
+	 *
+	 * @param {string} file
 	 * @returns {string}
 	 * @deprecated
 	 */
