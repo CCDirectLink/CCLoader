@@ -5,6 +5,7 @@ import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
+import { ManifestUtil } from './manifest.js';
 
 const CCLOADER_VERSION = '2.18.2';
 
@@ -14,6 +15,7 @@ export class ModLoader {
 		this.ui = new UI(this);
 		this.acorn = new Acorn();
 		this.loader = new Loader(this.filemanager);
+		this.manifestUtil = new ManifestUtil();
 
 		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');

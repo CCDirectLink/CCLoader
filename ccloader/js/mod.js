@@ -1,5 +1,4 @@
 import { Plugin } from './plugin.js';
-import { validateManifest, convertLegacyManifest } from './manifest.js';
 
 /** @typedef Modloader import ccloader.js */
 
@@ -12,6 +11,7 @@ export class Mod {
 	constructor(modloader, baseDirectory){
 		this.baseDirectory = baseDirectory.replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 		this.filemanager = modloader.filemanager;
+		this.manifestUtil = modloader.manifestUtil;
 		this.window = modloader._getGameWindow();
 
 		this._loadManifest();
@@ -239,8 +239,8 @@ export class Mod {
 		}
 
 		let data = JSON.parse(text);
-		if (legacy) data = convertLegacyManifest(data);
-		let errors = validateManifest(data, legacy);
+		if (legacy) data = this.manifestUtil.convertLegacyManifest(data);
+		let errors = this.manifestUtil.validateManifest(data, legacy);
 		if (errors.length > 0) {
 			throw new Error([
 				`invalid mod manifest in file '${file}':`,
