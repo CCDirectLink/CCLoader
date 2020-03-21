@@ -1,7 +1,10 @@
-*
+/*
 !package.json
 !mods.json
 !.gitignore
 !ccloader/
+ccloader/data/
+!ccloader/data/definitions.db
+!ccloader/data/final.table
 !assets/mods/simplify/
 !assets/mods/ccloader-version-display/
