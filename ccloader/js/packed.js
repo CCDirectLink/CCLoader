@@ -19,8 +19,8 @@ const jszipCache = new Map();
 // eslint-disable-next-line no-unused-vars
 class PackedManager {
 	/**
-     * 
-     * @param {string} url 
+     *
+     * @param {string} url
      */
 	async get(url) {
 		try {
@@ -32,7 +32,7 @@ class PackedManager {
 					statusText: 'not found'
 				});
 			}
-			
+
 			return new Response(await file.async('blob'), {
 				headers: {
 					'Content-Type': this._contentType(url)
@@ -47,14 +47,14 @@ class PackedManager {
 	}
 
 	/**
-	 * 
-	 * @param {string} url 
+	 *
+	 * @param {string} url
 	 * @returns {Promise<string[]>}
 	 */
 	async getFiles(url) {
 		const zip = await this._openZip(url);
 		const folder = this._openFolder(zip, this._assetPath(url));
-		
+
 		const result = [];
 		folder.forEach((relativePath, file) => {
 			if (!file.dir) {
@@ -65,8 +65,8 @@ class PackedManager {
 	}
 
 	/**
-	 * 
-	 * @param {string} url 
+	 *
+	 * @param {string} url
 	 * @returns {Promise<boolean>}
 	 */
 	async isDirectory(url) {
@@ -74,10 +74,10 @@ class PackedManager {
 		const file = zip.file(this._assetPath(url));
 		return file && file.dir;
 	}
-    
+
 	/**
-     * 
-     * @param {string} url 
+     *
+     * @param {string} url
      */
 	packedName(url) {
 		url = this._normalize(url);
@@ -85,8 +85,8 @@ class PackedManager {
 	}
 
 	/**
-	 * 
-	 * @param {string} url 
+	 *
+	 * @param {string} url
 	 */
 	async _openZip(url) {
 		const zip = this._zipPath(url);
@@ -109,8 +109,8 @@ class PackedManager {
 	}
 
 	/**
-	 * 
-	 * @param {JSZip} root 
+	 *
+	 * @param {JSZip} root
 	 * @param {string} path
 	 */
 	_openFolder(root, path) {
@@ -120,7 +120,7 @@ class PackedManager {
 		}
 		return root;
 	}
-    
+
 	/**
      * @param {string} url
      * @returns {string}
@@ -131,8 +131,8 @@ class PackedManager {
 	}
 
 	/**
-     * 
-     * @param {string} url 
+     *
+     * @param {string} url
      */
 	_zipPath(url) {
 		url = this._normalize(url);
@@ -140,8 +140,8 @@ class PackedManager {
 	}
 
 	/**
-     * 
-     * @param {string} url 
+     *
+     * @param {string} url
      */
 	_assetPath(url) {
 		url = this._normalize(url);
@@ -149,8 +149,8 @@ class PackedManager {
 	}
 
 	/**
-	 * 
-	 * @param {string} url 
+	 *
+	 * @param {string} url
 	 */
 	_normalize(url) {
 		url = url.replace(/\\/g, '/').replace(/\/\//, '/');
@@ -159,7 +159,7 @@ class PackedManager {
 			url = '/' + url;
 		}
 		if (url.startsWith('/ccloader')) {
-			url = url.substr(9); // '/ccloader'.length 
+			url = url.substr(9); // '/ccloader'.length
 		}
 		return url;
 	}

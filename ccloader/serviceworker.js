@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
 
 	if (path.startsWith('/assets/mods/') && packedMods.includes(packedManger.packedName(path))) {
 		//console.log('Handling fetch event for', packedManger.packedName(path), '(', packedManger._zipPath(path), '): ', packedManger._assetPath(path));
-        
+
 		event.respondWith(packedManger.get(path));
 	}
 });

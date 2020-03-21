@@ -12,16 +12,16 @@ export class Acorn {
 	}
 
 	/**
-	 * 
-	 * @param {string} jscode 
+	 *
+	 * @param {string} jscode
 	 */
 	parse(jscode){
 		this.tree = acorn.parse(jscode, {onToken: () => {}});
 	}
 
 	/**
-	 * 
-	 * @param {{entries: {[key: string]: {type: 'select', name: string, pattern: string, from: {type: string, values: {name: string, value: string, type?: 'dynamic'}[]}}}, tree: any[]}} dbDefinition 
+	 *
+	 * @param {{entries: {[key: string]: {type: 'select', name: string, pattern: string, from: {type: string, values: {name: string, value: string, type?: 'dynamic'}[]}}}, tree: any[]}} dbDefinition
 	 */
 	analyse(dbDefinition){
 		const defs = [];
@@ -32,10 +32,10 @@ export class Acorn {
 
 		/** @type {{[name: string]: string}} */
 		const entries = {};
-		
+
 		while (defs.length > 0) {
 			const start = defs.length;
-			
+
 			walker.findNodeAt(this.tree, undefined, undefined, (nodeType, node) => {
 				for (const i in defs) {
 					if (!Object.prototype.hasOwnProperty.call(defs, i)) {
@@ -50,7 +50,7 @@ export class Acorn {
 					}
 				}
 			}, walker.base);
-			
+
 			if(start <= defs.length) {
 				console.warn(defs.length + ' definitions did not match', defs);
 				break;
@@ -66,11 +66,11 @@ export class Acorn {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {{type: 'object'|'static'|'dynamic'|'raw', name: string, parent: string, children: any[]}} node
 	 * @param {DbTree} parent
 	 * @param {{[name: string]: string}} entries
-	 * @returns {DbTree|DbNode} 
+	 * @returns {DbTree|DbNode}
 	 */
 	_buildTree(node, parent, entries) {
 		switch (node.type) {
@@ -82,7 +82,7 @@ export class Acorn {
 			parent.addNode(result);
 			break;
 		}
-		case 'static': 
+		case 'static':
 			parent.addStatic(node.name, entries[node.name], node.parent);
 			break;
 		case 'dynamic':
@@ -94,32 +94,32 @@ export class Acorn {
 		}
 	}
 
-	
+
 	/**
-	 * 
-	 * @param {{type: string, values: {name: string, value: string, type?: 'dynamic'}[]}} compiled 
-	 * @param {string} nodeType 
-	 * @param {string} node 
-	 * @param {string} pattern 
+	 *
+	 * @param {{type: string, values: {name: string, value: string, type?: 'dynamic'}[]}} compiled
+	 * @param {string} nodeType
+	 * @param {string} node
+	 * @param {string} pattern
 	 * @param {{[name: string]: string}} entries
 	 */
 	_getSelectNode(compiled, nodeType, node, pattern, entries) {
 		if(nodeType !== compiled.type) {
 			return undefined;
 		}
-		
+
 		for(const condition of compiled.values){
 			const realValue = this._resolve(node, condition.name);
 			if(realValue === undefined || realValue !== this._resolveValue(condition, entries))
 				return undefined;
 		}
-		
+
 		return this._resolve(node, pattern);
 	}
 
 	/**
-	 * 
-	 * @param {{name: string, value: string, type?: 'dynamic'}} pair 
+	 *
+	 * @param {{name: string, value: string, type?: 'dynamic'}} pair
 	 * @param {{[name: string]: string}} entries
 	 * @returns {string}
 	 */
@@ -137,13 +137,13 @@ export class Acorn {
 	_resolve(node, path) {
 		const split = path.split('.');
 		let result = node;
-		
+
 		for(const step of split){
 			result = result[step];
 			if(result === undefined || result === null)
 				return undefined;
 		}
-		
+
 		return result;
 	}
 }

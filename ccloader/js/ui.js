@@ -54,8 +54,8 @@ const LOG_TYPE = {
 };
 export class UI {
 	/**
-     * 
-     * @param {import('./ccloader').ModLoader} modloader 
+     *
+     * @param {import('./ccloader').ModLoader} modloader
      */
 	constructor(modloader) {
 		this.loaded = false;
@@ -94,24 +94,24 @@ export class UI {
 	}
 
 	/**
-	 * 
-	 * @param  {...any} msg 
+	 *
+	 * @param  {...any} msg
 	 */
 	log(...msg) {
 		this._drawMessage(msg.join(' '), buttons.blue, 2);
 	}
 
 	/**
-	 * 
-	 * @param  {...any} msg 
+	 *
+	 * @param  {...any} msg
 	 */
 	warn(...msg) {
 		this._drawMessage(msg.join(' '), buttons.orange, 5);
 	}
 
 	/**
-	 * 
-	 * @param  {...any} msg 
+	 *
+	 * @param  {...any} msg
 	 */
 	error(...msg) {
 		if (msg[0] instanceof Error) {
@@ -120,10 +120,10 @@ export class UI {
 
 		this._drawMessage(msg.join(' '), buttons.red, 15);
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} text 
+	 *
+	 * @param {string} text
 	 * @param {{x: number, y: number, left: string, center: string, right: string}} type
 	 * @param {number} timeout Timeout in seconds
 	 */
@@ -135,8 +135,8 @@ export class UI {
 	}
 
 	/**
-	 * 
-	 * @param {string} text 
+	 *
+	 * @param {string} text
 	 * @param {{x: number, y: number, left: string, center: string, right: string}} type
 	 * @param {number} timeout Timeout in seconds
 	 */
@@ -147,7 +147,7 @@ export class UI {
 			entry.style.height = buttonSizes.center.size.height * SCALING;
 			entry.style.fontSize = (buttonSizes.center.size.height - BORDER_SIZE) * SCALING / 2 + 'px';
 			entry.style.marginTop = '5px';
-	
+
 			const left = document.createElement('div');
 			left.style.backgroundImage = `url("${type.left}")`;
 			left.style.imageRendering = 'pixelated';
@@ -155,7 +155,7 @@ export class UI {
 			left.style.height = buttonSizes.left.size.height * SCALING;
 			left.style.backgroundSize = `${buttonSizes.left.size.width * SCALING}px ${buttonSizes.left.size.height * SCALING}px`;
 			entry.appendChild(left);
-			
+
 			const center = document.createElement('div');
 			center.style.backgroundImage = `url("${type.center}")`;
 			center.style.imageRendering = 'pixelated';
@@ -166,7 +166,7 @@ export class UI {
 			center.innerText = text;
 
 			entry.appendChild(center);
-			
+
 			const right = document.createElement('div');
 			right.style.backgroundImage = `url("${type.right}")`;
 			right.style.imageRendering = 'pixelated';
@@ -174,9 +174,9 @@ export class UI {
 			right.style.height = buttonSizes.right.size.height * SCALING;
 			right.style.backgroundSize = `${buttonSizes.right.size.width * SCALING}px ${buttonSizes.right.size.height * SCALING}px`;
 			entry.appendChild(right);
-	
+
 			this.container.appendChild(entry);
-	
+
 			setTimeout(() => this.container.removeChild(entry), timeout * 1000);
 		} else {
 			const entry = document.createElement('div');
@@ -186,9 +186,9 @@ export class UI {
 
 			entry.style.lineHeight = buttonSizes.center.size.height * SCALING + 'px';
 			entry.innerText = text;
-	
+
 			this.container.appendChild(entry);
-	
+
 			setTimeout(() => this.container.removeChild(entry), timeout * 1000);
 		}
 	}
@@ -200,8 +200,8 @@ export class UI {
 	}
 
 	/**
-	 * 
-	 * @param {Image} img 
+	 *
+	 * @param {Image} img
 	 */
 	_prepareImage(img) {
 		const canvas = document.createElement('canvas');

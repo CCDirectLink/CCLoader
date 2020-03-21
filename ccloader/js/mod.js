@@ -6,9 +6,9 @@ const path = require('path');
 
 export class Mod {
 	/**
-	 * 
+	 *
 	 * @param {import('./ccloader').ModLoader} modloader
-	 * @param {string} file 
+	 * @param {string} file
 	 */
 	constructor(modloader, file){
 		this.file = file;
@@ -112,21 +112,21 @@ export class Mod {
 			return '';
 		return this.manifest.plugin;
 	}
-	
+
 	get isEnabled(){
 		if(!this.loaded || this.disabled)
 			return false;
-		
+
 		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
 	}
 
 	get baseDirectory(){
 		return this._getBaseName(this.file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 */
 	getAsset(path){
 		if(!this.loaded)
@@ -146,9 +146,9 @@ export class Mod {
 	}
 
 	/**
-	 * 
-	 * @param {string} original 
-	 * @param {string} newPath 
+	 *
+	 * @param {string} original
+	 * @param {string} newPath
 	 */
 	setAsset(original, newPath){
 		this.runtimeAssets[original] = newPath;
@@ -183,7 +183,7 @@ export class Mod {
 			console.error(e);
 			return;
 		}
-		
+
 		try {
 			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
@@ -199,22 +199,22 @@ export class Mod {
 		this.manifest.postload = this._normalizeScript(file, this.manifest.postload);
 		this.manifest.prestart = this._normalizeScript(file, this.manifest.prestart);
 		this.manifest.plugin = this._normalizeScript(file, this.manifest.plugin);
-		
+
 		if(!this.manifest.ccmodDependencies) {
 			this.manifest.ccmodDependencies = this.manifest.dependencies;
 		}
-		
+
 		if(this.manifest.table){
 			if(!this._isPathAbsolute(this.manifest.table)) {
 				this.manifest.table = this._getBaseName(file) + '/' + this.manifest.table;
 			}
 			this.manifest.table = this._normalizePath(this.manifest.table);
 		}
-		
+
 		if(!this.manifest.name) {
 			this.manifest.name = this._getModNameFromFile();
 		}
-		
+
 		const assets = await this._findAssets(this._getBaseName(file) + '/assets/');
 		this.manifest.assets = assets;
 		this.loaded = true;
@@ -243,7 +243,7 @@ export class Mod {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {string} manifestFile
 	 * @param {string} [input]
 	 * @returns {string | undefined}
@@ -257,7 +257,7 @@ export class Mod {
 		}
 		return this._normalizePath(input);
 	}
-	
+
 	_getModNameFromFile(){
 		if (!this.file.includes('package.json')) {
 			return 'Unknown mod';
@@ -269,16 +269,16 @@ export class Mod {
 	}
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 */
 	_isPathAbsolute(path){
 		return /^(?:\/|[a-z]+:\/\/)/.test(path);
 	}
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 */
 	_getBaseName(path){
 		if(path.indexOf('/') >= 0)
@@ -290,8 +290,8 @@ export class Mod {
 	}
 
 	/**
-	 * 
-	 * @param {string} path 
+	 *
+	 * @param {string} path
 	 */
 	_normalizePath(path){
 		if(path.replace(/\\/g, '/').indexOf('assets/') == 0)
@@ -299,10 +299,10 @@ export class Mod {
 		else
 			return path;
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} dir 
+	 *
+	 * @param {string} dir
 	 */
 	async _findAssets(dir){
 		if(window.isLocal || this.filemanager.isPacked(dir)){
@@ -331,10 +331,10 @@ export class Mod {
 	async initializeTable(ccloader){
 		if(!this.loaded || !this.manifest.table)
 			return;
-		
+
 		const hash = await this.filemanager.getModDefintionHash(this.manifest.table);
 		const tablePath = path.join(this._getBaseName(this.file), hash);
-			
+
 		this.table = await this.filemanager.loadTable(tablePath, hash);
 		if(!this.table){
 			console.log('[' + this.manifest.name + '] Creating mod definition database..');

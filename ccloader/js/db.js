@@ -3,10 +3,10 @@
  */
 export class Db {
 	/**
-	 * 
-	 * @param {{[name: string]: string}} entries 
-	 * @param {string?} hash 
-	 * @param {DbTree?} tree 
+	 *
+	 * @param {{[name: string]: string}} entries
+	 * @param {string?} hash
+	 * @param {DbTree?} tree
 	 */
 	constructor(entries, hash, tree) {
 		/** @type {{[name: string]: string}} */
@@ -16,8 +16,8 @@ export class Db {
 	}
 
 	/**
-	 * 
-	 * @param {{entries: {[name: string]: string}, hash: string, tree: DbTree, db?: any}} data 
+	 *
+	 * @param {{entries: {[name: string]: string}, hash: string, tree: DbTree, db?: any}} data
 	 */
 	load(data) {
 		if (data.db) {
@@ -33,8 +33,8 @@ export class Db {
 	}
 
 	/**
-	 * 
-	 * @param {string} entry 
+	 *
+	 * @param {string} entry
 	 * @returns {string | undefined}
 	 */
 	lookup(entry) {
@@ -42,7 +42,7 @@ export class Db {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {*} root The root of CrossCode
 	 * @param {any?} parent The root of the database
 	 */
@@ -57,8 +57,8 @@ export class Db {
 	}
 
 	/**
-	 * 
-	 * @param {{hash: string, db: {data: {type: 'object', name: string, members: any[]}}}} data 
+	 *
+	 * @param {{hash: string, db: {data: {type: 'object', name: string, members: any[]}}}} data
 	 */
 	_loadLegacy(data) {
 		this.isLegacy = true;
@@ -70,8 +70,8 @@ export class Db {
 	}
 
 	/**
-	 * 
-	 * @param {{type: 'object'|'member', name: string, members?: any[], parent?: string, compiledName?: string}} data 
+	 *
+	 * @param {{type: 'object'|'member', name: string, members?: any[], parent?: string, compiledName?: string}} data
 	 * @param {DbTree} parent
 	 * @
 	 */
@@ -103,9 +103,9 @@ export class Db {
  */
 export class DbTree {
 	/**
-	 * 
-	 * @param {string} name 
-	 * @param {(DbTree | DbNode)[]} children 
+	 *
+	 * @param {string} name
+	 * @param {(DbTree | DbNode)[]} children
 	 */
 	constructor(name, children) {
 		/** @type {'object'} */
@@ -115,7 +115,7 @@ export class DbTree {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param {*} root The root of CrossCode
 	 * @param {any?} parent The parent of the database
 	 */
@@ -131,7 +131,7 @@ export class DbTree {
 
 	/**
 	 * Add unparsed data
-	 * @param {{type: 'object'|'static'|'dynamic'|'raw', name: string, children?: (DbTree | DbNode)[], parent?: string, compiled?: string}} data 
+	 * @param {{type: 'object'|'static'|'dynamic'|'raw', name: string, children?: (DbTree | DbNode)[], parent?: string, compiled?: string}} data
 	 */
 	addChild(data) {
 		if (data.type === 'object') {
@@ -147,17 +147,17 @@ export class DbTree {
 
 	/**
 	 * Add an already parsed child
-	 * @param {DbNode | DbTree} node 
+	 * @param {DbNode | DbTree} node
 	 */
 	addNode(node) {
 		this.children.push(node);
 	}
 
 	/**
-	 * 
-	 * @param {string} name 
-	 * @param {string} compiled 
-	 * @param {string} parent 
+	 *
+	 * @param {string} name
+	 * @param {string} compiled
+	 * @param {string} parent
 	 * @returns {DbTree}
 	 */
 	addStatic(name, compiled, parent) {
@@ -167,10 +167,10 @@ export class DbTree {
 	}
 
 	/**
-	 * 
-	 * @param {string} name 
-	 * @param {string} compiled 
-	 * @param {string} parent 
+	 *
+	 * @param {string} name
+	 * @param {string} compiled
+	 * @param {string} parent
 	 * @returns {DbTree}
 	 */
 	addDynamic(name, compiled, parent) {
@@ -180,9 +180,9 @@ export class DbTree {
 	}
 
 	/**
-	 * 
-	 * @param {string} name 
-	 * @param {string} compiled 
+	 *
+	 * @param {string} name
+	 * @param {string} compiled
 	 * @returns {DbTree}
 	 */
 	addRaw(name, compiled) {
@@ -197,11 +197,11 @@ export class DbTree {
  */
 class DbNode {
 	/**
-	 * 
-	 * @param {'static'|'dynamic'|'raw'} type 
-	 * @param {string} name 
-	 * @param {string} compiled 
-	 * @param {string?} parent 
+	 *
+	 * @param {'static'|'dynamic'|'raw'} type
+	 * @param {string} name
+	 * @param {string} compiled
+	 * @param {string?} parent
 	 */
 	constructor(type, name, compiled, parent) {
 		this.type = type;
@@ -223,17 +223,17 @@ class DbNode {
 			break;
 		}
 	}
-	
+
 	/**
-	 * 
-	 * @param {string} parentString 
-	 * @param {*} root 
+	 *
+	 * @param {string} parentString
+	 * @param {*} root
 	 */
 	_getParent(parentString, root){
 		if(parentString === undefined || parentString === ''){
 			return root;
 		}
-		
+
 		let parent = root;
 		for (const key of parentString.split('.')) {
 			parent = parent[key];
