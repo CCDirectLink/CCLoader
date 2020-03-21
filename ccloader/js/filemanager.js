@@ -403,15 +403,6 @@ export class Filemanager {
 
 	/**
 	 *
-	 * @param {string} def
-	 * @deprecated
-	 */
-	getModDefintionHash(def){
-		return this._getHash('assets/' + def);
-	}
-
-	/**
-	 *
 	 * @param {string} table
 	 * @deprecated
 	 */
@@ -420,18 +411,6 @@ export class Filemanager {
 			return false;
 
 		return this._resourceExists('ccloader/data/' + table);
-	}
-
-	/**
-	 *
-	 * @param {string} table
-	 * @deprecated
-	 */
-	modTableExists(table){
-		if(!table)
-			return false;
-
-		return this._resourceExists('ccloader/data/assets/' + table);
 	}
 
 	/**

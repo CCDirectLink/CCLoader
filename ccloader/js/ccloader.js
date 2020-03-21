@@ -383,7 +383,7 @@ export class ModLoader {
 
 	_executeLegacy() {
 		this._executeMainDb();
-		return this._executeDb();
+		this._finalizeEntries(this.table.entries);
 	}
 
 	/**
@@ -407,9 +407,6 @@ export class ModLoader {
 		this.modTables = {};
 		this._createTable(await this.filemanager.getTableName());
 		this.table.execute(this._getGameWindow(), this._getGameWindow());
-		for (const mod of this.mods) {
-			mod.executeTable(this);
-		}
 	}
 
 	/**
@@ -464,39 +461,6 @@ export class ModLoader {
 		this.table = await this.filemanager.loadTable(tableName, hash);
 		if(!this.table) {
 			this._createTable(tableName);
-		}
-	}
-
-
-	/**
-	 * Applies all definitions and loads the mods
-	 * @deprecated
-	 */
-	async _executeDb() {
-		const entries = Object.assign({}, this.table.entries);
-
-		try {
-			await this._executeModTables(entries);
-			this._finalizeEntries(entries);
-		} catch (err) {
-			console.error('An error occured while loading mod tables', err);
-		}
-	}
-
-	/**
-	 * Loads the mod tables
-	 * @param {{[key: string]: string}} entries
-	 * @deprecated
-	 */
-	async _executeModTables(entries) {
-		for (const mod of this.mods) {
-			if (mod.isEnabled) {
-				const table = await mod.initializeTable(this);
-				if (table) {
-					Object.assign(entries, table.entries);
-					mod.executeTable(this);
-				}
-			}
 		}
 	}
 

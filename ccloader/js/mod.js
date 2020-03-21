@@ -2,8 +2,6 @@ import { Plugin } from './plugin.js';
 
 /** @typedef Modloader import ccloader.js */
 
-const path = require('path');
-
 export class Mod {
 	/**
 	 *
@@ -185,7 +183,7 @@ export class Mod {
 		}
 
 		try {
-			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, table?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 			this.manifest = JSON.parse(data);
 			if(!this.manifest)
 				return;
@@ -202,13 +200,6 @@ export class Mod {
 
 		if(!this.manifest.ccmodDependencies) {
 			this.manifest.ccmodDependencies = this.manifest.dependencies;
-		}
-
-		if(this.manifest.table){
-			if(!this._isPathAbsolute(this.manifest.table)) {
-				this.manifest.table = this._getBaseName(file) + '/' + this.manifest.table;
-			}
-			this.manifest.table = this._normalizePath(this.manifest.table);
 		}
 
 		if(!this.manifest.name) {
@@ -320,55 +311,5 @@ export class Mod {
 			}
 			return result;
 		}
-	}
-
-	// -------------- DEPRECATED --------------
-
-	/**
-	 * @param {import('./ccloader').ModLoader} ccloader
-	 * @deprecated
-	 */
-	async initializeTable(ccloader){
-		if(!this.loaded || !this.manifest.table)
-			return;
-
-		const hash = await this.filemanager.getModDefintionHash(this.manifest.table);
-		const tablePath = path.join(this._getBaseName(this.file), hash);
-
-		this.table = await this.filemanager.loadTable(tablePath, hash);
-		if(!this.table){
-			console.log('[' + this.manifest.name + '] Creating mod definition database..');
-			if(ccloader.acorn.needsParsing) {
-				console.log('[' + this.manifest.name + '] Parsing...');
-				const jscode = await this.filemanager.getResourceAsync('assets/js/game.compiled.js');
-				ccloader.acorn.parse(jscode);
-			}
-
-			try {
-				const dbtext = await this.filemanager.getResourceAsync('assets/' + this.manifest.table);
-				const dbdef = JSON.parse(dbtext);
-				console.log('[' + this.manifest.name + '] Analysing...');
-				this.table = ccloader.acorn.analyse(dbdef);
-				console.log('[' + this.manifest.name + '] Writing...');
-				await this.filemanager.saveTable(tablePath, this.table, hash);
-				console.log('[' + this.manifest.name + '] Finished!');
-			} catch (e) {
-				console.error(`Could not load definitions of mod ${this.manifest.name}. Disabling.`, e);
-				this.disabled = true;
-			}
-		}
-
-		return this.table;
-	}
-
-	/**
-	 * @param {ModLoader} ccloader
-	 * @deprecated
-	 */
-	executeTable(ccloader){
-		if(!this.loaded || !this.table)
-			return;
-
-		this.table.execute(ccloader._getGameWindow(), ccloader._getGameWindow());
 	}
 }
