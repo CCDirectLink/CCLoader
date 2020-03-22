@@ -238,27 +238,19 @@ export class Mod {
 			}
 		}
 
-		let data = JSON.parse(text);
-		let errors = [];
-		if (legacy) {
-			this.manifestUtil.validateLegacy(data, errors);
-			if (errors.length === 0) {
+		try {
+			let data = JSON.parse(text);
+
+			if (legacy) {
+				this.manifestUtil.validateLegacy(data);
 				data = this.manifestUtil.convertFromLegacy(data);
 			}
-		}
 
-		if (errors.length === 0) {
-			this.manifestUtil.validate(data, errors, legacy);
+			this.manifestUtil.validate(data, legacy);
+			return data;
+		} catch (err) {
+			throw new Error(`invalid mod manifest in '${file}': ${err.message}`)
 		}
-
-		if (errors.length > 0) {
-			throw new Error([
-				`invalid mod manifest in file '${file}':`,
-				...errors.map(err => `- ${err}`)
-			].join('\n'));
-		}
-
-		return data;
 	}
 
 	/**

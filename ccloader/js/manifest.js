@@ -20,14 +20,23 @@ function getType(value) {
 	return TYPES.unknown;
 }
 
+export class ManifestValidationError extends Error {
+	/**
+	 * @param {string[]} problems
+	 */
+	constructor(problems) {
+		super('\n' + problems.map(p => `- ${p}`).join('\n'));
+		this.problems = problems;
+	}
+}
+
 export class ManifestUtil {
 	/**
 	 * @param {any} data
-	 * @param {string[]} outErrors
 	 * @param {boolean} legacyRelaxedChecks
 	 */
-	validate(data, outErrors, legacyRelaxedChecks) {
-		this._errors = outErrors;
+	validate(data, legacyRelaxedChecks) {
+		this._problems = [];
 
 		this._assertType('<document>', data, [TYPES.object]);
 
@@ -37,7 +46,7 @@ export class ManifestUtil {
 			data.id !== undefined &&
 			!/^[a-zA-Z0-9_\-]+$/.test(data.id)
 		) {
-			this._errors.push(
+			this._problems.push(
 				'id must consist only of one or more alphanumberic characters, hyphens or underscores',
 			);
 		}
@@ -69,12 +78,12 @@ export class ManifestUtil {
 		this._assertType('assetsDir', data.assetsDir, [TYPES.string], true);
 
 		if (!legacyRelaxedChecks && data.legacy_main !== undefined) {
-			this._errors.push(
+			this._problems.push(
 				'legacy_main must not be used (it exists only for compatibility reasons) and will be removed soon',
 			);
 		}
 		if (!legacyRelaxedChecks && data.legacy_loadAsScript !== undefined) {
-			this._errors.push(
+			this._problems.push(
 				'legacy_loadAsScript must not be used (it exists only for compatibility reasons) and will be removed soon',
 			);
 		}
@@ -83,14 +92,18 @@ export class ManifestUtil {
 		this._assertType('preload', data.preload, [TYPES.string], true);
 		this._assertType('postload', data.postload, [TYPES.string], true);
 		this._assertType('prestart', data.prestart, [TYPES.string], true);
+
+		if (this._problems.length > 0) {
+			throw new ManifestValidationError(this._problems);
+		}
 	}
 
 	/**
 	 * @param {any} data
-	 * @param {string[]} outErrors
+	 * @returns {string[]}`
 	 */
-	validateLegacy(data, outErrors) {
-		this._errors = outErrors;
+	validateLegacy(data) {
+		this._problems = [];
 
 		this._assertType('<document>', data, [TYPES.object]);
 
@@ -121,11 +134,15 @@ export class ManifestUtil {
 		this._assertType('preload', data.preload, [TYPES.string], true);
 		this._assertType('postload', data.postload, [TYPES.string], true);
 		this._assertType('prestart', data.prestart, [TYPES.string], true);
+
+		if (this._problems.length > 0) {
+			throw new ManifestValidationError(this._problems);
+		}
 	}
 
 	/**
 	 * @param {any} data
-	 * @return {ccloader.Manifest}
+	 * @returns {ccloader.Manifest}
 	 */
 	convertFromLegacy(data) {
 		return {
@@ -171,7 +188,7 @@ export class ManifestUtil {
 	_assertType(valueName, value, expectedTypes, optional = false) {
 		if (optional && value === undefined) return true;
 		if (!expectedTypes.includes(getType(value))) {
-			this._errors.push(
+			this._problems.push(
 				`expected type of '${valueName}' to be '${expectedTypes.join(' | ')}'`,
 			);
 			return false;
