@@ -15,7 +15,6 @@ export class Mod {
 		this.window = modloader._getGameWindow();
 
 		this._loadManifest();
-		this._loadManifest2().then(manifest => console.log(baseDirectory, manifest));
 	}
 
 	load() {
@@ -50,7 +49,7 @@ export class Mod {
 	get name() {
 		if(!this.loaded)
 			return undefined;
-		return this.manifest.name;
+		return this.manifest.id;
 	}
 	get displayedName() {
 		if(!this.loaded)
@@ -172,55 +171,6 @@ export class Mod {
 
 	async _loadManifest() {
 		let file;
-		let data;
-		// try {
-		// 	file = this.baseDirectory + 'ccmod.json'
-		// 	data = await this.filemanager.getResourceAsync(file);
-		// } catch (e1) {
-			try {
-				file = this.baseDirectory + 'package.json'
-				data = await this.filemanager.getResourceAsync(file);
-			} catch (e2) {
-				// console.error(e1);
-				console.error(e2);
-				return;
-			}
-		// }
-
-		try {
-			/** @type {{name: string, ccmodHumanName?: string, version?: string, description?: string, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
-			this.manifest = JSON.parse(data);
-			if(!this.manifest)
-				return;
-		} catch (e) {
-			console.error('Could not load mod: ' + file, e);
-			return;
-		}
-
-		this.manifest.main = this._normalizeScript(this.manifest.main);
-		this.manifest.preload = this._normalizeScript(this.manifest.preload);
-		this.manifest.postload = this._normalizeScript(this.manifest.postload);
-		this.manifest.prestart = this._normalizeScript(this.manifest.prestart);
-		this.manifest.plugin = this._normalizeScript(this.manifest.plugin);
-
-		if(!this.manifest.ccmodDependencies) {
-			this.manifest.ccmodDependencies = this.manifest.dependencies;
-		}
-
-		if(!this.manifest.name) {
-			this.manifest.name = this._getBaseName(this.baseDirectory);
-		}
-
-		const assets = await this._findAssets(this.baseDirectory + 'assets/');
-		this.manifest.assets = assets;
-		this.loaded = true;
-		if(this.onloaded) {
-			this.onloaded();
-		}
-	}
-
-	async _loadManifest2() {
-		let file;
 		let text;
 		let legacy = false;
 		try {
@@ -240,16 +190,29 @@ export class Mod {
 
 		try {
 			let data = JSON.parse(text);
-
 			if (legacy) {
 				this.manifestUtil.validateLegacy(data);
 				data = this.manifestUtil.convertFromLegacy(data);
 			}
-
 			this.manifestUtil.validate(data, legacy);
-			return data;
+			this.manifest = data;
 		} catch (err) {
 			throw new Error(`invalid mod manifest in '${file}': ${err.message}`)
+		}
+
+		this.manifest.main = this._normalizeScript(this.manifest.legacy_main);
+		this.manifest.preload = this._normalizeScript(this.manifest.preload);
+		this.manifest.postload = this._normalizeScript(this.manifest.postload);
+		this.manifest.prestart = this._normalizeScript(this.manifest.prestart);
+		this.manifest.plugin = this._normalizeScript(this.manifest.plugin);
+
+		this.manifest.assets = await this._findAssets(`${this.baseDirectory}assets/`);
+
+		return 'hello';
+
+		this.loaded = true;
+		if(this.onloaded) {
+			this.onloaded();
 		}
 	}
 
@@ -306,17 +269,6 @@ export class Mod {
 	 *
 	 * @param {string} path
 	 */
-	_getBaseName(path){
-		path = path.replace(/\/+$/, '');
-		if(path.indexOf('/') >= 0)
-			path = path.substring(path.lastIndexOf('/') + 1);
-		return path;
-	}
-
-	/**
-	 *
-	 * @param {string} path
-	 */
 	_normalizePath(path){
 		if(path.replace(/\\/g, '/').indexOf('assets/') == 0)
 			return path.substr(7);
@@ -329,6 +281,7 @@ export class Mod {
 	 * @param {string} dir
 	 */
 	async _findAssets(dir){
+		debugger;
 		if(window.isLocal || this.filemanager.isPacked(dir)){
 			return await this.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else {
