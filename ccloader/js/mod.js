@@ -180,7 +180,7 @@ export class Mod {
 			try {
 				file = this.baseDirectory + 'package.json'
 				data = await this.filemanager.getResourceAsync(file);
-			} catch (_e2) {
+			} catch (e2) {
 				// console.error(e1);
 				console.error(e2);
 				return;
@@ -239,8 +239,18 @@ export class Mod {
 		}
 
 		let data = JSON.parse(text);
-		if (legacy) data = this.manifestUtil.convertLegacyManifest(data);
-		let errors = this.manifestUtil.validateManifest(data, legacy);
+		let errors = [];
+		if (legacy) {
+			this.manifestUtil.validateLegacy(data, errors);
+			if (errors.length === 0) {
+				data = this.manifestUtil.convertFromLegacy(data);
+			}
+		}
+
+		if (errors.length === 0) {
+			this.manifestUtil.validate(data, errors, legacy);
+		}
+
 		if (errors.length > 0) {
 			throw new Error([
 				`invalid mod manifest in file '${file}':`,

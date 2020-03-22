@@ -2,6 +2,7 @@ const TYPES = {
 	string: 'string',
 	array: 'array',
 	object: 'object',
+	boolean: 'boolean',
 	null: 'null',
 	unknown: 'unknown',
 };
@@ -13,6 +14,7 @@ const TYPES = {
 function getType(value) {
 	if (value === null) return TYPES.null;
 	if (typeof value === 'string') return TYPES.string;
+	if (typeof value === 'boolean') return TYPES.boolean;
 	if (Array.isArray(value)) return TYPES.array;
 	if (typeof value === 'object') return TYPES.object;
 	return TYPES.unknown;
@@ -21,16 +23,20 @@ function getType(value) {
 export class ManifestUtil {
 	/**
 	 * @param {any} data
+	 * @param {string[]} outErrors
 	 * @param {boolean} legacyRelaxedChecks
-	 * @returns {string[]}
 	 */
-	validateManifest(data, legacyRelaxedChecks) {
-		this._errors = [];
+	validate(data, outErrors, legacyRelaxedChecks) {
+		this._errors = outErrors;
 
 		this._assertType('<document>', data, [TYPES.object]);
 
 		this._assertType('id', data.id, [TYPES.string]);
-		if (!legacyRelaxedChecks && /[a-zA-Z0-9_\-]+/.test(data.id)) {
+		if (
+			!legacyRelaxedChecks &&
+			data.id !== undefined &&
+			!/^[a-zA-Z0-9_\-]+$/.test(data.id)
+		) {
 			this._errors.push(
 				'id must consist only of one or more alphanumberic characters, hyphens or underscores',
 			);
@@ -51,39 +57,108 @@ export class ManifestUtil {
 				);
 			}
 		}
+		this._assertType('hidden', data.hidden, [TYPES.boolean], true);
 
 		this._assertPeople('authors', data.authors, true);
 		this._assertPeople('contributors', data.contributors, true);
 		this._assertPeople('maintainers', data.maintainers, true);
 
-		if (data.dependencies !== undefined) {
-			if (this._assertType('dependencies', data.dependencies, [TYPES.object])) {
-				Object.keys(data.dependencies).reduce((valid, key) => {
-					let value = data.dependencies[key];
-					let valueName = `dependencies[${JSON.stringify(key)}]`;
-					return this._assertType(valueName, value, [TYPES.string]) && valid;
-				}, true);
-			}
-		}
+		this._assertDependencies('dependencies', data.dependencies);
 
-		if (data.assets !== undefined) {
-			if (this._assertType('assets', data.assets, [TYPES.array])) {
-				data.assets.reduce(
-					(valid, value, index) =>
-						this._assertType(`assets[${index}]`, value, [TYPES.string]) &&
-						valid,
-					true,
-				);
-			}
-		}
+		this._assertAssets('assets', data.assets);
 		this._assertType('assetsDir', data.assetsDir, [TYPES.string], true);
 
-		this._assertType('assetsDir', data.assetsDir, [TYPES.string], true);
+		if (!legacyRelaxedChecks && data.legacy_main !== undefined) {
+			this._errors.push(
+				'legacy_main must not be used (it exists only for compatibility reasons) and will be removed soon',
+			);
+		}
+		if (!legacyRelaxedChecks && data.legacy_loadAsScript !== undefined) {
+			this._errors.push(
+				'legacy_loadAsScript must not be used (it exists only for compatibility reasons) and will be removed soon',
+			);
+		}
+
 		this._assertType('plugin', data.plugin, [TYPES.string], true);
 		this._assertType('preload', data.preload, [TYPES.string], true);
+		this._assertType('postload', data.postload, [TYPES.string], true);
 		this._assertType('prestart', data.prestart, [TYPES.string], true);
+	}
 
-		return this._errors;
+	/**
+	 * @param {any} data
+	 * @param {string[]} outErrors
+	 */
+	validateLegacy(data, outErrors) {
+		this._errors = outErrors;
+
+		this._assertType('<document>', data, [TYPES.object]);
+
+		this._assertType('name', data.name, [TYPES.string]);
+		this._assertType('version', data.version, [TYPES.string]);
+		this._assertType('license', data.license, [TYPES.string], true);
+
+		this._assertType(
+			'ccmodHumanName',
+			data.ccmodHumanName,
+			[TYPES.string],
+			true,
+		);
+		this._assertType('description', data.description, [TYPES.string], true);
+		this._assertType('homepage', data.homepage, [TYPES.string], true);
+		this._assertType('hidden', data.hidden, [TYPES.boolean], true);
+
+		this._assertDependencies('ccmodDependencies', data.ccmodDependencies);
+		this._assertDependencies('dependencies', data.dependencies);
+
+		this._assertAssets('assets', data.assets);
+
+		this._assertType('module', data.module, [TYPES.boolean], true);
+		this._assertType('usesRequire', data.usesRequire, [TYPES.boolean], true);
+
+		this._assertType('main', data.main, [TYPES.string], true);
+		this._assertType('plugin', data.plugin, [TYPES.string], true);
+		this._assertType('preload', data.preload, [TYPES.string], true);
+		this._assertType('postload', data.postload, [TYPES.string], true);
+		this._assertType('prestart', data.prestart, [TYPES.string], true);
+	}
+
+	/**
+	 * @param {any} data
+	 * @return {ccloader.Manifest}
+	 */
+	convertFromLegacy(data) {
+		return {
+			id: data.name,
+			version: data.version,
+			license: data.license,
+
+			title: {
+				en_US:
+					data.ccmodHumanName !== undefined ? data.ccmodHumanName : data.name,
+			},
+			description:
+				data.description !== undefined
+					? { en_US: data.description }
+					: undefined,
+			homepage:
+				data.homepage !== undefined ? { en_US: data.homepage } : undefined,
+			hidden: data.hidden,
+
+			dependencies:
+				data.ccmodDependencies !== undefined
+					? data.ccmodDependencies
+					: data.dependencies,
+
+			assets: data.assets,
+
+			legacy_loadAsScript: !data.module,
+			legacy_main: data.main,
+			plugin: data.plugin,
+			preload: data.preload,
+			postload: data.postload,
+			prestart: data.prestart,
+		};
 	}
 
 	/**
@@ -162,42 +237,48 @@ export class ManifestUtil {
 		// same story as with getType in this.assertLocalizedString
 		if (getType(value) === TYPES.string) return true;
 
-		return ['name', 'email', 'url', 'comment'].reduce(
-			(valid, key) =>
-				this._assertLocalizedString(
-					`${valueName}.${key}`,
-					value[key],
-					key !== 'name',
-				) && valid,
-			true,
-		);
+		return ['name', 'email', 'url', 'comment'].reduce((valid, key) => {
+			let valueName2 = `${valueName}.${key}`;
+			let optional = key !== 'name;';
+			return (
+				this._assertLocalizedString(valueName2, value[key], optional) && valid
+			);
+		}, true);
 	}
 
 	/**
-	 * @param {any} data
-	 * @return {ccloader.Manifest}
+	 * @param {string} valueName
+	 * @param {unknown} value
+	 * @returns {boolean}
 	 */
-	convertLegacyManifest(data) {
-		return {
-			id: data.name,
-			version: data.version,
-			license: data.license,
-			title: { en_US: data.name },
-			description:
-				data.description !== undefined
-					? { en_US: data.description }
-					: undefined,
-			homepage:
-				data.homepage !== undefined ? { en_US: data.homepage } : undefined,
-			dependencies:
-				data.ccmodDependencies !== undefined
-					? data.ccmodDependencies
-					: data.dependencies,
-			assets: data.assets,
-			plugin: data.plugin,
-			preload: data.preload,
-			postload: data.postload,
-			prestart: data.prestart,
-		};
+	_assertDependencies(valueName, value) {
+		if (value === undefined) return true;
+		if (!this._assertType(valueName, value, [TYPES.object])) {
+			return false;
+		}
+
+		return Object.keys(value).reduce((valid, key) => {
+			let valueName2 = `${valueName}[${JSON.stringify(key)}]`;
+			return this._assertType(valueName2, value[key], [TYPES.string]) && valid;
+		}, true);
+	}
+
+	/**
+	 * @param {string} valueName
+	 * @param {unknown} value
+	 * @returns {boolean}
+	 */
+	_assertAssets(valueName, value) {
+		if (value === undefined) return true;
+		if (!this._assertType(valueName, value, [TYPES.array])) {
+			return false;
+		}
+
+		return value.reduce(
+			(valid, value2, index) =>
+				this._assertType(`${valueName}[${index}]`, value2, [TYPES.string]) &&
+				valid,
+			true,
+		);
 	}
 }

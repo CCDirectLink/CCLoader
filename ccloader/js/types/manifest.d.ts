@@ -29,6 +29,7 @@ declare namespace ccloader {
 			description?: LocalizedString;
 			homepage?: LocalizedString;
 			keywords?: LocalizedString[];
+			hidden?: boolean;
 
 			authors?: Person[];
 			contributors?: Person[];
