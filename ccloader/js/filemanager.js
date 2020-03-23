@@ -49,7 +49,7 @@ export class Filemanager {
 	 * @param {string} folder
 	 */
 	getAllModsFiles(folder){
-		const subs = this._getLocalFolders(folder || 'assets/mods/');
+		const subs = this._getFolders(folder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
 	}
 
@@ -146,6 +146,27 @@ export class Filemanager {
 
 	/**
 	 * Returns all files with the given ending in the folder
+	 * @param {string} folder
+	 */
+	_getFolders(folder) {
+		if(!folder)
+			folder = 'assets/mods/';
+
+		if(isLocal) {
+			return this._getResoucesInLocalFolder(folder, ending);
+		} else {
+			var results = [];
+			for(var i in this.modList){
+				if(this._resourceExists(folder + this.modList[i] + ending)){
+					results.push(folder + this.modList[i] + ending);
+				}
+			}
+			return results;
+		}
+	}
+
+	/**
+	 * Returns all files with the given ending in the folder
 	 * @param {string?} folder
 	 * @param {string?} ending
 	 */
@@ -158,8 +179,8 @@ export class Filemanager {
 		} else {
 			var results = [];
 			for(var i in this.modList){
-				if(this._resourceExists('assets/mods/' + this.modList[i] + ending)){
-					results.push('assets/mods/' + this.modList[i] + ending);
+				if(this._resourceExists(folder + this.modList[i] + ending)){
+					results.push(folder + this.modList[i] + ending);
 				}
 			}
 			return results;
