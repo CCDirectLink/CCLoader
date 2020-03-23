@@ -153,12 +153,12 @@ export class Filemanager {
 			folder = 'assets/mods/';
 
 		if(isLocal) {
-			return this._getResoucesInLocalFolder(folder, ending);
+			return this._getLocalFolders(folder);
 		} else {
 			var results = [];
 			for(var i in this.modList){
-				if(this._resourceExists(folder + this.modList[i] + ending)){
-					results.push(folder + this.modList[i] + ending);
+				if(this._resourceExists(folder + this.modList[i])){
+					results.push(folder + this.modList[i]);
 				}
 			}
 			return results;
