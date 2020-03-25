@@ -419,16 +419,29 @@
 				.sort((a, b) => ('' + a.name).localeCompare(b.name));
 			
 			const tab = this.options.addTab('mods', 'Mods');
+
+			const infoBoxSupported = !!sc.OptionInfoBox;
+			if (infoBoxSupported) {
+				ig.lang.labels.sc.gui.options['mods-description'] = {description: 'In this menu you can \\c[3]enable or disable installed mods\\c[0]. Mod descriptions are shown below. \\c[1]The game needs to be restarted\\c[0] if you change any options here!'};
+				const descriptionEntry = this.options.addEntry('mods-description', 'INFO', undefined, tab, 'options.mods-description.description');
+				// marginBottom is a custom field, see _hookInfoBox
+				descriptionEntry.marginBottom = 6;
+			}
+
 			for (const mod of mods){
 				if (mod.hidden) {
 					continue;
 				}
 
 				const optionName = 'modEnabled-' + mod.name.toLowerCase();
-				this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
+				const modOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
+				// checkboxRightAlign is a custom field, see _hookRow
+				modOption.checkboxRightAlign = true;
 
 				const name = mod.displayName || mod.name;
-				const description = (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
+				const description = infoBoxSupported
+					? mod.description || ''
+					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
 
 				ig.lang.labels.sc.gui.options[optionName] = {name, description};
 
@@ -554,6 +567,8 @@
 			this._getVarNames()
 				.then(() => {
 					this._hookTabBox();
+					this._hookRow();
+					this._hookInfoBox();
 					this.loaded = true;
 					this._initializeLogLevel(0);
 				})
@@ -594,6 +609,7 @@
 		 * @param {*=} data 
 		 * @param {boolean=} restart 
 		 * @param {string=} header
+		 * @returns {any}
 		 */
 		addEntry(name, type, init, cat, data, restart, header) {
 			if(!this.loaded)
@@ -616,6 +632,8 @@
 			
 			cc.sc.OPTIONS_DEFINITION[name] = obj;
 			sc.options[this.valuesName][name] = init;
+
+			return obj;
 		}
 
 		reload() {
@@ -717,6 +735,42 @@
 			cc.sc.OptionsTabBox.prototype[entries.init] = function(){
 				original.apply(this, arguments);
 				window.simplify.options._loadTabs(this);
+			};
+		}
+
+		_hookRow() {
+			// stop if this CC version still has obfuscated code
+			if (!sc.OptionRow) return;
+			// if speedrunners absolutely want the redesigned "Mods" menu AND someone
+			// is willing to generate symbol definitions for the following code -
+			// please help me
+
+			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
+			const original = sc.OptionRow.prototype.init;
+			sc.OptionRow.prototype.init = function() {
+				original.apply(this, arguments);
+				if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
+					this.typeGui.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
+					const additionalWidth = this.typeGui.hook.size.x - this.typeGui.button.hook.size.x;
+					const lineHook = this.hook.children[1];
+					const slopeHook = this.hook.children[2];
+					lineHook.size.x += additionalWidth;
+					slopeHook.pos.x += additionalWidth;
+				}
+			};
+		}
+
+		_hookInfoBox() {
+			// the comments are basically the same as in _hookRow
+			if (!sc.OptionInfoBox) return;
+
+			// add marginBottom field to options in sc.OPTIONS_DEFINITION
+			const original = sc.OptionInfoBox.prototype.init;
+			sc.OptionInfoBox.prototype.init = function(option) {
+				original.apply(this, arguments);
+				if (option.marginBottom) {
+					this.hook.size.y += option.marginBottom; 
+				}
 			};
 		}
 
