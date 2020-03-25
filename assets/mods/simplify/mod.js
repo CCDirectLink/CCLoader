@@ -440,7 +440,7 @@
 
 				const name = mod.displayName || mod.name;
 				const description = infoBoxSupported
-					? mod.description || ''
+					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
 
 				ig.lang.labels.sc.gui.options[optionName] = {name, description};
