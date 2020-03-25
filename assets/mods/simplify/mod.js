@@ -643,19 +643,19 @@
 
 			Object.defineProperties(sc.options[this.valuesName], {
 				'logLevel-log': {
-					get: () => ((localStorage.getItem('logFlags') & 4) == 4) || false,
+					get: () => (((localStorage.getItem('logFlags') || 3) & 4) == 4),
 					set: value => value 
 						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 4)
 						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 3)
 				},
 				'logLevel-warn': {
-					get: () => ((localStorage.getItem('logFlags') & 2) == 2) || true,
+					get: () => (((localStorage.getItem('logFlags') || 3) & 2) == 2),
 					set: value => value 
 						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 2)
 						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 5)
 				},
 				'logLevel-error': {
-					get: () => ((localStorage.getItem('logFlags') & 1) == 1) || true,
+					get: () => (((localStorage.getItem('logFlags') || 3) & 1) == 1),
 					set: value => value 
 						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 1)
 						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 6)
