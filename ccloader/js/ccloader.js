@@ -53,12 +53,22 @@ export class ModLoader {
 		this.loader.continue(this.frame);
 		await this._waitForGame();
 
+		// At this point the game UI has become interactive, though the legacy
+		// "main" entrypoint is loaded a couple hundred milliseconds later, so
+		// CCLoader status overlay is still visible. I think it will result in
+		// better UX if we give the user an "illusion" of interactivity before
+		// "main" is removed for good.
+		this._getGameWindow().focus();
+
 		await this._executeLegacy();
 		await this._executeMain();
 
 
 		this._fireLoadEvent();
 		this._removeOverlay();
+		// Re-focus the game iframe a second time because at this point CCLoader has
+		// **really** finished loading the game along with the active mods.
+		this._getGameWindow().focus();
 	}
 
 	async _initializeServiceWorker() {
