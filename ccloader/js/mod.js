@@ -50,7 +50,7 @@ export class Mod {
 			return undefined;
 		return this.manifest.name;
 	}
-	get displayedName() {
+	get displayName() {
 		if(!this.loaded)
 			return undefined;
 		return this.manifest.ccmodHumanName;
