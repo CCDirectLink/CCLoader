@@ -6,7 +6,7 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 
-const CCLOADER_VERSION = '2.18.2';
+const CCLOADER_VERSION = '2.18.3';
 
 export class ModLoader {
 	constructor() {
