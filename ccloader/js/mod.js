@@ -1,5 +1,3 @@
-import { Plugin } from './plugin.js';
-
 /** @typedef Modloader import ccloader.js */
 
 export class Mod {
@@ -161,9 +159,7 @@ export class Mod {
 		delete this.window._tmp;
 
 		const plugin = module.default;
-		if (!plugin
-			|| !plugin.prototype
-			|| !(plugin.prototype instanceof Plugin)) {
+		if (!plugin || !plugin.prototype) {
 			return;
 		}
 
@@ -223,7 +219,7 @@ export class Mod {
 		if(!this.loaded)
 			return;
 
-		if (this.pluginInstance) {
+		if (this.pluginInstance && this.pluginInstance[name]) {
 			await this.pluginInstance[name]();
 		}
 

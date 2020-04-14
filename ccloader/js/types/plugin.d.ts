@@ -8,6 +8,6 @@ declare namespace ccloader {
         public readonly prestart?: () => Promise<void>;
         public readonly main?: () => Promise<void>;
 
-        public constructor(mods: Mod[]);
+        public constructor(mod: Mod);
     }
 }
