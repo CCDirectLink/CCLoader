@@ -79,19 +79,27 @@ export class ModLoader {
 	 * Notifies filemanager and the serviceworker about existing packed mods.
 	 * @param {string[]} packedMods
 	 */
-	_loadPackedMods(packedMods) {
+	async _loadPackedMods(packedMods) {
 		const names = packedMods.map((m) => m.substring(12, m.length));
-		this._sendPackedModNames(names);
+		await this._sendPackedModNames(packedMods);
 		this.filemanager.setPackedMods(names);
 	}
 
 	/**
 	 *
 	 * Notifies the serviceworker about existing packed mods.
-	 * @param {string[]} names
+	 * @param {string[]} packedMods
 	 */
-	_sendPackedModNames(names) {
-		this._serviceWorker.postMessage(names);
+	async _sendPackedModNames(packedMods) {
+		const caches = this._getGameWindow().caches;
+		const keys = await caches.keys();
+		await Promise.all(keys.map(name => caches.delete(name)));
+
+		const packedCache = await caches.open('packedMods');
+		const dummyResponse = () => new Response('', { status: 200 });
+		// CacheStorage does not like the chrome-extension:// schema
+		const dummyPrefix = 'http://localhost/';
+		await Promise.all(packedMods.map(path => packedCache.put(dummyPrefix + path, dummyResponse())));
 	}
 
 	async _buildCrosscodeVersion(){
@@ -120,7 +128,7 @@ export class ModLoader {
 
 		if (packedMods.length > 0) {
 			await this._initializeServiceWorker();
-			this._loadPackedMods(packedMods);
+			await this._loadPackedMods(packedMods);
 			for (const packed of packedMods) {
 				modFiles.push(packed.substring(0, packed.length) + '/package.json');
 			}
