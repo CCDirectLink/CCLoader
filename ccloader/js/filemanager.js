@@ -176,7 +176,7 @@ export class Filemanager {
 
 		if(isLocal) {
 			return this._getResoucesInLocalFolder(folder, ending);
-		} else {
+		} else if (folder.endsWith('mods/')) {
 			var results = [];
 			for(var i in this.modList){
 				if(this._resourceExists(folder + this.modList[i] + ending)){
@@ -184,6 +184,10 @@ export class Filemanager {
 				}
 			}
 			return results;
+		} else {
+			if (this._resourceExists(folder + '/' + ending))
+				return [folder + '/' + ending];
+			return [];
 		}
 	}
 
