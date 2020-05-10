@@ -123,7 +123,12 @@ export class Filemanager {
 	 * @returns {Promise<ServiceWorker>}
 	 */
 	async loadServiceWorker(path, window) {
-		await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		const currentRegistration = await window.navigator.serviceWorker.getRegistration();
+		if (currentRegistration) {
+			await currentRegistration.update();
+		} else {
+			await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		}
 
 		if (!window.navigator.serviceWorker.controller || window.navigator.serviceWorker.controller.state !== 'activated') {
 			window.location.reload();
