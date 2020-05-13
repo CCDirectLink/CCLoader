@@ -5,7 +5,6 @@ self.importScripts(
 
 // eslint-disable-next-line no-undef
 const packedManger = new PackedManager();
-const packedMods = [];
 
 
 self.addEventListener('install', () => {
@@ -14,16 +13,6 @@ self.addEventListener('install', () => {
 
 self.addEventListener('activate', () => {
 	self.clients.claim();
-});
-
-self.addEventListener('message', (event) => {
-	packedMods.splice(0);
-	packedMods.push(...event.data);
-
-	event.waitUntil((async () => {
-		const keys = await caches.keys();
-		await Promise.all(keys.map(name => caches.delete(name)));
-	})());
 });
 
 self.addEventListener('fetch', (event) => {
@@ -50,9 +39,16 @@ self.addEventListener('fetch', (event) => {
 		}
 	}
 
-	if (path.startsWith('/assets/mods/') && packedMods.includes(packedManger.packedName(path))) {
+	if (path.startsWith('/assets/mods/')) {
+		const packedName = packedManger.packedName(path);
 		//console.log('Handling fetch event for', packedManger.packedName(path), '(', packedManger._zipPath(path), '): ', packedManger._assetPath(path));
 
-		event.respondWith(packedManger.get(path));
+		event.respondWith((async () => {
+			const cache = await caches.open('packedMods');
+			if (await cache.match('http://localhost/assets/mods/' + packedName)) {
+				return packedManger.get(path);
+			}
+			return fetch(request);
+		})());
 	}
 });

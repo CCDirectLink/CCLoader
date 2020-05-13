@@ -123,7 +123,13 @@ export class Filemanager {
 	 * @returns {Promise<ServiceWorker>}
 	 */
 	async loadServiceWorker(path, window) {
-		await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		const currentRegistration = await window.navigator.serviceWorker.getRegistration();
+		if (currentRegistration) {
+			//Do not await update since the worker only performs a simple task. Even if there is a bugfix it should be enough to not crash. 
+			currentRegistration.update();
+		} else {
+			await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+		}
 
 		if (!window.navigator.serviceWorker.controller || window.navigator.serviceWorker.controller.state !== 'activated') {
 			window.location.reload();
@@ -176,7 +182,7 @@ export class Filemanager {
 
 		if(isLocal) {
 			return this._getResoucesInLocalFolder(folder, ending);
-		} else {
+		} else if (folder.endsWith('mods/')) {
 			var results = [];
 			for(var i in this.modList){
 				if(this._resourceExists(folder + this.modList[i] + ending)){
@@ -184,6 +190,10 @@ export class Filemanager {
 				}
 			}
 			return results;
+		} else {
+			if (this._resourceExists(folder + '/' + ending))
+				return [folder + '/' + ending];
+			return [];
 		}
 	}
 
