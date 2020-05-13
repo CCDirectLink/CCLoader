@@ -125,7 +125,8 @@ export class Filemanager {
 	async loadServiceWorker(path, window) {
 		const currentRegistration = await window.navigator.serviceWorker.getRegistration();
 		if (currentRegistration) {
-			await currentRegistration.update();
+			//Do not await update since the worker only performs a simple task. Even if there is a bugfix it should be enough to not crash. 
+			currentRegistration.update();
 		} else {
 			await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
 		}
