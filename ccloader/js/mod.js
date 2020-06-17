@@ -130,13 +130,20 @@ export class Mod {
 
 		path = path.replace(/\\/g, '/').trim();
 
-		if(this.runtimeAssets && this.runtimeAssets[path]) {
-			return this.runtimeAssets;
+		if (this.runtimeAssets && this.runtimeAssets[path]) {
+			return this.runtimeAssets[path];
 		}
 
-		for(const asset of this.assets) {
-			if(asset.endsWith(path)) {
-				return asset;
+		const base = this.baseDirectory.substr(7) + 'assets/';
+		for (const asset of this.assets) {
+			if (asset.startsWith(base)) {
+				if (asset.substr(base.length) === path) {
+					return asset;
+				}
+			} else {
+				if (path.endsWith(asset)) {
+					return asset;
+				}
 			}
 		}
 	}
