@@ -451,9 +451,11 @@
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
-					set: value => value 
-						? localStorage.setItem(optionName, 'true')
-						: localStorage.setItem(optionName, 'false')
+					set: value => {
+						value 
+							? localStorage.setItem(optionName, 'true')
+							: localStorage.setItem(optionName, 'false');
+					}
 				});
 			}
 
@@ -662,21 +664,27 @@
 			Object.defineProperties(sc.options[this.valuesName], {
 				'logLevel-log': {
 					get: () => (((localStorage.getItem('logFlags') || 3) & 4) == 4),
-					set: value => value 
-						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 4)
-						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 3)
+					set: value => {
+						value 
+							? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 4)
+							: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 3);
+					}
 				},
 				'logLevel-warn': {
 					get: () => (((localStorage.getItem('logFlags') || 3) & 2) == 2),
-					set: value => value 
-						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 2)
-						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 5)
+					set: value => {
+						value 
+							? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 2)
+							: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 5);
+					}
 				},
 				'logLevel-error': {
 					get: () => (((localStorage.getItem('logFlags') || 3) & 1) == 1),
-					set: value => value 
-						? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 1)
-						: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 6)
+					set: value => {
+						value 
+							? localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) | 1)
+							: localStorage.setItem('logFlags', (localStorage.getItem('logFlags') || 3) & 6);
+					}
 				}
 			});
 		}

@@ -1,9 +1,18 @@
 /// <reference path="../../../ccloader/js/types/plugin.d.ts" />
 
+import * as compat from './compat.js';
+
 /**
  * @extends {ccloader.Plugin}
  */
-export default class Test extends Plugin {
+export default class Simplify extends Plugin {
+	constructor(mod) {
+		super();
+
+		/** @type {string} */
+		this.baseDir = mod.baseDirectory;
+	}
+
 	preload() {
 		this._applyArgs();
 		this._hookStart();
@@ -12,6 +21,10 @@ export default class Test extends Plugin {
 	postload() {
 		this._applyArgs();
 		return import('./postloadModule.js');
+	}
+
+	async main() {
+		await compat.apply(this.baseDir);
 	}
 
 	_hookStart() {
