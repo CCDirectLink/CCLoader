@@ -1,18 +1,16 @@
 import { Filemanager } from './filemanager.js';
-import { Acorn } from './acorn.js';
 import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 
-const CCLOADER_VERSION = '2.18.5';
+const CCLOADER_VERSION = '2.19.0';
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
-		this.acorn = new Acorn();
 		this.loader = new Loader(this.filemanager);
 
 		this.frame = document.getElementById('frame');
@@ -32,7 +30,6 @@ export class ModLoader {
 	 */
 	async startGame() {
 		await this._buildCrosscodeVersion();
-		await this._initializeLegacy();
 
 		await this.loader.initialize();
 
@@ -40,7 +37,6 @@ export class ModLoader {
 		this._orderCheckMods();
 		this._registerMods();
 
-		this._setupLegacyGamewindow();
 		this._setupGamewindow();
 
 		await this._loadPlugins();
@@ -60,7 +56,6 @@ export class ModLoader {
 		// "main" is removed for good.
 		this._getGameWindow().focus();
 
-		await this._executeLegacy();
 		await this._executeMain();
 
 
@@ -102,9 +97,9 @@ export class ModLoader {
 		await Promise.all(packedMods.map(path => packedCache.put(dummyPrefix + path, dummyResponse())));
 	}
 
-	async _buildCrosscodeVersion(){
+	async _buildCrosscodeVersion() {
 		try {
-			const {changelog} = JSON.parse(await this.filemanager.getResourceAsync('assets/data/changelog.json'));
+			const { changelog } = JSON.parse(await this.filemanager.getResourceAsync('assets/data/changelog.json'));
 			this.ccVersion = changelog[0].version;
 		} catch (e) {
 			let ccVersion = localStorage.getItem('cc.version');
@@ -209,18 +204,18 @@ export class ModLoader {
 	 */
 	_unmetModDependencies(mod, mods) {
 		const deps = mod.dependencies;
-		if(!deps) {
+		if (!deps) {
 			return null;
 		}
 
 		/** @type {{[name: string]: string}} */
 		const result = {};
 		for (const depName in deps) {
-			if(!Object.prototype.hasOwnProperty.call(deps, depName))
+			if (!Object.prototype.hasOwnProperty.call(deps, depName))
 				continue;
 
 			const depRange = semver.validRange(deps[depName]);
-			if(!depRange) {
+			if (!depRange) {
 				result[depName] = `Syntax error in version range "${deps[depName]}" for dependency ${depName}`;
 				continue;
 			}
@@ -364,7 +359,8 @@ export class ModLoader {
 				if (this._getGameWindow().ig && this._getGameWindow().ig.ready) {
 					clearInterval(intervalid);
 					resolve();
-				}}, 1000);
+				}
+			}, 1000);
 		});
 	}
 
@@ -387,116 +383,5 @@ export class ModLoader {
 			this.status.outerHTML = '';
 			this.overlay.outerHTML = '';
 		}
-	}
-
-	// -------------- DEPRECATED --------------
-
-	_isLegacy() {
-		return !semver.satisfies(this.ccVersion, '^1.1.0');
-	}
-
-	_initializeLegacy() {
-		return this._initializeTable();
-	}
-
-	_executeLegacy() {
-		this._executeMainDb();
-		this._finalizeEntries(this.table.entries);
-	}
-
-	/**
-	 * Sets up all global objects from ccloader in the game window
-	 */
-	_setupLegacyGamewindow() {
-		Object.assign(this._getGameWindow(), {
-			reloadTables: () => this.reloadTables(),
-			getEntry: name => this._getGameWindow().entries[name],
-			getEntryName: value =>
-				Object.keys(this._getGameWindow().entries)
-					.find(key => this._getGameWindow().entries[key] === value)
-		});
-	}
-
-	/**
-	 * Reloads all definitions
-	 * @deprecated
-	 */
-	async reloadTables() {
-		this.modTables = {};
-		this._createTable(await this.filemanager.getTableName());
-		this.table.execute(this._getGameWindow(), this._getGameWindow());
-	}
-
-	/**
-	 * Loads a cached table if available and creates a new one otherwise
-	 * @deprecated
-	 */
-	async _initializeTable() {
-		if (this._isLegacy()) {
-			const tableName = await this.filemanager.getTableName();
-			if (this.filemanager.tableExists(tableName)) {
-				await this._loadTable(tableName);
-			} else {
-				await this._createTable(tableName);
-			}
-		} else {
-			await this._loadTable('final.table');
-		}
-	}
-
-	/**
-	 * Creates the table from the definitions.db. It will also generate a cached table if possible.
-	 * @param {string} tableName
-	 * @deprecated
-	 */
-	async _createTable(tableName) {
-		this._setStatus('Initializing Mapping');
-		console.log('Reading files...');
-		const jscode = await this.filemanager.getResourceAsync('assets/js/game.compiled.js');
-		const dbtext = await this.filemanager.getResourceAsync('ccloader/data/definitions.db');
-
-		try {
-			const dbdef = JSON.parse(dbtext);
-			console.log('Parsing...');
-			this.acorn.parse(jscode);
-			console.log('Analysing...');
-			this.table = this.acorn.analyse(dbdef);
-			console.log('Writing...');
-			await this.filemanager.saveTable(tableName, this.table);
-			console.log('Finished!');
-		} catch (e) {
-			console.error('Could not load definitions.', e);
-		}
-	}
-
-	/**
-	 * Loads the cached table
-	 * @param {string} tableName
-	 * @deprecated
-	 */
-	async _loadTable(tableName) {
-		const hash = this._isLegacy() ? await this.filemanager.getDefintionHash() : 'final';
-		this.table = await this.filemanager.loadTable(tableName, hash);
-		if(!this.table) {
-			this._createTable(tableName);
-		}
-	}
-
-	/**
-	 * @param {{[key: string]: string}} entries
-	 * @deprecated
-	 */
-	_finalizeEntries(entries) {
-		Object.defineProperty(this._getGameWindow(), 'entries', {
-			value : Object.freeze(entries),
-			writable : false
-		});
-	}
-
-	/**
-	 * @deprecated
-	 */
-	_executeMainDb() {
-		this.table.execute(this._getGameWindow(), this._getGameWindow());
 	}
 }

@@ -1,5 +1,3 @@
-import { Db } from './db.js';
-
 const fs = require('fs');
 const path = require('path');
 
@@ -40,7 +38,7 @@ export class Filemanager {
 	 * @param {string} file
 	 * @param {boolean} isModule
 	 */
-	loadMod(file, isModule){
+	loadMod(file, isModule) {
 		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
 	}
 
@@ -48,7 +46,7 @@ export class Filemanager {
 	 *
 	 * @param {string} folder
 	 */
-	getAllModsFiles(folder){
+	getAllModsFiles(folder) {
 		const subs = this._getFolders(folder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
 	}
@@ -66,7 +64,7 @@ export class Filemanager {
 	 * @param {string} resource
 	 * @returns {Promise<string>}
 	 */
-	async getResourceAsync(resource){
+	async getResourceAsync(resource) {
 		resource = resource.replace(/\\/g, '/');
 		if (resource.startsWith('assets/') || resource.startsWith('ccloader/')) {
 			resource = '/' + resource;
@@ -128,7 +126,7 @@ export class Filemanager {
 			//Do not await update since the worker only performs a simple task. Even if there is a bugfix it should be enough to not crash. 
 			currentRegistration.update();
 		} else {
-			await window.navigator.serviceWorker.register(path, {updateViaCache: 'none'});
+			await window.navigator.serviceWorker.register(path, { updateViaCache: 'none' });
 		}
 
 		if (!window.navigator.serviceWorker.controller || window.navigator.serviceWorker.controller.state !== 'activated') {
@@ -155,15 +153,15 @@ export class Filemanager {
 	 * @param {string} folder
 	 */
 	_getFolders(folder) {
-		if(!folder)
+		if (!folder)
 			folder = 'assets/mods/';
 
-		if(isLocal) {
+		if (isLocal) {
 			return this._getLocalFolders(folder);
 		} else {
 			var results = [];
-			for(var i in this.modList){
-				if(this._resourceExists(folder + this.modList[i])){
+			for (var i in this.modList) {
+				if (this._resourceExists(folder + this.modList[i])) {
 					results.push(folder + this.modList[i]);
 				}
 			}
@@ -176,16 +174,16 @@ export class Filemanager {
 	 * @param {string?} folder
 	 * @param {string?} ending
 	 */
-	_getResourcesInFolder(folder, ending){
-		if(!folder)
+	_getResourcesInFolder(folder, ending) {
+		if (!folder)
 			folder = 'assets/mods/';
 
-		if(isLocal) {
+		if (isLocal) {
 			return this._getResoucesInLocalFolder(folder, ending);
 		} else if (folder.endsWith('mods/')) {
 			var results = [];
-			for(var i in this.modList){
-				if(this._resourceExists(folder + this.modList[i] + ending)){
+			for (var i in this.modList) {
+				if (this._resourceExists(folder + this.modList[i] + ending)) {
 					results.push(folder + this.modList[i] + ending);
 				}
 			}
@@ -268,9 +266,9 @@ export class Filemanager {
 		const filePath = path.join(dir, file);
 
 		try {
-			if(await this._isDirectoryAsync(filePath)){
+			if (await this._isDirectoryAsync(filePath)) {
 				return await this.findFiles(filePath, endings);
-			} else  if (!endings || endings.some(ending => filePath.endsWith(ending))) {
+			} else if (!endings || endings.some(ending => filePath.endsWith(ending))) {
 				return [filePath.substr(7).replace(/\\/g, '/')];
 			}
 			return [];
@@ -283,21 +281,21 @@ export class Filemanager {
 	 *
 	 * @param {string} resource
 	 */
-	_resourceExists(resource){
-		if(isLocal){
-			try{
+	_resourceExists(resource) {
+		if (isLocal) {
+			try {
 				fs.statSync(resource);
 				return true;
-			} catch(e) {
+			} catch (e) {
 				return false;
 			}
 		} else {
-			try{
+			try {
 				const req = new XMLHttpRequest();
 				req.open('HEAD', '/' + resource, false);
 				req.send();
 				return req.status != 404;
-			}catch(e){
+			} catch (e) {
 				return false;
 			}
 		}
@@ -320,7 +318,7 @@ export class Filemanager {
 	 * @param {string} type
 	 * @returns {Promise<void>}
 	 */
-	_loadScript(url, doc, type){
+	_loadScript(url, doc, type) {
 		if (!type) {
 			type = 'text/javascript';
 		}
@@ -344,8 +342,8 @@ export class Filemanager {
 		/** @type {string[]} */
 		let results = [];
 
-		if(isLocal) {
-			try{
+		if (isLocal) {
+			try {
 				fs.readdirSync(folder).forEach(file => {
 					try {
 						file = path.join(folder, file);
@@ -353,9 +351,9 @@ export class Filemanager {
 						if (!this._isDirectory(file) && file.endsWith(ending)) {
 							results.push(file);
 						}
-					} catch(e) { }
+					} catch (e) { }
 				});
-			} catch(e) { }
+			} catch (e) { }
 		}
 
 		return results;
@@ -369,12 +367,12 @@ export class Filemanager {
 		/** @type {string[]} */
 		let results = [];
 
-		if(isLocal) {
-			try{
+		if (isLocal) {
+			try {
 				return fs.readdirSync(folder)
 					.map(file => path.join(folder, file))
 					.filter(file => this._isDirectory(file));
-			} catch(e) { }
+			} catch (e) { }
 		}
 
 		return results;
@@ -385,13 +383,13 @@ export class Filemanager {
 	 * @param {string} file
 	 * @returns {boolean}
 	 */
-	_isDirectory(file){
+	_isDirectory(file) {
 		const stat = fs.statSync(file);
 		return stat && stat.isDirectory();
 	}
 
-	_createDirectories(){
-		if(isLocal){
+	_createDirectories() {
+		if (isLocal) {
 			this._createDirectory('ccloader/data/assets/mods');
 		}
 	}
@@ -400,12 +398,12 @@ export class Filemanager {
 	 *
 	 * @param {string} dir
 	 */
-	_createDirectory(dir){
+	_createDirectory(dir) {
 		if (isBrowser) {
 			return;
 		}
 
-		if(fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+		if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
 			return;
 		}
 
@@ -413,96 +411,5 @@ export class Filemanager {
 		this._createDirectory(parent);
 
 		fs.mkdirSync(dir);
-	}
-
-
-	// -------------- DEPRECATED --------------
-
-	/**
-	 * @deprecated
-	 */
-	getTableName(){
-		return this._getHash('assets/js/game.compiled.js');
-	}
-
-	/**
-	 * @deprecated
-	 */
-	getDefintionHash(){
-		return this._getHash('ccloader/data/definitions.db');
-	}
-
-	/**
-	 *
-	 * @param {string} table
-	 * @deprecated
-	 */
-	tableExists(table){
-		if(!table)
-			return false;
-
-		return this._resourceExists('ccloader/data/' + table);
-	}
-
-	/**
-	 *
-	 * @param {string} tableName
-	 * @param {Db} table
-	 * @param {string?} hash
-	 * @returns {void}
-	 * @deprecated
-	 */
-	async saveTable(tableName, table, hash){
-		if(!hash){
-			return await this.saveTable(tableName, table, await this.getDefintionHash());
-		}
-
-		if(isLocal) {
-			try {
-				this._createDirectory(path.dirname('ccloader/data/' + tableName));
-			} catch(e) {}
-			table.hash = hash;
-			fs.writeFileSync('ccloader/data/' + tableName, JSON.stringify(table), 'utf-8');
-		}
-	}
-
-	/**
-	 *
-	 * @param {string} tableName
-	 * @param {string} hash
-	 * @returns {Db | undefined}
-	 * @deprecated
-	 */
-	async loadTable(tableName, hash){
-		const text = await this.getResourceAsync('ccloader/data/' + tableName);
-		if(!text) {
-			return undefined;
-		}
-
-		try {
-			const json = JSON.parse(text);
-			const table = new Db();
-
-			if(!json || !json.hash)
-				return undefined;
-
-			if(hash && hash != json.hash)
-				return undefined;
-
-			table.load(json);
-			return table;
-		} catch (e) {
-			console.error('Could not load definitions: ' + tableName, e);
-		}
-	}
-
-	/**
-	 *
-	 * @param {string} file
-	 * @returns {string}
-	 * @deprecated
-	 */
-	async _getHash(file) {
-		return Crypto.MD5(this.getResourceAsync(file)) + '.table';
 	}
 }
