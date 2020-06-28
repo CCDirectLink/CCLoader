@@ -3,8 +3,9 @@
 !mods.json
 !.gitignore
 !ccloader/
-ccloader/data/
-!ccloader/data/definitions.db
-!ccloader/data/final.table
+!assets/
+assets/*
+!assets/mods/
+assets/mods/*
 !assets/mods/simplify/
 !assets/mods/ccloader-version-display/
