@@ -18,6 +18,7 @@ export class Loader {
 		const code = await this._loadEntrypoint();
 		this.doc = this._parseEntrypoint(code);
 		this._insertBase();
+		this._insertOverlay();
 		this.postloadPoint = this._findGame();
 	}
 
@@ -29,10 +30,9 @@ export class Loader {
 
 	/**
 	 * Returns a promise that resolves when the postload point is reached.
-	 * @param {HTMLIFrameElement} frame
 	 * @returns {Promise<void>}
 	 */
-	startGame(frame) {
+	startGame() {
 		return new Promise((resolve) => {
 			Object.assign(window, {
 				postload: resolve,
@@ -40,30 +40,48 @@ export class Loader {
 
 			const hook = this._createScript('window.parent.postload()');
 			this._insertAfter(hook, this.postloadPoint);
-			this._hookDOM(frame);
-			this._startGame(frame);
+			this._hookDOM();
+			this._startGame();
 		});
 	}
 
 	/**
 	 * Returns a promise that resolves when the postload point is reached.
-	 * @param {HTMLIFrameElement} frame
 	 */
-	continue(frame) {
-		this.currentBody = frame.contentDocument.lastChild.lastChild; //Actual body; bypasses document.body hook
-		if (frame.contentWindow['ig']['_DOMReady']) {
-			frame.contentWindow['ig']['_DOMReady']();
+	continue() {
+		this.currentBody = document.lastChild.lastChild; //Actual body; bypasses document.body hook
+		if (window['ig']['_DOMReady']) {
+			window['ig']['_DOMReady']();
 		}
 	}
 
 	/**
-	 *
-	 * @param {HTMLIFrameElement} frame
+	 * Turns the status overlay invisible.
 	 */
-	_startGame(frame) {
-		frame.contentDocument.open();
-		frame.contentDocument.write(this.doc.documentElement.outerHTML);
-		frame.contentDocument.close();
+	removeOverlay() {
+		const overlay = document.getElementById('overlay');
+		const status = document.getElementById('status');
+
+		status.style.visibility = 'hidden';
+		overlay.style.visibility = 'hidden';
+	}
+
+	/**
+	 * Displays the given status in the overlay.
+	 * @param {string} text 
+	 */
+	setStatus(text) {
+		const status = document.getElementById('status');
+		const virtStatus = this.doc.getElementById('status');
+
+		status.innerText = text;
+		virtStatus.innerText = text;
+	}
+
+	_startGame() {
+		document.open();
+		document.write(this.doc.documentElement.outerHTML);
+		document.close();
 	}
 
 
@@ -89,6 +107,38 @@ export class Loader {
 
 	_insertBase() {
 		this.doc.head.insertBefore(this.getBase(), this.doc.head.firstChild);
+	}
+
+	_insertOverlay() {
+		/*
+		<link rel="stylesheet" href="index.css">
+
+		<div id="overlay"></div>
+		<h1 id="status" class="title">Initializing CCLoader</h1>
+		<div id="ui" class="ui"></div>
+		**/
+
+		const style = this.doc.createElement('link');
+		style.rel = 'stylesheet';
+		style.href = '../ccloader/index.css';
+		this.doc.head.appendChild(style);
+
+		const overlayDiv = this.doc.createElement('div');
+		overlayDiv.id = 'overlay';
+		this.doc.body.appendChild(overlayDiv);
+		this.overlay = overlayDiv;
+
+		const status = this.doc.createElement('h1');
+		status.id = 'status';
+		status.className = 'title';
+		status.innerText = 'Initializing CCLoader';
+		this.doc.body.appendChild(status);
+		this.status = status;
+
+		const uiDiv = this.doc.createElement('div');
+		uiDiv.id = 'ui';
+		uiDiv.className = 'ui';
+		this.doc.body.appendChild(uiDiv);
 	}
 
 	/**
@@ -121,11 +171,10 @@ export class Loader {
 
 	/**
 	 *
-	 * @param {HTMLIFrameElement} frame
 	 */
-	_hookDOM(frame) {
+	_hookDOM() {
 		this.currentBody = undefined;
-		Object.defineProperty(frame.contentDocument, 'body', {
+		Object.defineProperty(document, 'body', {
 			get: () => {
 				return this.currentBody;
 			},

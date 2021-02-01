@@ -9,7 +9,6 @@ export class Mod {
 	constructor(modloader, file){
 		this.file = file;
 		this.filemanager = modloader.filemanager;
-		this.window = modloader._getGameWindow();
 
 		this._loadManifest();
 	}
@@ -159,11 +158,11 @@ export class Mod {
 
 
 	async _loadPlugin() {
-		this.window._tmp = this.plugin;
-		const module = await this.window.eval.bind(this)(`
+		window._tmp = this.plugin;
+		const module = await window.eval.bind(this)(`
 			import('../../assets/' + window._tmp);
 		`);
-		delete this.window._tmp;
+		delete window._tmp;
 
 		const plugin = module.default;
 		if (!plugin || !plugin.prototype) {

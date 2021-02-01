@@ -1,26 +1,17 @@
-body {
+html, body {
     background-color: #000;
-    font-family: monospace;
-}
-
-#frame {
-    position: absolute;
-    display: block;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
+    font-size: inherit !important;
 }
 
 .title {
     position: absolute;
     text-align: center;
     left: 0;
-    bottom: 4em;
-    font-size: 2em;
+    bottom: 4rem;
+    font-size: 2rem;
     width: 100%;
     color: #FFF;
+    font-family: monospace;
 }
 
 .ui {

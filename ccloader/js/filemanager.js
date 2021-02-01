@@ -39,7 +39,7 @@ export class Filemanager {
 	 * @param {boolean} isModule
 	 */
 	loadMod(file, isModule) {
-		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
+		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
 	/**
