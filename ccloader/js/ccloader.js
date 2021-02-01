@@ -1,9 +1,9 @@
 import { Filemanager } from './filemanager.js';
-import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
+import { Package } from './package.js';
 
 const CCLOADER_VERSION = '2.19.0';
 
@@ -117,6 +117,7 @@ export class ModLoader {
 	 */
 	async _loadModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
+		const ccmodFiles = this.filemanager.getAllCCModFiles();
 		const packedMods = this.filemanager.getAllModPackages();
 
 		if (packedMods.length > 0) {
@@ -127,12 +128,23 @@ export class ModLoader {
 			}
 		}
 
-		this.mods = [];
+		/** @type {Package[]} */
+		const packages = [];
 		for (const modFile of modFiles) {
-			this.mods.push(new Mod(this, modFile, false));
+			packages.push(new Package(this, modFile));
+		}
+		for (const ccmodFile of ccmodFiles) {
+			const pkg = new Package(this, ccmodFile, true);
+
+			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
+			if (existing) {
+				packages.splice(existing, 1);
+			}
+
+			packages.push(pkg);
 		}
 
-		return Promise.all(this.mods.map((mod) => mod.onload(this.mods)));
+		this.mods = await Promise.all(packages.map(pkg => pkg.load()));
 	}
 
 	/**

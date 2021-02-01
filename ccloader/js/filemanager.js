@@ -55,6 +55,15 @@ export class Filemanager {
 	 *
 	 * @param {string} folder
 	 */
+	getAllCCModFiles(folder) {
+		const subs = this._getFolders(folder);
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'ccmod.json')));
+	}
+
+	/**
+	 *
+	 * @param {string} folder
+	 */
 	getAllModPackages(folder) {
 		return this._getResourcesInFolder(folder, '.ccmod');
 	}
