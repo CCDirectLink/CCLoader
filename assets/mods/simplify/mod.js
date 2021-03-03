@@ -434,7 +434,7 @@
 				}
 
 				const optionName = 'modEnabled-' + mod.name.toLowerCase();
-				const modOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
+				const modOption = this.options.addEntry(optionName, 'MOD', true, tab, undefined, true);
 				// checkboxRightAlign is a custom field, see _hookRow
 				modOption.checkboxRightAlign = true;
 
@@ -442,12 +442,13 @@
 				const description = infoBoxSupported
 					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
+				let icon = "";
+				if (mod.icon && mod.icon["24x24"]) {
+					icon = "/" + mod.baseDirectory + "/" + mod.icon["24x24"];
+				}
 
-				ig.lang.labels.sc.gui.options[optionName] = {name, description};
-
-				
 				const lang = ig.lang.labels.sc.gui.options;
-				lang[optionName] = {name, description};
+				lang[optionName] = {name, icon, description};
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
@@ -568,6 +569,7 @@
 
 			this._getVarNames()
 				.then(() => {
+					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();
 					this._hookInfoBox();
@@ -744,8 +746,27 @@
 				original.apply(this, arguments);
 				window.simplify.options._loadTabs(this);
 			};
+
+			// only supporting non obfuscated versions 
+			if (!sc.OptionsTabBox) return;
+			sc.OptionsTabBox.inject({
+				_createOptionList: function () {
+					this.parent(...arguments);
+					this.rows
+						.filter(e => e.option && e.option.type === 'MOD')
+						.forEach(mod => mod.setPos(11, 48));
+				}
+			});
 		}
 
+		_addModOption() {
+			// I assume these do not exist in the obfuscated version
+			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
+
+			sc.OPTION_TYPES.MOD = 7;
+			sc.OPTION_GUIS[sc.OPTION_TYPES.MOD] = sc.OPTION_GUIS[sc.OPTION_TYPES.CHECKBOX];
+		}
+		
 		_hookRow() {
 			// stop if this CC version still has obfuscated code
 			if (!sc.OptionRow) return;
@@ -755,19 +776,56 @@
 
 			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
 			const original = sc.OptionRow.prototype.init;
-			sc.OptionRow.prototype.init = function() {
-				original.apply(this, arguments);
-				if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
-					this.typeGui.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
-					const additionalWidth = this.typeGui.hook.size.x - this.typeGui.button.hook.size.x;
-					const lineHook = this.hook.children[1];
-					const slopeHook = this.hook.children[2];
-					lineHook.size.x += additionalWidth;
-					slopeHook.pos.x += additionalWidth;
+
+			sc.OptionRow.prototype.defaultModIcon = new ig.ImageGui(new ig.Image('media/gui/menu.png'), 536, 160, 23, 23);
+			
+			sc.OptionRow.prototype._addModIcon = function(optionName) {
+				debugger;
+				const iconPath = ig.lang.get('sc.gui.options.' + optionName + '.icon');
+				if (iconPath) {
+					const img = new ig.Image(iconPath);
+					img.addLoadListener({
+						onLoadableComplete: function (success) {
+						let icon = success ? 
+										new ig.ImageGui(img, 0, 0, 24, 24) : 
+										this.defaultModIcon;
+						icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
+						icon.setPos(0, 5);
+						this.addChildGui(icon);
+						this.icon = icon;
+						}.bind(this)
+					});
+				} else {
+					const icon = this.defaultModIcon;
+					icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
+					icon.setPos(0, 5);
+					this.addChildGui(icon);
+					this.icon = icon;
+				}
+			};
+
+			sc.OptionRow.prototype.init = function(optionName, row, rowButtonGroup, isLocal, width) {
+				if (sc.OPTIONS_DEFINITION[optionName].type !== 'MOD') {
+					original.apply(this, arguments);
+				} else {
+					original.apply(this, [optionName, row, rowButtonGroup, isLocal, width - 24, 28]);
+					this.nameGui.setPos(27, 6);
+					this._addModIcon(optionName);
+				}
+				if (this.option.checkboxRightAlign) {
+					if (this.option.type === 'CHECKBOX' || this.option.type === 'MOD') {
+						this.typeGui.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
+						const additionalWidth = this.typeGui.hook.size.x - this.typeGui.button.hook.size.x;
+						const lineHook = this.hook.children[1];
+						const slopeHook = this.hook.children[2];
+						lineHook.size.x += additionalWidth;
+						slopeHook.pos.x += additionalWidth;
+					}
 				}
 			};
 		}
 
+			
 		_hookInfoBox() {
 			// the comments are basically the same as in _hookRow
 			if (!sc.OptionInfoBox) return;
