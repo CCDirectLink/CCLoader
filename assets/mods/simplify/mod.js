@@ -442,9 +442,9 @@
 				const description = infoBoxSupported
 					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
-				let icon = "";
-				if (mod.icon && mod.icon["24x24"]) {
-					icon = "/" + mod.baseDirectory + "/" + mod.icon["24x24"];
+				let icon = '';
+				if (mod.icon && mod.icon['24x24']) {
+					icon = '/' + mod.baseDirectory + '/' + mod.icon['24x24'];
 				}
 
 				const lang = ig.lang.labels.sc.gui.options;
@@ -770,7 +770,7 @@
 		_hookRow() {
 			// stop if this CC version still has obfuscated code
 			if (!sc.OptionRow) return;
-			// if speedrunners absolutely want the redesigned "Mods" menu AND someone
+			// if speedrunners absolutely want the redesigned 'Mods' menu AND someone
 			// is willing to generate symbol definitions for the following code -
 			// please help me
 
@@ -780,19 +780,18 @@
 			sc.OptionRow.prototype.defaultModIcon = new ig.ImageGui(new ig.Image('media/gui/menu.png'), 536, 160, 23, 23);
 			
 			sc.OptionRow.prototype._addModIcon = function(optionName) {
-				debugger;
 				const iconPath = ig.lang.get('sc.gui.options.' + optionName + '.icon');
 				if (iconPath) {
 					const img = new ig.Image(iconPath);
 					img.addLoadListener({
 						onLoadableComplete: function (success) {
-						let icon = success ? 
-										new ig.ImageGui(img, 0, 0, 24, 24) : 
-										this.defaultModIcon;
-						icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
-						icon.setPos(0, 5);
-						this.addChildGui(icon);
-						this.icon = icon;
+							let icon = success ? 
+								new ig.ImageGui(img, 0, 0, 24, 24) : 
+								this.defaultModIcon;
+							icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
+							icon.setPos(0, 5);
+							this.addChildGui(icon);
+							this.icon = icon;
 						}.bind(this)
 					});
 				} else {
