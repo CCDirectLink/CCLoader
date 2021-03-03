@@ -443,8 +443,8 @@
 					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
 				let icon = '';
-				if (mod.icon && mod.icon['24x24']) {
-					icon = '/' + mod.baseDirectory + '/' + mod.icon['24x24'];
+				if (mod.icons && mod.icons['24']) {
+					icon = '/' + mod.baseDirectory + '/' + mod.icons['24'];
 				}
 
 				const lang = ig.lang.labels.sc.gui.options;
@@ -566,9 +566,10 @@
 		constructor() {
 			/** @type {{name: string, cat: number}[]} */
 			this.tabs = [];
-
+			debugger;
 			this._getVarNames()
 				.then(() => {
+					debugger;
 					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();

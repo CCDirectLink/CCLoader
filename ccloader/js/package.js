@@ -30,7 +30,7 @@ export class Package {
 		const result = new Mod(this.modloader);
 		const file = this.file;
 
-		/** @type {{name: string, displayName?: string, ccmodHumanName?: string, version?: string, description?: string, icon?: {"24x24": string}, module?: boolean, hidden?: boolean, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+		/** @type {{name: string, displayName?: string, ccmodHumanName?: string, version?: string, description?: string, icons?: {"24": string}, module?: boolean, hidden?: boolean, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 		let manifest;
 		try {
 			manifest = await this._parse(file);
@@ -47,7 +47,7 @@ export class Package {
 		result.name = manifest.name || this._getModNameFromFile(file);
 		result.displayName = manifest.displayName || manifest.ccmodHumanName;
 		result.description = manifest.description;
-		result.icon = manifest.icon;
+		result.icons = manifest.icons;
 		result.version = manifest.version;
 		result.module = !!manifest.module;
 		result.hidden = !!manifest.hidden;
@@ -90,7 +90,7 @@ export class Package {
 		result.name = manifest.id || this._getModNameFromFile(file);
 		result.displayName = manifest.title && manifest.title['en_US'] || manifest.title;
 		result.description = manifest.description && manifest.description['en_US'] || manifest.description;
-		result.icon = manifest.icon;
+		result.icons = manifest.icons;
 		result.version = manifest.version || '0.0.0';
 		result.module = manifest.module === undefined || !!manifest.module;
 		result.hidden = false;
