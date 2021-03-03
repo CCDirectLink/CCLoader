@@ -754,7 +754,7 @@
 					this.parent(...arguments);
 					this.rows
 						.filter(e => e.option && e.option.type === 'MOD')
-						.forEach(mod => mod.setPos(11, 48));
+						.forEach(mod => mod.setPos(11, mod.hook.pos.y));
 				}
 			});
 		}
@@ -763,7 +763,7 @@
 			// I assume these do not exist in the obfuscated version
 			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
 
-			sc.OPTION_TYPES.MOD = 7;
+			sc.OPTION_TYPES.MOD = Object.keys(sc.OPTION_TYPES).length;
 			sc.OPTION_GUIS[sc.OPTION_TYPES.MOD] = sc.OPTION_GUIS[sc.OPTION_TYPES.CHECKBOX];
 		}
 		
@@ -784,7 +784,7 @@
 				if (iconPath) {
 					const img = new ig.Image(iconPath);
 					img.addLoadListener({
-						onLoadableComplete: function (success) {
+						onLoadableComplete: (success) => {
 							let icon = success ? 
 								new ig.ImageGui(img, 0, 0, 24, 24) : 
 								this.defaultModIcon;
@@ -792,7 +792,7 @@
 							icon.setPos(0, 5);
 							this.addChildGui(icon);
 							this.icon = icon;
-						}.bind(this)
+						}
 					});
 				} else {
 					const icon = this.defaultModIcon;
