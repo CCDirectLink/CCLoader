@@ -137,7 +137,7 @@ export class ModLoader {
 			const pkg = new Package(this, ccmodFile, true);
 
 			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
-			if (existing) {
+			if (existing > -1) {
 				packages.splice(existing, 1);
 			}
 
