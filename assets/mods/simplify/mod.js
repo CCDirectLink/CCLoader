@@ -791,7 +791,6 @@
 			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
 			sc.OptionRow.inject({
 				iconGui: null,
-				iconGfx: null,
 				iconSettings: null,
 		
 				init(...args) {
