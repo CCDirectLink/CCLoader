@@ -455,7 +455,7 @@
 					sizeY: 23,
 				};
 
-				if (mod.icons && typeof mod.icons['24'] == 'string') {
+				if (mod.icons && typeof mod.icons['24'] === 'string') {
 					modOption.icon = {
 						path: `/${mod.baseDirectory}/${mod.icons['24']}`,
 						offsetX: 0,
@@ -755,15 +755,12 @@
 		}
 
 		_hookTabBox() {
-			const original = cc.sc.OptionsTabBox.prototype[entries.init];
-			cc.sc.OptionsTabBox.prototype[entries.init] = function(){
-				original.apply(this, arguments);
-				window.simplify.options._loadTabs(this);
-			};
-
-			// only supporting non obfuscated versions 
 			if (!sc.OptionsTabBox) return;
 			sc.OptionsTabBox.inject({
+				init(...args) {
+					this.parent(...args);
+					window.simplify.options._loadTabs(this);
+				},
 				_createOptionList: function () {
 					this.parent(...arguments);
 					this.rows
@@ -774,7 +771,6 @@
 		}
 
 		_addModOption() {
-			// I assume these do not exist in the obfuscated version
 			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
 
 			sc.OPTION_TYPES.MOD = Object.keys(sc.OPTION_TYPES).length;
@@ -782,13 +778,8 @@
 		}
 		
 		_hookRow() {
-			// stop if this CC version still has obfuscated code
 			if (!sc.OptionRow) return;
-			// if speedrunners absolutely want the redesigned 'Mods' menu AND someone
-			// is willing to generate symbol definitions for the following code -
-			// please help me
-
-			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
+			
 			sc.OptionRow.inject({
 				iconGui: null,
 				iconSettings: null,
@@ -829,7 +820,6 @@
 
 			
 		_hookInfoBox() {
-			// the comments are basically the same as in _hookRow
 			if (!sc.OptionInfoBox) return;
 
 			// add marginBottom field to options in sc.OPTIONS_DEFINITION
