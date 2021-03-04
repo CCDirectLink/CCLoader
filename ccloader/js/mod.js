@@ -11,6 +11,7 @@ export class Mod {
 		this.name = '';
 		this.displayName = '';
 		this.description = '';
+		this.icons = {};
 		this.version = '0.0.0';
 		this.module = false;
 		this.hidden = false;
