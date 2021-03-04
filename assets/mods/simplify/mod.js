@@ -434,7 +434,7 @@
 				}
 
 				const optionName = 'modEnabled-' + mod.name.toLowerCase();
-				const modOption = this.options.addEntry(optionName, 'MOD', true, tab, undefined, true);
+				const modOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 				// checkboxRightAlign is a custom field, see _hookRow
 				modOption.checkboxRightAlign = true;
 
@@ -442,13 +442,28 @@
 				const description = infoBoxSupported
 					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
-				let icon = '';
-				if (mod.icons && mod.icons['24']) {
-					icon = '/' + mod.baseDirectory + '/' + mod.icons['24'];
-				}
-
+				
 				const lang = ig.lang.labels.sc.gui.options;
-				lang[optionName] = {name, icon, description};
+				lang[optionName] = {name, description};
+
+				// default icon
+				modOption.icon = {
+					path: 'media/gui/menu.png',
+					offsetX: 536,
+					offsetY: 160,
+					sizeX: 23,
+					sizeY: 23,
+				};
+
+				if (mod.icons && typeof mod.icons['24'] == 'string') {
+					modOption.icon = {
+						path: '/' + mod.baseDirectory + '/' + mod.icons['24'],
+						offsetX: 0,
+						offsetY: 0,
+						sizeX: 24,
+						sizeY: 24,
+					};
+				}
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
@@ -566,10 +581,8 @@
 		constructor() {
 			/** @type {{name: string, cat: number}[]} */
 			this.tabs = [];
-			debugger;
 			this._getVarNames()
 				.then(() => {
-					debugger;
 					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();
@@ -776,53 +789,57 @@
 			// please help me
 
 			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
-			const original = sc.OptionRow.prototype.init;
-
-			sc.OptionRow.prototype.defaultModIcon = new ig.ImageGui(new ig.Image('media/gui/menu.png'), 536, 160, 23, 23);
+			sc.OptionRow.inject({
+				iconGui: null,
+				iconGfx: null,
+				iconSettings: null,
+		
+				init(...args) {
+					this.parent(...args);
 			
-			sc.OptionRow.prototype._addModIcon = function(optionName) {
-				const iconPath = ig.lang.get('sc.gui.options.' + optionName + '.icon');
-				if (iconPath) {
-					const img = new ig.Image(iconPath);
-					img.addLoadListener({
-						onLoadableComplete: (success) => {
-							let icon = success ? 
-								new ig.ImageGui(img, 0, 0, 24, 24) : 
-								this.defaultModIcon;
-							icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
-							icon.setPos(0, 5);
-							this.addChildGui(icon);
-							this.icon = icon;
-						}
-					});
-				} else {
-					const icon = this.defaultModIcon;
-					icon.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
-					icon.setPos(0, 5);
-					this.addChildGui(icon);
-					this.icon = icon;
-				}
-			};
+					let lineHook = this.hook.children[1];
 
-			sc.OptionRow.prototype.init = function(optionName, row, rowButtonGroup, isLocal, width) {
-				if (sc.OPTIONS_DEFINITION[optionName].type !== 'MOD') {
-					original.apply(this, arguments);
-				} else {
-					original.apply(this, [optionName, row, rowButtonGroup, isLocal, width - 24, 28]);
-					this.nameGui.setPos(27, 6);
-					this._addModIcon(optionName);
-				}
-				if (this.option.checkboxRightAlign) {
-					if (this.option.type === 'CHECKBOX' || this.option.type === 'MOD') {
-						this.typeGui.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
-						const additionalWidth = this.typeGui.hook.size.x - this.typeGui.button.hook.size.x;
+					if (this.option.icon != null) {
+						let { icon } = this.option;
+						this.iconSettings = icon;
+						this.iconGui = new ig.ImageGui(
+							new ig.Image(icon.path),
+							icon.offsetX,
+							icon.offsetY,
+							icon.sizeX,
+							icon.sizeY,
+						);
+						this.iconGui.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
+						this.iconGui.setPos(this.nameGui.hook.pos.x, lineHook.pos.y + 2);
+						this.addChildGui(this.iconGui);
+						this.nameGui.hook.pos.x += this.iconGui.hook.pos.x + this.iconGui.hook.size.x;
+					}
+			
+					if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
+						let checkbox = this.typeGui;
+						checkbox.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
+						let additionalWidth = checkbox.hook.size.x - checkbox.button.hook.size.x;
 						const lineHook = this.hook.children[1];
 						const slopeHook = this.hook.children[2];
 						lineHook.size.x += additionalWidth;
 						slopeHook.pos.x += additionalWidth;
 					}
-				}
-			};
+				},
+			
+				updateDrawables(renderer) {
+					this.parent(renderer);
+					if (this.iconGfx == null || this.iconSettings == null) return;
+					renderer.addGfx(
+						this.iconGfx,
+						0,
+						5,
+						this.iconSettings.offsetX || 0,
+						this.iconSettings.offsetY || 0,
+						this.iconSettings.sizeX || this.iconGfx.width,
+						this.iconSettings.sizeY || this.iconGfx.height,
+					);
+				},
+			});
 		}
 
 			
