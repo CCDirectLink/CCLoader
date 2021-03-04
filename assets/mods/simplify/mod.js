@@ -457,7 +457,7 @@
 
 				if (mod.icons && typeof mod.icons['24'] == 'string') {
 					modOption.icon = {
-						path: '/' + mod.baseDirectory + '/' + mod.icons['24'],
+						path: `/${mod.baseDirectory}/${mod.icons['24']}`,
 						offsetX: 0,
 						offsetY: 0,
 						sizeX: 24,
