@@ -30,7 +30,7 @@ export class Package {
 		const result = new Mod(this.modloader);
 		const file = this.file;
 
-		/** @type {{name: string, displayName?: string, ccmodHumanName?: string, version?: string, description?: string, icons?: {"24": string}, module?: boolean, hidden?: boolean, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
+		/** @type {{name: string, displayName?: string, ccmodHumanName?: string, version?: string, description?: string, icons?: {[size: string]: string}, module?: boolean, hidden?: boolean, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
 		let manifest;
 		try {
 			manifest = await this._parse(file);
