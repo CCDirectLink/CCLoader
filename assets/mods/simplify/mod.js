@@ -824,20 +824,6 @@
 						slopeHook.pos.x += additionalWidth;
 					}
 				},
-			
-				updateDrawables(renderer) {
-					this.parent(renderer);
-					if (this.iconGfx == null || this.iconSettings == null) return;
-					renderer.addGfx(
-						this.iconGfx,
-						0,
-						5,
-						this.iconSettings.offsetX || 0,
-						this.iconSettings.offsetY || 0,
-						this.iconSettings.sizeX || this.iconGfx.width,
-						this.iconSettings.sizeY || this.iconGfx.height,
-					);
-				},
 			});
 		}
 
