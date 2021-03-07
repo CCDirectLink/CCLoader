@@ -123,9 +123,23 @@ export class ModLoader {
 		if (packedMods.length > 0) {
 			await this._initializeServiceWorker();
 			await this._loadPackedMods(packedMods);
-			for (const packed of packedMods) {
-				modFiles.push(packed.substring(0, packed.length) + '/package.json');
-			}
+			await Promise.all(packedMods.map(async packed => {
+				const path = packed.substring(0, packed.length);
+
+				const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
+				if (isCCMod) {
+					ccmodFiles.push(path + '/ccmod.json');
+					return;
+				}
+
+				const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
+				if (isPkg) {
+					modFiles.push(path + '/package.json');
+					return;
+				}
+				
+				console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
+			}));
 		}
 
 		/** @type {Package[]} */

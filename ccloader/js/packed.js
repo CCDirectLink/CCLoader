@@ -76,6 +76,17 @@ class PackedManager {
 	}
 
 	/**
+	 *
+	 * @param {string} url
+	 * @returns {Promise<boolean>}
+	 */
+	async isFile(url) {
+		const zip = await this._openZip(url);
+		const file = zip.file(this._assetPath(url));
+		return !!file;
+	}
+
+	/**
      *
      * @param {string} url
      */

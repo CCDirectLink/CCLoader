@@ -108,6 +108,23 @@ export class Filemanager {
 		}
 	}
 
+	/**
+	 * 
+	 * @param {string} file 
+	 * @returns {Promise<boolean>}
+	 */
+	async packedFileExists(file) {
+		if (!this.isPacked(file)) {
+			return false;
+		}
+		
+		return (await fetch(file, {
+			headers: {
+				'X-Cmd': 'isFile'
+			}
+		})).json();
+	}
+
 
 	/**
 	 *

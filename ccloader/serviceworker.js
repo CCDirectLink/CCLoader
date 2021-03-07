@@ -27,12 +27,17 @@ self.addEventListener('fetch', (event) => {
 				event.respondWith((async () => new Response(JSON.stringify(
 					await packedManger.getFiles(path)),
 				{status: 200}))());
-				break;
+				return;
 			case 'isDirectory':
 				event.respondWith((async () => new Response(JSON.stringify(
 					await packedManger.isDirectory(path)),
 				{status: 200}))());
-				break;
+				return;
+			case 'isFile':
+				event.respondWith((async () => new Response(JSON.stringify(
+					await packedManger.isFile(path)),
+				{status: 200}))());
+				return;
 			}
 		} catch (e) {
 			console.error('An error occured while inspecting a packed mod', e);
