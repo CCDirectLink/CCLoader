@@ -31,8 +31,9 @@ export class Mod {
 		this.dependencies = {};
 	}
 
-	load() {
-		return this._loadStage('main');
+	async load() {
+		await this._loadStage('main');
+		await this._loadPlugin('poststart');
 	}
 	loadPrestart() {
 		return this._loadStage('prestart');
