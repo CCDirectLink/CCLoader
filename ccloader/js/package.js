@@ -99,7 +99,7 @@ export class Package {
 		result.preload = this._normalizeScript(file, manifest.preload);
 		result.postload = this._normalizeScript(file, manifest.postload);
 		result.prestart = this._normalizeScript(file, manifest.prestart);
-		result.plugin = this._normalizeScript(file, manifest.main);
+		result.plugin = this._normalizeScript(file, manifest.plugin);
 
 		result.baseDirectory = this.baseDirectory;
 		result.assets = await this._findAssets(this._getBaseName(file) + '/assets/', manifest.assets);
