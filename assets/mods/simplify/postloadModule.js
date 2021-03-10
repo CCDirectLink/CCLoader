@@ -3,9 +3,6 @@ import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
 	
-	/** @type {typeof import("fs")} */
-	const fs = (!window.fs && window.require) ? require('fs') : window.fs;
-	
 	class SimplifyResources {
 		constructor() {
 			/** @type {{handler: (xhr: any, url: string) => void), filter?: string, beforeCall?: boolean}[]} */
@@ -98,25 +95,15 @@ import CustomDebugState from './lib/custom-debug-state.js';
 			const result = new Promise((resolve, reject) => {
 				path = this._stripAssets(path);
 		
-				if(window.require) {
-					fs.readFile('assets/' + path, 'utf8', (err, data) => {
-						if (err) {
-							return reject(err);
-						}
-						
-						resolve(data);
-					});
-				} else {
-					const req = new XMLHttpRequest();
-					req.open('GET', path, true);
-					req.onreadystatechange = function(){
-						if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
-							resolve(req.responseText);
-						}
-					};
-					req.onerror = err => reject(err);
-					req.send();
-				}
+				const req = new XMLHttpRequest();
+				req.open('GET', path, true);
+				req.onreadystatechange = function(){
+					if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
+						resolve(req.responseText);
+					}
+				};
+				req.onerror = err => reject(err);
+				req.send();
 			});
 	
 			if (callback || errorCb) {
