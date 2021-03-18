@@ -9,7 +9,7 @@ if (window.process) {
 }
 
 window.onload = () => {
-	const modloader = window.modloader = new ModLoader();
+	const modloader = new ModLoader();
 	modloader.startGame()
 		.then()
 		.catch(err => console.error('Something went wrong while loading the game', err));

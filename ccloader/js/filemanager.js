@@ -39,7 +39,7 @@ export class Filemanager {
 	 * @param {boolean} isModule
 	 */
 	loadMod(file, isModule) {
-		return this._loadScript(file, this.modloader.frame.contentDocument, isModule ? 'module' : 'text/javascript');
+		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
 	/**
@@ -49,6 +49,15 @@ export class Filemanager {
 	getAllModsFiles(folder) {
 		const subs = this._getFolders(folder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
+	}
+
+	/**
+	 *
+	 * @param {string} folder
+	 */
+	getAllCCModFiles(folder) {
+		const subs = this._getFolders(folder);
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'ccmod.json')));
 	}
 
 	/**
@@ -97,6 +106,23 @@ export class Filemanager {
 		} catch (e) {
 			return [];
 		}
+	}
+
+	/**
+	 * 
+	 * @param {string} file 
+	 * @returns {Promise<boolean>}
+	 */
+	async packedFileExists(file) {
+		if (!this.isPacked(file)) {
+			return false;
+		}
+		
+		return (await fetch(file, {
+			headers: {
+				'X-Cmd': 'isFile'
+			}
+		})).json();
 	}
 
 

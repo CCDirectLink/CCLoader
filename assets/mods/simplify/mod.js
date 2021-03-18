@@ -442,12 +442,28 @@
 				const description = infoBoxSupported
 					? mod.description || ' '
 					: (mod.description || 'If checked this mod is enabled.') + ' \\c[1]Needs a restart!';
-
-				ig.lang.labels.sc.gui.options[optionName] = {name, description};
-
 				
 				const lang = ig.lang.labels.sc.gui.options;
 				lang[optionName] = {name, description};
+
+				// default icon
+				modOption.icon = {
+					path: 'media/gui/menu.png',
+					offsetX: 536,
+					offsetY: 160,
+					sizeX: 23,
+					sizeY: 23,
+				};
+
+				if (mod.icons && typeof mod.icons['24'] === 'string') {
+					modOption.icon = {
+						path: `/${mod.baseDirectory}/${mod.icons['24']}`,
+						offsetX: 0,
+						offsetY: 0,
+						sizeX: 24,
+						sizeY: 24,
+					};
+				}
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
@@ -565,9 +581,9 @@
 		constructor() {
 			/** @type {{name: string, cat: number}[]} */
 			this.tabs = [];
-
 			this._getVarNames()
 				.then(() => {
+					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();
 					this._hookInfoBox();
@@ -739,37 +755,71 @@
 		}
 
 		_hookTabBox() {
-			const original = cc.sc.OptionsTabBox.prototype[entries.init];
-			cc.sc.OptionsTabBox.prototype[entries.init] = function(){
-				original.apply(this, arguments);
-				window.simplify.options._loadTabs(this);
-			};
-		}
-
-		_hookRow() {
-			// stop if this CC version still has obfuscated code
-			if (!sc.OptionRow) return;
-			// if speedrunners absolutely want the redesigned "Mods" menu AND someone
-			// is willing to generate symbol definitions for the following code -
-			// please help me
-
-			// add checkboxRightAlign field to options in sc.OPTIONS_DEFINITION
-			const original = sc.OptionRow.prototype.init;
-			sc.OptionRow.prototype.init = function() {
-				original.apply(this, arguments);
-				if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
-					this.typeGui.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
-					const additionalWidth = this.typeGui.hook.size.x - this.typeGui.button.hook.size.x;
-					const lineHook = this.hook.children[1];
-					const slopeHook = this.hook.children[2];
-					lineHook.size.x += additionalWidth;
-					slopeHook.pos.x += additionalWidth;
+			if (!sc.OptionsTabBox) return;
+			sc.OptionsTabBox.inject({
+				init(...args) {
+					this.parent(...args);
+					window.simplify.options._loadTabs(this);
+				},
+				_createOptionList: function () {
+					this.parent(...arguments);
+					this.rows
+						.filter(e => e.option && e.option.type === 'MOD')
+						.forEach(mod => mod.setPos(11, mod.hook.pos.y));
 				}
-			};
+			});
 		}
 
+		_addModOption() {
+			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
+
+			sc.OPTION_TYPES.MOD = Object.keys(sc.OPTION_TYPES).length;
+			sc.OPTION_GUIS[sc.OPTION_TYPES.MOD] = sc.OPTION_GUIS[sc.OPTION_TYPES.CHECKBOX];
+		}
+		
+		_hookRow() {
+			if (!sc.OptionRow) return;
+			
+			sc.OptionRow.inject({
+				iconGui: null,
+				iconSettings: null,
+		
+				init(...args) {
+					this.parent(...args);
+			
+					let lineHook = this.hook.children[1];
+
+					if (this.option.icon != null) {
+						let { icon } = this.option;
+						this.iconSettings = icon;
+						this.iconGui = new ig.ImageGui(
+							new ig.Image(icon.path),
+							icon.offsetX,
+							icon.offsetY,
+							icon.sizeX,
+							icon.sizeY,
+						);
+						this.iconGui.setAlign(ig.GUI_ALIGN.X_LEFT, ig.GUI_ALIGN.Y_BOTTOM);
+						this.iconGui.setPos(this.nameGui.hook.pos.x, lineHook.pos.y + 2);
+						this.addChildGui(this.iconGui);
+						this.nameGui.hook.pos.x += this.iconGui.hook.pos.x + this.iconGui.hook.size.x;
+					}
+			
+					if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
+						let checkbox = this.typeGui;
+						checkbox.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
+						let additionalWidth = checkbox.hook.size.x - checkbox.button.hook.size.x;
+						const lineHook = this.hook.children[1];
+						const slopeHook = this.hook.children[2];
+						lineHook.size.x += additionalWidth;
+						slopeHook.pos.x += additionalWidth;
+					}
+				},
+			});
+		}
+
+			
 		_hookInfoBox() {
-			// the comments are basically the same as in _hookRow
 			if (!sc.OptionInfoBox) return;
 
 			// add marginBottom field to options in sc.OPTIONS_DEFINITION

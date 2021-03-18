@@ -1,6 +1,7 @@
 /// <reference path="../../../ccloader/js/types/plugin.d.ts" />
 
 import * as compat from './compat.js';
+import './classInject.js'
 
 /**
  * @extends {ccloader.Plugin}

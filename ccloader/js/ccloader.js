@@ -1,11 +1,11 @@
 import { Filemanager } from './filemanager.js';
-import { Mod } from './mod.js';
 import { UI } from './ui.js';
 import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
+import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.19.0';
+const CCLOADER_VERSION = '2.20.0';
 
 export class ModLoader {
 	constructor() {
@@ -13,11 +13,9 @@ export class ModLoader {
 		this.ui = new UI(this);
 		this.loader = new Loader(this.filemanager);
 
-		this.frame = document.getElementById('frame');
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
 
-		this.modsLoaded = 0;
 		/** @type {Mod[]} */
 		this.mods = [];
 		/** @type {{[name: string]: string}} */
@@ -42,11 +40,11 @@ export class ModLoader {
 		await this._loadPlugins();
 		await this._executePreload();
 
-		this._setStatus('Loading Game');
-		await this.loader.startGame(this.frame); //Executes until postload
+		this.loader.setStatus('Loading Game');
+		await this.loader.startGame(); //Executes until postload
 
 		await this._executePostload();
-		this.loader.continue(this.frame);
+		this.loader.continue();
 		await this._waitForGame();
 
 		// At this point the game UI has become interactive, though the legacy
@@ -54,20 +52,20 @@ export class ModLoader {
 		// CCLoader status overlay is still visible. I think it will result in
 		// better UX if we give the user an "illusion" of interactivity before
 		// "main" is removed for good.
-		this._getGameWindow().focus();
+		window.focus();
 
 		await this._executeMain();
 
 
 		this._fireLoadEvent();
-		this._removeOverlay();
+		this.loader.removeOverlay();
 		// Re-focus the game iframe a second time because at this point CCLoader has
 		// **really** finished loading the game along with the active mods.
-		this._getGameWindow().focus();
+		window.focus();
 	}
 
 	async _initializeServiceWorker() {
-		this._serviceWorker = await this.filemanager.loadServiceWorker('serviceworker.js', this._getGameWindow());
+		this._serviceWorker = await this.filemanager.loadServiceWorker('serviceworker.js', window);
 	}
 
 	/**
@@ -86,7 +84,7 @@ export class ModLoader {
 	 * @param {string[]} packedMods
 	 */
 	async _sendPackedModNames(packedMods) {
-		const caches = this._getGameWindow().caches;
+		const caches = window.caches;
 		const keys = await caches.keys();
 		await Promise.all(keys.map(name => caches.delete(name)));
 
@@ -119,22 +117,48 @@ export class ModLoader {
 	 */
 	async _loadModPackages() {
 		const modFiles = this.filemanager.getAllModsFiles();
+		const ccmodFiles = this.filemanager.getAllCCModFiles();
 		const packedMods = this.filemanager.getAllModPackages();
 
 		if (packedMods.length > 0) {
 			await this._initializeServiceWorker();
 			await this._loadPackedMods(packedMods);
-			for (const packed of packedMods) {
-				modFiles.push(packed.substring(0, packed.length) + '/package.json');
-			}
+			await Promise.all(packedMods.map(async packed => {
+				const path = packed.substring(0, packed.length);
+
+				const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
+				if (isCCMod) {
+					ccmodFiles.push(path + '/ccmod.json');
+					return;
+				}
+
+				const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
+				if (isPkg) {
+					modFiles.push(path + '/package.json');
+					return;
+				}
+				
+				console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
+			}));
 		}
 
-		this.mods = [];
+		/** @type {Package[]} */
+		const packages = [];
 		for (const modFile of modFiles) {
-			this.mods.push(new Mod(this, modFile, false));
+			packages.push(new Package(this, modFile));
+		}
+		for (const ccmodFile of ccmodFiles) {
+			const pkg = new Package(this, ccmodFile, true);
+
+			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
+			if (existing > -1) {
+				packages.splice(existing, 1);
+			}
+
+			packages.push(pkg);
 		}
 
-		return Promise.all(this.mods.map((mod) => mod.onload(this.mods)));
+		this.mods = await Promise.all(packages.map(pkg => pkg.load()));
 	}
 
 	/**
@@ -261,8 +285,8 @@ export class ModLoader {
 	 * Pushes mods into the game window's inactiveMods and activeMods arrays and registers their versions.
 	 */
 	_registerMods() {
-		const inactiveMods = this._getGameWindow().inactiveMods = [];
-		const activeMods = this._getGameWindow().activeMods = [];
+		const inactiveMods = window.inactiveMods = [];
+		const activeMods = window.activeMods = [];
 
 		for (const mod of this.mods) {
 			if (mod.isEnabled) {
@@ -273,37 +297,29 @@ export class ModLoader {
 			}
 		}
 
-		this._getGameWindow().activeMods = Object.freeze(this._getGameWindow().activeMods);
-		this._getGameWindow().inactiveMods = Object.freeze(this._getGameWindow().inactiveMods);
-	}
-
-	/**
-	 *
-	 * @returns {window}
-	 */
-	_getGameWindow() {
-		return this.frame.contentWindow;
+		window.activeMods = Object.freeze(window.activeMods);
+		window.inactiveMods = Object.freeze(window.inactiveMods);
 	}
 
 	/**
 	 * Sets up all global objects from ccloader in the game window.
 	 */
 	_setupGamewindow() {
-		this.ui.applyBindings(this._getGameWindow().console);
+		this.ui.applyBindings(window.console);
 
 		const versions = Object.assign(this.versions, {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
 		});
 
-		Object.assign(this._getGameWindow(), {
+		Object.assign(window, {
 			Plugin,
 			versions,
 			Greenworks
 		});
 
-		this._getGameWindow().document.head.appendChild(this.loader.getBase());
-		this._getGameWindow().document.createEvent('Event').initEvent('modsLoaded', true, true);
+		window.document.head.appendChild(this.loader.getBase());
+		window.document.createEvent('Event').initEvent('modsLoaded', true, true);
 	}
 
 	/**
@@ -329,16 +345,6 @@ export class ModLoader {
 		}
 	}
 
-	/**
-	 *
-	 * @param {string} text
-	 */
-	_setStatus(text) {
-		if (this.status && this.status.isConnected) {
-			this.status.innerHTML = text;
-		}
-	}
-
 	async _executePostload() {
 		for (const mod of this.mods.filter(m => m.isEnabled)) {
 			try {
@@ -356,7 +362,7 @@ export class ModLoader {
 	_waitForGame() {
 		return new Promise(resolve => {
 			const intervalid = setInterval(() => {
-				if (this._getGameWindow().ig && this._getGameWindow().ig.ready) {
+				if (window.ig && window.ig.ready) {
 					clearInterval(intervalid);
 					resolve();
 				}
@@ -375,13 +381,6 @@ export class ModLoader {
 	}
 
 	_fireLoadEvent() {
-		this._getGameWindow().document.body.dispatchEvent(new Event('modsLoaded'));
-	}
-
-	_removeOverlay() {
-		if (this.status && this.overlay && this.status.isConnected && this.overlay.isConnected) {
-			this.status.outerHTML = '';
-			this.overlay.outerHTML = '';
-		}
+		window.document.body.dispatchEvent(new Event('modsLoaded'));
 	}
 }
