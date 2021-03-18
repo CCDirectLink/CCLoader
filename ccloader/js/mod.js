@@ -33,7 +33,7 @@ export class Mod {
 
 	async load() {
 		await this._loadStage('main');
-		await this._loadPlugin('poststart');
+		await this._loadStage('poststart');
 	}
 	loadPrestart() {
 		return this._loadStage('prestart');
