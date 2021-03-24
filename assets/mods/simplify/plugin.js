@@ -70,8 +70,9 @@ export default class Simplify extends Plugin {
 	 * @returns {[string, string][]}
 	 */
 	_parseArgs() {
-		if (window.require) {
-			return require('nw.gui').App.argv.map(e => e.split('='));
+		const nwGui = window.require ? window.require('nw.gui') : null;
+		if (nwGui) {
+			return nwGui.App.argv.map(e => e.split('='));
 		} else {
 			return Array.from(new URL(window.parent.location.href).searchParams.entries())
 		}
