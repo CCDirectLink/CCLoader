@@ -60,10 +60,14 @@ export class UI {
 	constructor(modloader) {
 		this.loaded = false;
 		this.modloader = modloader;
-		this.container = document.getElementById('ui');
+		this.nextID = 1;
 
 		this._loadImage();
 		this.applyBindings(console);
+	}
+
+	get container() {
+		return document.getElementById('ui')
 	}
 
 	applyBindings(console) {
@@ -141,12 +145,16 @@ export class UI {
 	 * @param {number} timeout Timeout in seconds
 	 */
 	_drawButton(text, type, timeout) {
+		const id = 'uimsg_' + this.nextID++;
+		
+		const entry = document.createElement('div');
+		entry.id = id;
+		entry.style.display = 'flex';
+		entry.style.height = buttonSizes.center.size.height * SCALING;
+		entry.style.marginTop = '5px';
+
 		if (this.loaded) {
-			const entry = document.createElement('div');
-			entry.style.display = 'flex';
-			entry.style.height = buttonSizes.center.size.height * SCALING;
 			entry.style.fontSize = (buttonSizes.center.size.height - BORDER_SIZE) * SCALING / 2 + 'px';
-			entry.style.marginTop = '5px';
 
 			const left = document.createElement('div');
 			left.style.backgroundImage = `url("${type.left}")`;
@@ -175,22 +183,14 @@ export class UI {
 			right.style.backgroundSize = `${buttonSizes.right.size.width * SCALING}px ${buttonSizes.right.size.height * SCALING}px`;
 			entry.appendChild(right);
 
-			this.container.appendChild(entry);
-
-			setTimeout(() => this.container.removeChild(entry), timeout * 1000);
 		} else {
-			const entry = document.createElement('div');
-			entry.style.display = 'flex';
-			entry.style.height = buttonSizes.center.size.height * SCALING;
-			entry.style.marginTop = '5px';
-
 			entry.style.lineHeight = buttonSizes.center.size.height * SCALING + 'px';
 			entry.innerText = text;
-
-			this.container.appendChild(entry);
-
-			setTimeout(() => this.container.removeChild(entry), timeout * 1000);
 		}
+
+		this.container.appendChild(entry);
+
+		setTimeout(() => this.container.removeChild(document.getElementById(id)), timeout * 1000);
 	}
 
 	_loadImage() {

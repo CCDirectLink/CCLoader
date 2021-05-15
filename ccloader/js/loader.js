@@ -79,9 +79,17 @@ export class Loader {
 	}
 
 	_startGame() {
+		this._copyUI();
+
 		document.open();
 		document.write(this.doc.documentElement.outerHTML);
 		document.close();
+	}
+
+	_copyUI() {
+		const target = this.doc.getElementById('ui');
+		const source = document.getElementById('ui');
+		target.innerHTML = source.innerHTML;
 	}
 
 
