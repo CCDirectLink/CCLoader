@@ -185,20 +185,12 @@ export class Package {
 	 * @param {string[] | undefined} list
 	 */
 	async _findAssets(dir, list){
-		if(window.isLocal || this.modloader.filemanager.isPacked(dir)){
+		if(!list || this.modloader.filemanager.isPacked(dir)){
 			return await this.modloader.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
+		} else if (list) {
+			return list.map(asset => this.modloader.filemanager.filePathToAssetPath(dir + asset));
 		} else {
-			const assets = list;
-			if (!assets) {
-				return [];
-			}
-			const base = this._getBaseName(this.file) + '/';
-
-			const result = [];
-			for(const asset of assets) {
-				result.push(base + asset);
-			}
-			return result;
+			return [];
 		}
 	}
 }

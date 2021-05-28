@@ -295,12 +295,21 @@ export class Filemanager {
 			if (await this._isDirectoryAsync(filePath)) {
 				return await this.findFiles(filePath, endings);
 			} else if (!endings || endings.some(ending => filePath.endsWith(ending))) {
-				return [filePath.substr(7).replace(/\\/g, '/')];
+				return [this.filePathToAssetPath(filePath)];
 			}
 			return [];
 		} catch (e) {
 			return [];
 		}
+	}
+
+	/**
+	 *
+	 * @param {string} filePath
+	 * @returns {string}
+	 */
+	filePathToAssetPath(filePath) {
+		return filePath.substr(7).replace(/\\/g, '/');
 	}
 
 	/**
