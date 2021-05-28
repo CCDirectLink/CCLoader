@@ -185,7 +185,7 @@ export class Package {
 	 * @param {string[] | undefined} list
 	 */
 	async _findAssets(dir, list){
-		if(!list || this.modloader.filemanager.isPacked(dir)){
+		if(window.isLocal || this.modloader.filemanager.isPacked(dir)){
 			return await this.modloader.filemanager.findFiles(dir, ['.json', '.json.patch', '.png', '.ogg']);
 		} else if (list) {
 			return list.map(asset => this.modloader.filemanager.filePathToAssetPath(dir + asset));
