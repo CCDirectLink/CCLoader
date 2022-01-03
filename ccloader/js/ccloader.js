@@ -6,6 +6,7 @@ import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
 const CCLOADER_VERSION = '2.20.2';
+const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
 	constructor() {
@@ -20,7 +21,8 @@ export class ModLoader {
 		this.mods = [];
 		/** @type {{[name: string]: string}} */
 		this.versions = {};
-
+		/** @type {string[]} */
+		this.extensions = this.filemanager.getExtensions();
 	}
 
 	/**
@@ -247,6 +249,7 @@ export class ModLoader {
 			let depVersion = null;
 			let enabled = true;
 			let depDesc = depName;
+			let isExtension = false;
 			let mod;
 			switch (depName) {
 			case 'ccloader':
@@ -256,15 +259,23 @@ export class ModLoader {
 				depVersion = this.ccVersion;
 				break;
 			default:
-				depDesc = 'mod ' + depDesc;
-				mod = mods.find(m => m.name === depName);
-				if (mod) {
-					depVersion = mod.version;
-					enabled = mod.isEnabled;
+				if(KNOWN_EXTENSIONS.includes(depName) || this.extensions.includes(depName)) {
+					isExtension = true;
+					depDesc = 'extension ' + depDesc;
+					depVersion = this.ccVersion;
+				} else {
+					depDesc = 'mod ' + depDesc;
+					mod = mods.find(m => m.name === depName);
+					if (mod) {
+						depVersion = mod.version;
+						enabled = mod.isEnabled;
+					}
 				}
 			}
 
-			if (!enabled) {
+			if (isExtension && !this.extensions.includes(depName)) {
+				result[depName] = `${depDesc} is missing`
+			} else if (!enabled) {
 				result[depName] = `${depDesc} is disabled`;
 			} else if (depVersion === null) {
 				result[depName] = `${depDesc} is missing`;
