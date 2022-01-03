@@ -259,7 +259,7 @@ export class ModLoader {
 				depVersion = this.ccVersion;
 				break;
 			default:
-				if(KNOWN_EXTENSIONS.indexOf(depName) !== -1) {
+				if(KNOWN_EXTENSIONS.includes(depName) || this.extensions.includes(depName)) {
 					isExtension = true;
 					depDesc = 'extension ' + depDesc;
 					depVersion = this.ccVersion;
@@ -273,7 +273,7 @@ export class ModLoader {
 				}
 			}
 
-			if (isExtension && this.extensions.indexOf(depName) === -1 ) {
+			if (isExtension && !this.extensions.includes(depName)) {
 				result[depName] = `${depDesc} is missing`
 			} else if (!enabled) {
 				result[depName] = `${depDesc} is disabled`;
