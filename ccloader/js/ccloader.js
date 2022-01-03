@@ -6,6 +6,7 @@ import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
 const CCLOADER_VERSION = '2.20.2';
+const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
 	constructor() {
@@ -257,25 +258,25 @@ export class ModLoader {
 			case 'crosscode':
 				depVersion = this.ccVersion;
 				break;
-			case 'post-game':
-			case 'manlea':
-			case 'ninja-skin':
-				depVersion = this.ccVersion;
-				isExtension = true;
-				break;
 			default:
-				depDesc = 'mod ' + depDesc;
-				mod = mods.find(m => m.name === depName);
-				if (mod) {
-					depVersion = mod.version;
-					enabled = mod.isEnabled;
+				if(KNOWN_EXTENSIONS.indexOf(depName) !== -1) {
+					isExtension = true;
+					depDesc = 'extension ' + depDesc;
+					depVersion = this.ccVersion;
+				} else {
+					depDesc = 'mod ' + depDesc;
+					mod = mods.find(m => m.name === depName);
+					if (mod) {
+						depVersion = mod.version;
+						enabled = mod.isEnabled;
+					}
 				}
 			}
 
-			if (!enabled) {
+			if (isExtension && this.extensions.indexOf(depName) === -1 ) {
+				result[depName] = `${depDesc} is missing`
+			} else if (!enabled) {
 				result[depName] = `${depDesc} is disabled`;
-			} else if (isExtension && this.extensions.indexOf(depName) === -1) {
-				result[depName] = `extension ${depDesc} is missing`
 			} else if (depVersion === null) {
 				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {

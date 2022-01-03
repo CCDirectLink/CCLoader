@@ -178,11 +178,7 @@ export class Filemanager {
 	 * Returns an array of the extensions in 'assets/extensions'
 	 */
 	getExtensions() {
-		let extensionList = [];
-		this._getFolders('assets/extension').forEach(value => {
-			extensionList.push(value.substring(17))
-		})
-		return extensionList;
+		return this._getFolders('assets/extension').map(value => value.substr(17))
 	}
 
 	/**
