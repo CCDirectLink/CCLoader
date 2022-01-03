@@ -20,7 +20,8 @@ export class ModLoader {
 		this.mods = [];
 		/** @type {{[name: string]: string}} */
 		this.versions = {};
-
+		/** @type {string[]} */
+		this.extensions = this.filemanager.getExtensions();
 	}
 
 	/**
@@ -247,6 +248,7 @@ export class ModLoader {
 			let depVersion = null;
 			let enabled = true;
 			let depDesc = depName;
+			let isExtension = false;
 			let mod;
 			switch (depName) {
 			case 'ccloader':
@@ -254,6 +256,12 @@ export class ModLoader {
 				break;
 			case 'crosscode':
 				depVersion = this.ccVersion;
+				break;
+			case 'post-game':
+			case 'manlea':
+			case 'ninja-skin':
+				depVersion = this.ccVersion;
+				isExtension = true;
 				break;
 			default:
 				depDesc = 'mod ' + depDesc;
@@ -266,6 +274,8 @@ export class ModLoader {
 
 			if (!enabled) {
 				result[depName] = `${depDesc} is disabled`;
+			} else if (isExtension && this.extensions.indexOf(depName) === -1) {
+				result[depName] = `extension ${depDesc} is missing`
 			} else if (depVersion === null) {
 				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {

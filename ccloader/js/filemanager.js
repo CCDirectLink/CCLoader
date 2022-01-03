@@ -175,6 +175,17 @@ export class Filemanager {
 	}
 
 	/**
+	 * Returns an array of the extensions in 'assets/extensions'
+	 */
+	getExtensions() {
+		let extensionList = [];
+		this._getFolders('assets/extension').forEach(value => {
+			extensionList.push(value.substring(17))
+		})
+		return extensionList;
+	}
+
+	/**
 	 * Returns all files with the given ending in the folder
 	 * @param {string} folder
 	 */
