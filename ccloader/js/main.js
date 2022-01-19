@@ -4,7 +4,7 @@ import { ModLoader } from './ccloader.js';
 if (window.process) {
 	const envVar = process.env.CCLOADER_OVERRIDE_MAIN_URL;
 	if (envVar) {
-		window.location.replace(envVar);
+		window.location.replace(new URL(envVar, window.location.origin));
 	}
 }
 
