@@ -465,6 +465,8 @@
 					};
 				}
 
+				modOption.version = mod.version
+
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
 					set: value => {
@@ -783,6 +785,7 @@
 			sc.OptionRow.inject({
 				iconGui: null,
 				iconSettings: null,
+				versionText: null,
 		
 				init(...args) {
 					this.parent(...args);
@@ -804,7 +807,18 @@
 						this.addChildGui(this.iconGui);
 						this.nameGui.hook.pos.x += this.iconGui.hook.pos.x + this.iconGui.hook.size.x;
 					}
-			
+
+					if(this.option.version != null) {
+						this.versionText = new sc.TextGui(this.option.version, {
+							font: sc.fontsystem.tinyFont,
+							speed: ig.TextBlock.SPEED.IMMEDIATE
+						});
+						this.versionText.setAlign(ig.GUI_ALIGN.X_RIGHT, ig.GUI_ALIGN.Y_BOTTOM);
+						console.log(this.hook.size.x, this.hook.size.x / 2, this.hook.size.x - 48, this.hook.size.y)
+						this.versionText.setPos(38, 5);
+						this.addChildGui(this.versionText)
+					}
+
 					if (this.option.type === 'CHECKBOX' && this.option.checkboxRightAlign) {
 						let checkbox = this.typeGui;
 						checkbox.button.hook.align.x = ig.GUI_ALIGN.X_RIGHT;
