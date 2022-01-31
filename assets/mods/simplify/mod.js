@@ -810,12 +810,10 @@
 
 					if(this.option.version != null) {
 						this.versionText = new sc.TextGui(this.option.version, {
-							font: sc.fontsystem.tinyFont,
-							speed: ig.TextBlock.SPEED.IMMEDIATE
+							font: sc.fontsystem.tinyFont
 						});
 						this.versionText.setAlign(ig.GUI_ALIGN.X_RIGHT, ig.GUI_ALIGN.Y_BOTTOM);
-						console.log(this.hook.size.x, this.hook.size.x / 2, this.hook.size.x - 48, this.hook.size.y)
-						this.versionText.setPos(38, 5);
+						this.versionText.setPos(this.typeGui.button.hook.size.x + 8, lineHook.pos.y);
 						this.addChildGui(this.versionText)
 					}
 
