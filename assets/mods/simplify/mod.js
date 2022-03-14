@@ -464,8 +464,12 @@
 						sizeY: 24,
 					};
 				}
+				
+				modOption.version = mod.version;
 
-				modOption.version = mod.version
+				if (modOption.version && !modOption.version.toLowerCase().startsWith("v")) {
+					modOption.version = "v" + modOption.version;
+				}
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => localStorage.getItem(optionName) !== 'false',
