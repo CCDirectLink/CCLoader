@@ -19,7 +19,7 @@ import {appliers, DebugState} from "./patchsteps-patch.js";
  * @param {unknown} args is the user supplied arguments.
  */
 
-/* @type{Map<string,Callable> */
+/* @type {Map<string,Callable>} */
 const callables = new Map;
 
 /**
