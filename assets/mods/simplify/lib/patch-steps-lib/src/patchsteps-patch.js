@@ -209,12 +209,21 @@ export class DebugState {
 export const appliers = {};
 
 /**
+ * @typedef State
+ * @property {unknown} currentValue
+ * @property {unknown[]} stack
+ * @property {(fromGame: boolean| string, path: string) => Promise<any>}
+ * @property {DebugState} debugState
+ * @property {boolean} debug
+ * /
+
+/**
  * A user defined step that is distinguishable from builtin PatchSteps.
  * Errors that occur in callables are not handled by the PatchSteps interpreter.
  *
  * @async 
  * @callback Callable
- * @param {object} state is the internal PatchStep state.
+ * @param {State} state is the internal PatchStep state.
  * @param {unknown} args is the user supplied arguments.
  */
 
@@ -226,6 +235,14 @@ const callables = new Map;
  * @param {Callable} callable
  */
 export function registerCallable(id, callable) {
+	if (typeof id !== "string") {
+		throw Error('Id must be a string');
+	}
+
+	if (id.length === 0) {
+		throw Error('Id must not be empty.');
+	}
+
 	if (typeof callable !== "function") {
 		throw Error('Callable must be a function.');
 	}
@@ -352,13 +369,21 @@ function valueInsertion(obj, keyword, value) {
 // -- Step Execution --
 
 appliers["CALL"] = async function(state) {
-	const id = this["id"] || "";
-	const args = this["args"] || {};
+	const id = this["id"];
+	const args = this["args"];
+
+	// Any falsey values are invalid
+	if (!this["id"]) {
+		state.debugState.throwError('ValueError', 'Id must be set.');
+	}
+
 	if (!callables.has(id)) {
 		state.debugState.throwError('ValueError', `${id} is not a valid callable.`);
 	}
+
 	/** @type{Callable} **/
 	const callable = callables.get(id);
+
 	// No error handling provided as the callable is responsible 
 	// for that.
 	await callable(state, args);
