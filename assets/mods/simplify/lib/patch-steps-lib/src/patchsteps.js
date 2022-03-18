@@ -24,4 +24,4 @@ export const defaultSettings = differ.defaultSettings;
 export const patch = patcher.patch;
 export const appliers = patcher.appliers;
 export const DebugState = patcher.DebugState;
-
+export const registerCallable = patcher.registerCallable;
