@@ -3,14 +3,14 @@ import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
 
-	// Should this be added to preload? 
-	window.registerCallable = patchSteps.registerCallable;
-
 	class SimplifyResources {
 		constructor() {
 			/** @type {{handler: (xhr: any, url: string) => void), filter?: string, beforeCall?: boolean}[]} */
 			this.handlers = [];
-			
+			this.patchSteps = {
+				callable: patchSteps.callable,
+			};
+
 			this._hookAjax();
 			this._hookHttpRequest();
 			this._hookImages();
