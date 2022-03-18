@@ -2,7 +2,10 @@ import * as patchSteps from './lib/patch-steps-lib/src/patchsteps.js';
 import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
-	
+
+	// Should this be added to preload? 
+	window.registerCallable = patchSteps.registerCallable;
+
 	class SimplifyResources {
 		constructor() {
 			/** @type {{handler: (xhr: any, url: string) => void), filter?: string, beforeCall?: boolean}[]} */
