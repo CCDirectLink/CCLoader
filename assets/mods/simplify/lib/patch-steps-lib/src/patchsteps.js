@@ -9,6 +9,7 @@
 
 import * as utils from "./patchsteps-utils.js";
 import * as patcher from "./patchsteps-patch.js";
+import * as callable from "./patchsteps-callable.js";
 import * as differ from "./patchsteps-diff.js";
 
 export const version = "1.1.3";
@@ -24,4 +25,4 @@ export const defaultSettings = differ.defaultSettings;
 export const patch = patcher.patch;
 export const appliers = patcher.appliers;
 export const DebugState = patcher.DebugState;
-
+export {callable};
