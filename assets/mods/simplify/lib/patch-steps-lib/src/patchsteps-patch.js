@@ -537,3 +537,11 @@ appliers["DEBUG"] = async function (state) {
 	state.debug = !!this["value"];
 };
 
+// combine the values of an object/array with another object/array. similar to non-patchstep patching.
+appliers["MERGE_CONTENT"] = async function (state) {
+	if (!("content" in this)) {
+		state.debugState.throwError("ValueError", 'content must be set');
+	}
+
+	photomerge(state.currentValue, this["content"]);
+}
