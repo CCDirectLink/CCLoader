@@ -4,7 +4,7 @@ ig.module('impact.feature.greenworks.greenworks-fix').requires('impact.feature.g
 			this.name = 'Greenworks';
 			this.greenworks = null;
 			try {
-				const semver = parent.semver;
+				const semver = window.semver;
 				
 				this.steps.push('loaded');
 	

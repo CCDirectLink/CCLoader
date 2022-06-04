@@ -1,6 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
 const isBrowser = window.isBrowser;
 const isLocal = !isBrowser;
 
@@ -14,6 +11,17 @@ export class Filemanager {
 		this.packed = [];
 		// eslint-disable-next-line no-undef
 		this._packedManager = new PackedManager();
+
+		if (isLocal) {
+			this.fs = require('fs');
+			const path = require('path');
+			this.pathSep = path.sep;
+			this.pathJoin = path.join;
+		} else {
+			this.fs = null;
+			this.pathSep = '/';
+			this.pathJoin = (...args) => args.join('/');
+		}
 
 		if (isBrowser) {
 			this.getResourceAsync('../mods.json').then((text) => {
@@ -42,30 +50,43 @@ export class Filemanager {
 		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
-	/**
-	 *
-	 * @param {string} folder
-	 */
-	getAllModsFiles(folder) {
-		const subs = this._getFolders(folder);
-		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'package.json')));
+	getAllModsFiles() {
+		const subs = this._getModFoldersOnAndroid('/') || this._getFolders();
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
 	}
 
-	/**
-	 *
-	 * @param {string} folder
-	 */
-	getAllCCModFiles(folder) {
-		const subs = this._getFolders(folder);
-		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, path.sep + 'ccmod.json')));
+	getAllCCModFiles() {
+		const subs = this._getModFoldersOnAndroid('/') || this._getFolders();
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'ccmod.json')));
 	}
 
-	/**
-	 *
-	 * @param {string} folder
-	 */
-	getAllModPackages(folder) {
-		return this._getResourcesInFolder(folder, '.ccmod');
+	getAllModPackages() {
+		return this._getModFoldersOnAndroid('.ccmod') || this._getResourcesInFolder(null, '.ccmod');
+	}
+
+	_getModFoldersOnAndroid(ending) {
+		const provider = window.CrossAndroidModListProvider;
+		if (provider && provider.getModListAsJson) {
+			const entries = [];
+			for (let entry of JSON.parse(provider.getModListAsJson())) {
+				if (entry.endsWith(ending)) {
+					if (ending === '/') {
+						entry = entry.slice(0, -1);
+					}
+					entries.push('assets/mods/' + entry);
+				}
+			}
+			return entries;
+		}
+		return null;
+	}
+
+	getExtensions() {
+		const provider = window.CrossAndroidExtensionListProvider;
+		if (provider && provider.getExtensionListAsJson) {
+			return JSON.parse(provider.getExtensionListAsJson());
+		}
+		return this._getFolders('assets/extension').map(value => value.substr(17));
 	}
 
 	/**
@@ -175,15 +196,8 @@ export class Filemanager {
 	}
 
 	/**
-	 * Returns an array of the extensions in 'assets/extensions'
-	 */
-	getExtensions() {
-		return this._getFolders('assets/extension').map(value => value.substr(17))
-	}
-
-	/**
 	 * Returns all files with the given ending in the folder
-	 * @param {string} folder
+	 * @param {string?} folder
 	 */
 	_getFolders(folder) {
 		if (!folder)
@@ -243,7 +257,7 @@ export class Filemanager {
 		}
 
 		return new Promise((resolve, reject) => {
-			fs.readdir(dir, (err, files) => {
+			this.fs.readdir(dir, (err, files) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -260,7 +274,7 @@ export class Filemanager {
 	 */
 	_getStats(file) {
 		return new Promise((resolve, reject) => {
-			fs.stat(file, (err, stats) => {
+			this.fs.stat(file, (err, stats) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -296,7 +310,7 @@ export class Filemanager {
 	 * @returns {Promise<string[]>}
 	 */
 	async _checkFileForAsset(dir, file, endings) {
-		const filePath = path.join(dir, file);
+		const filePath = this.pathJoin(dir, file);
 
 		try {
 			if (await this._isDirectoryAsync(filePath)) {
@@ -326,7 +340,7 @@ export class Filemanager {
 	_resourceExists(resource) {
 		if (isLocal) {
 			try {
-				fs.statSync(resource);
+				this.fs.statSync(resource);
 				return true;
 			} catch (e) {
 				return false;
@@ -386,9 +400,9 @@ export class Filemanager {
 
 		if (isLocal) {
 			try {
-				fs.readdirSync(folder).forEach(file => {
+				this.fs.readdirSync(folder).forEach(file => {
 					try {
-						file = path.join(folder, file);
+						file = this.pathJoin(folder, file);
 
 						if (!this._isDirectory(file) && file.endsWith(ending)) {
 							results.push(file);
@@ -411,8 +425,8 @@ export class Filemanager {
 
 		if (isLocal) {
 			try {
-				return fs.readdirSync(folder)
-					.map(file => path.join(folder, file))
+				return this.fs.readdirSync(folder)
+					.map(file => this.pathJoin(folder, file))
 					.filter(file => this._isDirectory(file));
 			} catch (e) { }
 		}
@@ -426,7 +440,7 @@ export class Filemanager {
 	 * @returns {boolean}
 	 */
 	_isDirectory(file) {
-		const stat = fs.statSync(file);
+		const stat = this.fs.statSync(file);
 		return stat && stat.isDirectory();
 	}
 
@@ -445,13 +459,13 @@ export class Filemanager {
 			return;
 		}
 
-		if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+		if (this.fs.existsSync(dir) && this.fs.statSync(dir).isDirectory()) {
 			return;
 		}
 
-		const parent = path.join(dir, '..');
+		const parent = this.pathJoin(dir, '..');
 		this._createDirectory(parent);
 
-		fs.mkdirSync(dir);
+		this.fs.mkdirSync(dir);
 	}
 }
