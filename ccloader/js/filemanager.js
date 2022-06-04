@@ -56,12 +56,12 @@ export class Filemanager {
 	}
 
 	getAllModsFiles() {
-		const subs = isAndroid && this._androidModFolders ? this._androidModFolders : this._getFolders();
+		const subs = this._getFolders();
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
 	}
 
 	getAllCCModFiles() {
-		const subs = isAndroid && this._androidModFolders ? this._androidModFolders : this._getFolders();
+		const subs = this._getFolders();
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'ccmod.json')));
 	}
 
@@ -193,7 +193,9 @@ export class Filemanager {
 		if (!folder)
 			folder = 'assets/mods/';
 
-		if (isLocal) {
+		if (isAndroid && this._androidModFolders) {
+			return this._androidModFolders;
+		} else if (isLocal) {
 			return this._getLocalFolders(folder);
 		} else {
 			var results = [];
@@ -220,6 +222,9 @@ export class Filemanager {
 				// The returned entries are filenames within assets/mods/. If the file
 				// is a directory, a slash is appended to it.
 				if (entry.endsWith('/')) {
+					// The trailing slash must be removed because otherwise other
+					// components of CCLoader start failing, for example, asset overrides
+					// refuse to work.
 					this._androidModFolders.push('assets/mods/' + entry.slice(0, -1));
 				} else if (entry.endsWith('.ccmod')) {
 					this._androidModPackages.push('assets/mods/' + entry);
