@@ -1,5 +1,6 @@
 const isBrowser = window.isBrowser;
 const isLocal = !isBrowser;
+const isAndroid = !!window.CrossAndroid;
 
 export class Filemanager {
 	/**
@@ -21,6 +22,10 @@ export class Filemanager {
 			this.fs = null;
 			this.pathSep = '/';
 			this.pathJoin = (...args) => args.join('/');
+		}
+
+		if (isAndroid) {
+			this._receiveInfoFromAndroid();
 		}
 
 		if (isBrowser) {
@@ -51,40 +56,25 @@ export class Filemanager {
 	}
 
 	getAllModsFiles() {
-		const subs = this._getModFoldersOnAndroid('/') || this._getFolders();
+		const subs = isAndroid && this._androidModFolders ? this._androidModFolders : this._getFolders();
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
 	}
 
 	getAllCCModFiles() {
-		const subs = this._getModFoldersOnAndroid('/') || this._getFolders();
+		const subs = isAndroid && this._androidModFolders ? this._androidModFolders : this._getFolders();
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'ccmod.json')));
 	}
 
 	getAllModPackages() {
-		return this._getModFoldersOnAndroid('.ccmod') || this._getResourcesInFolder(null, '.ccmod');
-	}
-
-	_getModFoldersOnAndroid(ending) {
-		const provider = window.CrossAndroidModListProvider;
-		if (provider && provider.getModListAsJson) {
-			const entries = [];
-			for (let entry of JSON.parse(provider.getModListAsJson())) {
-				if (entry.endsWith(ending)) {
-					if (ending === '/') {
-						entry = entry.slice(0, -1);
-					}
-					entries.push('assets/mods/' + entry);
-				}
-			}
-			return entries;
+		if (isAndroid && this._androidModPackages) {
+			return this._androidModPackages;
 		}
-		return null;
+		return this._getResourcesInFolder(null, '.ccmod');
 	}
 
 	getExtensions() {
-		const provider = window.CrossAndroidExtensionListProvider;
-		if (provider && provider.getExtensionListAsJson) {
-			return JSON.parse(provider.getExtensionListAsJson());
+		if (isAndroid && this._androidExtensions) {
+			return this._androidExtensions;
 		}
 		return this._getFolders('assets/extension').map(value => value.substr(17));
 	}
@@ -213,6 +203,28 @@ export class Filemanager {
 				}
 			}
 			return results;
+		}
+	}
+
+	_receiveInfoFromAndroid() {
+		const extensionsProvider = window.CrossAndroidExtensionListProvider;
+		if (extensionsProvider && extensionsProvider.getExtensionListAsJson) {
+			this._androidExtensions = JSON.parse(extensionsProvider.getExtensionListAsJson());
+		}
+
+		const modsProvider = window.CrossAndroidModListProvider;
+		if (modsProvider && modsProvider.getModListAsJson) {
+			this._androidModFolders = [];
+			this._androidModPackages = [];
+			for (const entry of JSON.parse(modsProvider.getModListAsJson())) {
+				// The returned entries are filenames within assets/mods/. If the file
+				// is a directory, a slash is appended to it.
+				if (entry.endsWith('/')) {
+					this._androidModFolders.push('assets/mods/' + entry.slice(0, -1));
+				} else if (entry.endsWith('.ccmod')) {
+					this._androidModPackages.push('assets/mods/' + entry);
+				}
+			}
 		}
 	}
 
