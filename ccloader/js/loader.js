@@ -38,7 +38,7 @@ export class Loader {
 				postload: resolve,
 			});
 
-			const hook = this._createScript('window.parent.postload()');
+			const hook = this._createScript('window.postload()');
 			this._insertAfter(hook, this.postloadPoint);
 			this._hookDOM();
 			this._startGame();

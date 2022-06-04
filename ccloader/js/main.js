@@ -1,7 +1,7 @@
 import './normalize.js';
 import { ModLoader } from './ccloader.js';
 
-if (window.process) {
+if (window.process && window.process.env) {
 	const envVar = process.env.CCLOADER_OVERRIDE_MAIN_URL;
 	if (envVar) {
 		window.location.replace(new URL(envVar, window.location.origin));

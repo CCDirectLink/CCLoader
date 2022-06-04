@@ -34,6 +34,9 @@ export default class Simplify extends Plugin {
 			get() {
 				if (original) {
 					return async(...args) => {
+						if (window.CrossAndroid && window.CrossAndroid.executePostGameLoad) {
+							window.CrossAndroid.executePostGameLoad();
+						}
 						for (const mod of window.activeMods) {
 							try {
 								await mod.loadPrestart();
@@ -74,7 +77,7 @@ export default class Simplify extends Plugin {
 		if (nwGui) {
 			return nwGui.App.argv.map(e => e.split('='));
 		} else {
-			return Array.from(new URL(window.parent.location.href).searchParams.entries())
+			return Array.from(new URL(window.location.href).searchParams.entries())
 		}
 	}
 }
