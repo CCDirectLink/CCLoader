@@ -5,7 +5,7 @@ import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.22.0';
+const CCLOADER_VERSION = '2.22.1';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
@@ -123,25 +123,29 @@ export class ModLoader {
 		const packedMods = this.filemanager.getAllModPackages();
 
 		if (packedMods.length > 0) {
-			await this._initializeServiceWorker();
-			await this._loadPackedMods(packedMods);
-			await Promise.all(packedMods.map(async packed => {
-				const path = packed.substring(0, packed.length);
-
-				const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
-				if (isCCMod) {
-					ccmodFiles.push(path + '/ccmod.json');
-					return;
-				}
-
-				const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
-				if (isPkg) {
-					modFiles.push(path + '/package.json');
-					return;
-				}
-				
-				console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
-			}));
+			if (window.CrossAndroid) {
+				console.warn('Mods using .ccmod files are not supported yet. Please rename them to .zip and extract them before using CrossAndroid.');
+			} else {
+				await this._initializeServiceWorker();
+				await this._loadPackedMods(packedMods);
+				await Promise.all(packedMods.map(async packed => {
+					const path = packed.substring(0, packed.length);
+	
+					const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
+					if (isCCMod) {
+						ccmodFiles.push(path + '/ccmod.json');
+						return;
+					}
+	
+					const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
+					if (isPkg) {
+						modFiles.push(path + '/package.json');
+						return;
+					}
+					
+					console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
+				}));
+			}
 		}
 
 		/** @type {Package[]} */

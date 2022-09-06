@@ -3,5 +3,5 @@
 	"ccmodHumanName": "CCLoader",
 	"ccmodType": "base",
 	"description": "Modloader for CrossCode. This or a similar modloader is needed for most mods.",
-	"version": "2.22.0"
+	"version": "2.22.1"
 }
