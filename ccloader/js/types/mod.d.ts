@@ -18,7 +18,7 @@ declare namespace ccloader {
         get displayName(): string | undefined;
         get description(): string | undefined;
         get assets(): string[] | undefined;
-        get dependencies(): {[name: stirng]: string} | undefined;
+        get dependencies(): {[name: string]: string} | undefined;
         get version(): string | undefined;
         get module(): boolean | undefined;
         get hidden(): boolean | undefined;
