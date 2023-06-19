@@ -13,7 +13,7 @@
  */
 
 import {photocopy, photomerge} from "./patchsteps-utils.js";
-
+import {StepMachine} from "./patchsteps-stepmachine.js";
 // The following are definitions used for reference in DebugState.
 /*
  * ParsedPath is actually any type that translateParsedPath can understand.
@@ -89,16 +89,16 @@ export class DebugState {
 		this.currentFile = this.fileStack[this.fileStack.length - 1];
 		return lastFile;
 	}
-	
 	/**
 	 * Enters a step. Note that calls to this *surround* applyStep as the index is not available to it.
 	 * @final
 	 */
-	addStep(index, name = "") {
+	addStep(index, name = "", functionName = "") {
 		this.currentFile.stack.push({
 			type: "Step",
 			index,
-			name
+			name,
+			functionName
 		});
 	}
 
@@ -164,10 +164,15 @@ export class DebugState {
 					break;
 				case 'Step':
 					message += '\t\t\tat ';
+
 					if (step.name) {
 						message += `${step.name} `;
 					}
-					message += `(step: ${step.index})\n`;
+					if (step.functionName) {
+						message += `(step ${step.functionName}:${step.index})\n`;
+					} else {
+						message += `(step ${step.index})\n`;
+					}
 					break;
 				default:
 					break;
@@ -202,6 +207,28 @@ export class DebugState {
 		
 	}
 }
+
+/**
+ * @typedef State
+ * @property {unknown} currentValue
+ * @property {unknown[]} stack
+ * @property {(fromGame: boolean| string, path: string) => Promise<any>}
+ * @property {DebugState} debugState
+ * @property {boolean} debug
+ * /
+
+/**
+ * A user defined step that is distinguishable from builtin PatchSteps.
+ * Errors that occur in callables are not handled by the PatchSteps interpreter.
+ *
+ * @async 
+ * @callback Callable
+ * @param {State} state is the internal PatchStep state.
+ * @param {unknown} args is the user supplied arguments.
+ */
+
+/* @type {Map<string,Callable>} */
+export const callables = new Map;
 
 // Custom extensions are registered here.
 // Their 'this' is the Step, they are passed the state, and they are expected to return a Promise.
@@ -246,15 +273,21 @@ export async function patch(a, steps, loader, debugState) {
 	const state = {
 		currentValue: a,
 		stack: [],
+		stepMachine: new StepMachine(steps),
 		cloneMap: new Map(),
 		loader: loader,
 		debugState: debugState,
-		debug: false
+		debug: false,
+		memory: {}, 
+		functionName: "",		
+		stepReferenceIndex: 0,
 	};
-	for (let index = 0; index < steps.length; index++) {
+
+	for (const [absoluteStepIndex, step] of state.stepMachine.run()) {
 		try {
-			debugState.addStep(index);
-			await applyStep(steps[index], state, debugState);
+			const stepIndex = absoluteStepIndex - state.stepReferenceIndex;
+			debugState.addStep(stepIndex, "", state.functionName);
+			await applyStep(step, state, debugState);
 			debugState.removeLastStep();
 		} catch(e) {
 			debugState.print();
@@ -266,14 +299,30 @@ export async function patch(a, steps, loader, debugState) {
 	}
 }
 
+
 async function applyStep(step, state) {
 	await state.debugState.beforeStep();
-	state.debugState.getLastStep().name = step["type"];
-	if (!appliers[step["type"]]) {
-		state.debugState.getLastStep().name = '';
-		state.debugState.throwError('TypeError',`${step['type']} is not a valid type.`);
+	if (callables.has(step["type"])) {
+		// Let users call it like a native patchstep
+		let callableId = step["type"];
+		let callableStep = photocopy(step);
+		delete callableStep["type"];
+		step = {
+			"type": "CALL",
+			"id": callableId,
+			"args" : callableStep,
+		}
+		state.debugState.getLastStep().name = callableId;
+		// Prevent user from breaking everything by creating a "CALL" callable
+		await appliers["CALL"].call(step, state);
+	} else {
+		state.debugState.getLastStep().name = step["type"];
+		if (!appliers[step["type"]]) {
+			state.debugState.getLastStep().name = '';
+			state.debugState.throwError('TypeError',`${step['type']} is not a valid type.`);
+		}
+		await appliers[step["type"]].call(step, state);
 	}
-	await appliers[step["type"]].call(step, state);
 	await state.debugState.afterStep();
 }
 
@@ -545,3 +594,7 @@ appliers["MERGE_CONTENT"] = async function (state) {
 
 	photomerge(state.currentValue, this["content"]);
 }
+
+// Is a NOP step used to refer to code.
+appliers["LABEL"] = async function(state) {}
+
