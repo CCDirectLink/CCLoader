@@ -6,7 +6,7 @@
 	"prestart": "prestart.js",
 	"plugin": "plugin.js",
 	"hidden": true,
-	"version": "2.12.0",
+	"version": "2.12.1",
 	"ccmodDependencies": {
 		"ccloader": "^2.22.0",
 		"crosscode": "^1.0.0"
