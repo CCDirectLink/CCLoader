@@ -1,0 +1,341 @@
+[
+	{
+		"name": "Complete object key replacement",
+		"type": "simple",
+		"a": {
+			"major": 19,
+			"minor": 1
+		},
+		"b": {
+			"major": 20,
+			"minor": 0
+		},
+		"instructions": [
+			{"type": "SET_KEY", "index": "major", "content": 20},
+			{"type": "SET_KEY", "index": "minor", "content": 0}
+		]
+	},
+	{
+		"name": "Tilemap update",
+		"type": "simple",
+		"a": {
+			"width": 4,
+			"height": 4,
+			"tiles": [
+				0, 0, 1, 1,
+				0, 0, 1, 1,
+				0, 0, 1, 1,
+				0, 0, 1, 1
+			]
+		},
+		"b": {
+			"width": 4,
+			"height": 4,
+			"tiles": [
+				0, 0, 1, 1,
+				0, 2, 2, 1,
+				0, 2, 2, 1,
+				0, 0, 1, 1
+			]
+		},
+		"instructions": [
+			{"type": "ENTER", "index": "tiles"},
+			{"type": "SET_KEY", "index": 5,"content": 2},
+			{"type": "SET_KEY", "index": 6,"content": 2},
+			{"type": "SET_KEY", "index": 9,"content": 2},
+			{"type": "SET_KEY", "index": 10,"content": 2},
+			{"type": "EXIT"}
+		]
+	},
+	{
+		"name": "Deep structure optimization",
+		"type": "simple",
+		"a": {
+			"carrot": {
+				"point1": true,
+				"buried": {
+					"into": {
+						"heaps": true,
+						"ground": true
+					}
+				},
+				"point2": true
+			}
+		},
+		"b": {
+			"carrot": {
+				"point1": true,
+				"buried": {
+					"into": {
+						"heaps": false,
+						"ground": true
+					}
+				},
+				"point2": false
+			}
+		},
+		"instructions": [
+			{"type": "ENTER", "index": ["carrot", "buried", "into"]},
+			{"type": "SET_KEY", "index": "heaps", "content": false},
+			{"type": "EXIT","count": 2},
+			{"type": "SET_KEY", "index": "point2", "content": false},
+			{"type": "EXIT"}
+		]
+	},
+	{
+		"name": "Give Up And Rewrite heuristic",
+		"type": "simple",
+		"a": {
+			"carrot": {
+				"point1": true,
+				"buried": {
+					"into": "ground"
+				},
+				"point2": true
+			},
+			"kitten": [1, 2, 3]
+		},
+		"b": {
+			"carrot": {
+				"point1": false,
+				"buried": {
+					"into": "pennies"
+				},
+				"point2": false
+			},
+			"kitten": [1, 2, 2]
+		},
+		"instructions": [
+			{
+				"type": "SET_KEY",
+				"index": "carrot",
+				"content": {
+					"point1": false,
+					"buried": {
+						"into": "pennies"
+					},
+					"point2": false
+				}
+			},
+			{"type": "ENTER", "index": "kitten"},
+			{"type": "SET_KEY", "index": 2,"content": 2},
+			{"type": "EXIT"}
+		]
+	},
+	{
+		"name": "FOR_IN (single) test",
+		"type": "execute",
+		"a": {
+		},
+		"patch": [
+			{
+				"type": "FOR_IN",
+				"keyword": "DAY",
+				"values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+				"body": [
+					{"type": "SET_KEY", "index": "DAY", "content": "is a day"}
+				]
+			}
+		],
+		"b": {
+			"Monday": "is a day",
+			"Tuesday": "is a day",
+			"Wednesday": "is a day",
+			"Thursday": "is a day",
+			"Friday": "is a day",
+			"Saturday": "is a day",
+			"Sunday": "is a day"
+		}
+	},
+	{
+		"name": "FOR_IN (multiple) test",
+		"type": "execute",
+		"a": {
+		},
+		"patch": [
+			{
+				"type": "FOR_IN",
+				"keyword": {"d": "DAY", "n": "DNX", "p": "DPV"},
+				"values": [
+					{"p": "Sunday", "d": "Monday", "n": "Tuesday"},
+					{"p": "Monday", "d": "Tuesday", "n": "Wednesday"},
+					{"p": "Tuesday", "d": "Wednesday", "n": "Thursday"},
+					{"p": "Wednesday", "d": "Thursday", "n": "Friday"},
+					{"p": "Thursday", "d": "Friday", "n": "Saturday"},
+					{"p": "Friday", "d": "Saturday", "n": "Sunday"},
+					{"p": "Saturday", "d": "Sunday", "n": "Monday"}
+				],
+				"body": [
+					{"type": "SET_KEY", "index": "DAY", "content": "is the day after DPV and before DNX."}
+				]
+			}
+		],
+		"b": {
+			"Monday": "is the day after Sunday and before Tuesday.",
+			"Tuesday": "is the day after Monday and before Wednesday.",
+			"Wednesday": "is the day after Tuesday and before Thursday.",
+			"Thursday": "is the day after Wednesday and before Friday.",
+			"Friday": "is the day after Thursday and before Saturday.",
+			"Saturday": "is the day after Friday and before Sunday.",
+			"Sunday": "is the day after Saturday and before Monday."
+		}
+	},
+	{
+		"name": "IMPORT merge sanity / path parsing test",
+		"type": "execute",
+		"a": {
+			"hi": 1
+		},
+		"true:yup": {
+			"bye": 1
+		},
+		"true:sure": {
+			"lea": 1
+		},
+		"false:okay": {
+			"why": 1
+		},
+		"patch": [
+			{
+				"type": "IMPORT",
+				"src": "yup"
+			},
+			{
+				"type": "IMPORT",
+				"src": "game:sure"
+			},
+			{
+				"type": "IMPORT",
+				"src": "mod:okay"
+			}
+		],
+		"b": {
+			"hi": 1,
+			"bye": 1,
+			"lea": 1,
+			"why": 1
+		}
+	},
+	{
+		"name": "INCLUDE test",
+		"type": "execute",
+		"a": {
+		},
+		"false:okay": [
+			{
+				"type": "SET_KEY",
+				"index": "test",
+				"content": "Meep"
+			},
+			{
+				"type": "ENTER",
+				"index": "test"
+			}
+		],
+		"patch": [
+			{
+				"type": "INCLUDE",
+				"src": "okay"
+			},
+			{
+				"type": "SET_KEY",
+				"index": "best",
+				"content": "deep"
+			}
+		],
+		"b": {
+			"test": "Meep",
+			"best": "deep"
+		}
+	},
+	{
+		"name": "COPY/PASTE",
+		"type": "execute",
+		"a": {
+			"hi": [1]
+		},
+		"patch": [
+			{
+				"type": "ENTER",
+				"index": "hi"
+			},
+			{
+				"type": "COPY",
+				"alias": "num"
+			},
+			{"type": "EXIT"},
+			{
+				"type": "PASTE",
+				"alias": "num",
+				"index": "bye"
+			},
+			{
+				"type": "ENTER",
+				"index": "bye"
+			},
+			{
+				"type": "SET_KEY",
+				"index": 0,
+				"content": 2
+			}
+		],
+		"b": {
+			"hi": [1],
+			"bye": [2]
+		}
+	},
+	{
+		"name": "INIT_KEY",
+		"type": "execute",
+		"a": {
+			"0": 0
+		},
+		"patch": [
+			{
+				"type": "INIT_KEY",
+				"index": 0,
+				"content": 2
+			},
+			{
+				"type": "INIT_KEY",
+				"index": "",
+				"content": 2
+			}
+		],
+		"b": {
+			"0": 0,
+			"": 2
+		}
+	},
+	{
+		"name": "Array heuristic test A",
+		"type": "simple",
+		"a": [0, 1, 1, 2, 1, 1, 2, 1, 3],
+		"b": [0, 1, 2, 2, 1, 1, 3, 1, 3]
+	},
+	{
+		"name": "Array heuristic test B",
+		"type": "simple",
+		"a": [1, 1, 2, 2, 3, 3, 2, 2, 7],
+		"b": [2, 2, 1, 1, 3, 3, 2, 2, 8]
+	},
+	{
+		"name": "Array heuristic test append",
+		"type": "simple",
+		"a": [1, 1, 2, 2],
+		"b": [1, 1, 2, 2, 3, 3, 4, 4]
+	},
+	{
+		"name": "Array heuristic test remove from start and append",
+		"type": "simple",
+		"a": [1, 1, 2, 2],
+		"b": [2, 2, 3, 3, 4, 4]
+	},
+	{
+		"name": "Array heuristic test remove from start",
+		"type": "simple",
+		"a": [1, 1, 2, 2],
+		"b": [1, 2, 2]
+	}
+]
+

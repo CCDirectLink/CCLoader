@@ -1,26 +1,4 @@
-import {appliers, DebugState} from "./patchsteps-patch.js";
-
-/**
- * @typedef State
- * @property {unknown} currentValue
- * @property {unknown[]} stack
- * @property {(fromGame: boolean| string, path: string) => Promise<any>}
- * @property {DebugState} debugState
- * @property {boolean} debug
- * /
-
-/**
- * A user defined step that is distinguishable from builtin PatchSteps.
- * Errors that occur in callables are not handled by the PatchSteps interpreter.
- *
- * @async 
- * @callback Callable
- * @param {State} state is the internal PatchStep state.
- * @param {unknown} args is the user supplied arguments.
- */
-
-/* @type {Map<string,Callable>} */
-const callables = new Map;
+import {appliers, DebugState, callables} from "./patchsteps-patch.js";
 
 /**
  * @param {string} id
@@ -66,7 +44,7 @@ appliers["CALL"] = async function(state) {
 		if (e !== state.debugState) {
 			// So they know what happened
 			console.error(e);
-			state.debugState.throwError('ValueError', `Callable ${i} did not properly throw an error.`);
+			state.debugState.throwError('ValueError', `Callable ${id} did not properly throw an error.`);
 		}
 		// They properly threw the error
 		throw e;
