@@ -70,7 +70,7 @@ export class Package {
 	 * @returns {Mod}
 	 */
 	async _loadCCMod() {
-		const result = new Mod(this.modloader);
+		const result = new Mod(this.modloader, this.modset);
 		const file = this.file;
 
 		let manifest;

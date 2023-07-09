@@ -169,6 +169,7 @@ export class ModLoader {
 	
 		// load default folder
 		if (modset == null) {
+			modset = {name: 'default'};
 			modFiles = this.filemanager.getAllModsFiles();
 			ccmodFiles = this.filemanager.getAllCCModFiles();
 			packedMods = this.filemanager.getAllModPackages();
