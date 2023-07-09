@@ -248,7 +248,7 @@ export class ModLoader {
 			packages.push(new Package(this, modFile, modset.name));
 		}
 		for (const ccmodFile of ccmodFiles) {
-			const pkg = new Package(this, ccmodFile, modset, true);
+			const pkg = new Package(this, ccmodFile, modset.name, true);
 
 			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
 			if (existing > -1) {
