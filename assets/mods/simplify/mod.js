@@ -422,7 +422,7 @@
 			// Test modsets
 			window.modsets = [
 				{name: "test1"},
-				{name: "test2"],
+				{name: "test2"},
 			];
 			const modsets = [{name: 'default'}].concat(window.modsets);
 			if (infoBoxSupported) {
@@ -439,18 +439,18 @@
 				const optionName = `modset-${name}`;
 				const modsetOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 				options.push(modsetOption);	
-				modOption.checkboxRightAlign = true;
+				modsetOption.checkboxRightAlign = true;
 
 				const lang = ig.lang.labels.sc.gui.options;
-				lang[optionName] = {name, ""};
+				lang[optionName] = {name, description:""};
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => {
 						const isDefault = name === 'default';
-						let isActive = name === currentModSet:
+						let isActive = name === currentModSet;
 						if (isDefault && !isActive) {
 							// Look if the currentModSet is invalid
-							isActive = !modsets.some((ms) => ms.name === currentModSet));
+							isActive = !modsets.some((ms) => ms.name === currentModSet);
 							if (isActive) {
 								currentModSet = name;
 							}
@@ -459,14 +459,15 @@
 					},
 					set: value => {
 						let modsetName = name === 'default' ? '' : name;
+						const options = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui.submenus.options.hook.gui.listBox.rows;
 						if (value || name === 'default') {
 							// Uncheck all checkboxes
-							options.forEach((opt) => opt.button.setPressed(false));
+							options.forEach((opt) => opt.typeGui.button.setPressed(false));
 
 							currentModSet = modsetName;
-							localStorage.setItem(optionName, modsetName);
+							localStorage.setItem('modset', modsetName);
 						}
-						modsetOption.button.setPressed(value);
+						options.find(e => e.optionName == optionName).typeGui.button.setPressed(value);
 					}
 				});
 			}
