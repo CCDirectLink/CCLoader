@@ -144,7 +144,7 @@ export class ModLoader {
 		const modsetFiles = this.filemanager.getAllModSetsFiles();
 		let modFolder = '';	
 		let modset = null;
-		let modsets = modsetFiles.map((p) => new Modset(this, p));
+		let modsets = modsetFiles.map((manPath) => new Modset(this, manPath));
 		
 		let modFiles = [];
 		let ccmodFiles = [];
@@ -155,7 +155,7 @@ export class ModLoader {
 			// the first one found will be loaded in;
 			this.modsets = modsets;
 			const activeModsetName = localStorage.getItem('modset');
-			const activeModset = modsets.find(e => e.name === activeModsetName);
+			const activeModset = modsets.find(modset => modset.name === activeModsetName);
 			if (activeModset && activeModset.loaded) {
 				modset = activeModset;
 			} else if(activeModsetName) {
@@ -197,13 +197,14 @@ export class ModLoader {
 			const reposRoot = `assets/repos/`;
 			
 			for (const modName of modset.mods) {
-				let modFolder;
+				let parentFolder;
 				if (modToRepo[modName] == null) {
-					modFolder = modsFolder;
+					parentFolder = modsFolder;
 				} else {
-					modFolder = reposRoot + modToRepo[modName];
+					parentFolder = reposRoot + modToRepo[modName];
 				}
-				const foundModFiles = this.filemanager.getSelectModsFiles([modName], modFolder).pop() || [];
+				const selectFiles = this.filemanager.getSelectModsFiles([modName],parentFolder);
+				const foundModFiles = selectFiles.pop() || [];
 				if (foundModFiles.length === 0) {
 					console.log("Could not find", modName, "inside", modFolder);
 				} else {
