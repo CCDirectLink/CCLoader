@@ -68,26 +68,28 @@ export class Filemanager {
 	}
 
 	getSelectModsFiles(folderNames = [], modsFolder = '') {
-		let subs;
 		if (!modsFolder) {
 			modsFolder = 'assets/mods/';
 		}
-		if (modsFolder.endsWith('/')) {
-			subs = folderNames.map(e => modsFolder + e);
-		} else {
-			subs = folderNames.map(e => `${modsFolder}/${e}`);
-		}
-
 
 		const out = [];
-		for(const sub of subs) {
+		for(const folderName of folderNames) {
 			let resource = [];
-			for(const ending of this.endings) {
-				resource = this._getResourcesInFolder(sub, ending);
-				if (resource.length) {
-					break;
+			if (typeof folderName === "string") {
+				let sub;
+				if (modsFolder.endsWith('/')) {
+					sub = modsFolder + folderName;
+				} else {
+					sub = `${modsFolder}/${folderName}`;
+				}
+				for(const ending of this.endings) {
+					resource = this._getResourcesInFolder(sub, ending);
+					if (resource.length) {
+						break;
+					}
 				}
 			}
+
 			out.push(resource);
 		}
 		return out;
