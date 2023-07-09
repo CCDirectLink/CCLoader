@@ -119,6 +119,26 @@ export class ModLoader {
 	}
 
 
+	_sortModByExtension(manifestPath, modFiles, ccmodFiles, packedMods) {
+		const endings = [
+			'package.json',
+			'ccmod.json',
+			'.ccmod',
+		];
+		const selectedArray = [
+			modFiles,
+			ccmodFiles,
+			packedMods
+		];
+		for (let i = 0; i < endings.length; i++) {
+			const ending = endings[i];
+			if (manifestPath.endsWith(ending)) {
+				selectedArray[i].push(manifestPath);
+				break;
+			}
+		}
+	}
+
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available.
 	 * @returns {Promise<void>}
@@ -127,9 +147,12 @@ export class ModLoader {
 		let requiredMods = [];
 		const modsetFiles = this.filemanager.getAllModSetsFiles();
 		let modFolder = '';	
-		let modset = '';
+		let modset = null;
 		let modsets = modsetFiles.map((p) => new Modset(this, p));
 		
+		let modFiles = [];
+		let ccmodFiles = [];
+		let packedMods = [];
 		if (modsets.length > 0) {	
 			await Promise.all(modsets.map(modset => modset.load()));
 			// If there are modsets with the same name
@@ -138,19 +161,60 @@ export class ModLoader {
 			const activeModsetName = localStorage.getItem('modset');
 			const activeModset = modsets.find(e => e.name === activeModsetName);
 			if (activeModset && activeModset.loaded) {
-				modset = activeModset.name;
-				modFolder = activeModset.baseDirectory;
-				requiredMods = this.filemanager.getNecessaryModsFiles();
-				console.log("Loading in", activeModsetName, "located at", modFolder);
+				modset = activeModset;
 			} else if(activeModsetName) {
 				console.log("Could not load", activeModsetName, "loading default");
 			}
+		} 
+	
+		// load default folder
+		if (modset == null) {
+			modFiles = this.filemanager.getAllModsFiles();
+			ccmodFiles = this.filemanager.getAllCCModFiles();
+			packedMods = this.filemanager.getAllModPackages();
+		} else {
+			const modsFolder = modset.baseDirectory;
+			console.log("Loading in", modset.name, "located at", modsFolder);
+			const loaderMods = [
+				'simplify',
+				'ccloader-version-display',	
+			];
+			// Find necessary files
+			const loaderModsFiles = this.filemanager.getSelectModsFiles(loaderMods);
+			for(let i = 0; i < loaderModsFiles.length; i++) {
+				const loaderModFiles = loaderModsFiles[i];
+				if (loaderModFiles.length === 0) {
+					// Can not proceed
+				} else {
+					this._sortModByExtension(loaderModFiles[0], modFiles, ccmodFiles, packedMods);
+				}
+			}
+			// Build mod-name to repo mapping
+			const modToRepo = {};
+			for (const [repoName, repo] of Object.entries(modset.repos)) {
+				for (const modName of repo) {
+					modToRepo[modName] = repoName;
+				}
+			}
+			// TODO: Make flexible
+			const reposRoot = `assets/repos/`;
+			
+			for (const modName of modset.mods) {
+				let modFolder;
+				if (modToRepo[modName] == null) {
+					modFolder = modsFolder;
+				} else {
+					modFolder = reposRoot + modToRepo[modName];
+				}
+				const foundModFiles = this.filemanager.getSelectModsFiles([modName], modFolder).pop() || [];
+				if (foundModFiles.length === 0) {
+					console.log("Could not find", modName, "inside", modFolder);
+				} else {
+					this._sortModByExtension(foundModFiles[0], modFiles, ccmodFiles, packedMods);
+				}
+			}
 
 		}
-
-		const modFiles = requiredMods.concat(this.filemanager.getAllModsFiles(modFolder));
-		const ccmodFiles = this.filemanager.getAllCCModFiles(modFolder);
-		const packedMods = this.filemanager.getAllModPackages(modFolder);
 
 		if (packedMods.length > 0) {
 			if (window.CrossAndroid) {

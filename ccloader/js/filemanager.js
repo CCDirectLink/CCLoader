@@ -61,12 +61,35 @@ export class Filemanager {
 
 	}
 
-	getNecessaryModsFiles(modsFolder = '') {
-		const subs = [
-			'simplify',
-			'ccloader-version-display',	
-		].map(e => `assets/mods/${e}`);
-		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
+	getSelectModsFiles(folderNames = [], modsFolder = '') {
+		// Assume all strings in folderNames
+		// are valid folders
+		let subs;
+		if (!modsFolder) {
+			modsFolder = 'assets/mods/';
+			subs = folderNames.map(e => `${modsFolder}/${e}`);
+		} else {
+			subs = folderNames.map(e => `${modsFolder}/${e}`);
+		}
+		
+		const endings = [
+			'ccmod.json',
+			'package.json'
+		].map(e => this.pathSep + e);
+		endings.push('.ccmod');
+
+		const out = [];
+		for(const sub of subs) {
+			let resource = [];
+			for(const ending of endings) {
+				resource = this._getResourcesInFolder(sub, ending);
+				if (resource.length) {
+					break;
+				}
+			}
+			out.push(resource);
+		}
+		return out;
 	}
 
 	getAllModsFiles(modFolder = '') {
