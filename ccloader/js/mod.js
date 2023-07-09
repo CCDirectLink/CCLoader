@@ -5,9 +5,9 @@ export class Mod {
 	 *
 	 * @param {import('./ccloader').ModLoader} modloader
 	 */
-	constructor(modloader, modset = ''){
+	constructor(modloader, modset){
 		this.filemanager = modloader.filemanager;
-		this.modset = modset;
+		this.modset = modset || 'default';
 		this.name = '';
 		this.displayName = '';
 		this.description = '';
@@ -50,7 +50,7 @@ export class Mod {
 	
 	get enableKey() {
 		const name = this.name.toLowerCase();
-		const prefix = this.modset ? (this.modset + "-") : "";
+		const prefix = this.modset === 'default' ? '' : (this.modset + '-');
 		return `${prefix}modEnabled-${name}`;
 	}
 
