@@ -433,6 +433,7 @@
 			// In memory cache
 			let currentModSet = localStorage.getItem('modset');
 			let loaded = {};
+			const mainMenuGui = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui;
 			for (const modset of modsets) {
 				const name = modset.name;
 				const uniqueName = name.toLowerCase();
@@ -472,7 +473,7 @@
 					},
 					set: value => {
 						let modsetName = name === 'default' ? '' : name;
-						let options = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui.submenus.options;
+						let options = mainMenuGui._getMenuFromID(sc.MENU_SUBMENU.OPTIONS);
 						if (!options) {
 							return;
 						}
