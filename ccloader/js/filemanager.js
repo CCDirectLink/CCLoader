@@ -67,11 +67,13 @@ export class Filemanager {
 		let subs;
 		if (!modsFolder) {
 			modsFolder = 'assets/mods/';
-			subs = folderNames.map(e => `${modsFolder}/${e}`);
+		}
+		if (modsFolder.endsWith('/')) {
+			subs = folderNames.map(e => modsFolder + e);
 		} else {
 			subs = folderNames.map(e => `${modsFolder}/${e}`);
 		}
-		
+
 		const endings = [
 			'ccmod.json',
 			'package.json'

@@ -245,7 +245,7 @@ export class ModLoader {
 		/** @type {Package[]} */
 		const packages = [];
 		for (const modFile of modFiles) {
-			packages.push(new Package(this, modFile, modset));
+			packages.push(new Package(this, modFile, modset.name));
 		}
 		for (const ccmodFile of ccmodFiles) {
 			const pkg = new Package(this, ccmodFile, modset, true);
