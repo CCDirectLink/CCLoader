@@ -67,6 +67,11 @@ export class Filemanager {
 
 	}
 
+	/**
+	 *
+	 * @param {string[]} folderNames
+	 * @param {string} modsFolder
+	 */
 	getSelectModsFiles(folderNames = [], modsFolder = '') {
 		if (!modsFolder) {
 			modsFolder = 'assets/mods/';
