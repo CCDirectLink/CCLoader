@@ -553,7 +553,7 @@
 					get: () => localStorage.getItem(optionName) !== 'false',
 					set: value => {
 						value 
-							? localStorage.setItem(optionName, 'true')
+							? localStorage.removeItem(optionName)
 							: localStorage.setItem(optionName, 'false');
 					}
 				});
