@@ -402,7 +402,8 @@
 		}
 		async _postInitialize(){
 			this._initializeFont();
-			this._initializeOptions();
+			this._initializeModSetOptions();
+			this._initializeModOptions();
 			
 			document.body.dispatchEvent(new Event('simplifyInitialized', { bubbles: true }));
 		}
@@ -413,7 +414,67 @@
 			this.font.prepareMapping(ICON_MAPPING, page);
 			this.font.setMapping(ICON_MAPPING);
 		}
-		_initializeOptions(){
+
+		_initializeModSetOptions() {
+			const tab = this.options.addTab('modsets', 'ModSets');
+			const infoBoxSupported = !!sc.OptionInfoBox;
+			
+			// Test modsets
+			window.modsets = [
+				{name: "test1"},
+				{name: "test2"],
+			];
+			const modsets = [{name: 'default'}].concat(window.modsets);
+			if (infoBoxSupported) {
+				ig.lang.labels.sc.gui.options['modsets-description'] = {description: 'In this menu you can \\c[3]enable or disable installed modsets. \\c[1]The game needs to be restarted\\c[0] if you change any options here!'};
+
+			}
+
+			// Assume names are not duplicated, empty, or 
+			const options = [];
+			// In memory cache
+			let currentModSet = localStorage.getItem('modset');
+			for (const modset of modsets) {
+				const name = modset.name;
+				const optionName = `modset-${name}`;
+				const modsetOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
+				options.push(modsetOption);	
+				modOption.checkboxRightAlign = true;
+
+				const lang = ig.lang.labels.sc.gui.options;
+				lang[optionName] = {name, ""};
+
+				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
+					get: () => {
+						const isDefault = name === 'default';
+						let isActive = name === currentModSet:
+						if (isDefault && !isActive) {
+							// Look if the currentModSet is invalid
+							isActive = !modsets.some((ms) => ms.name === currentModSet));
+							if (isActive) {
+								currentModSet = name;
+							}
+						}
+						return isActive;
+					},
+					set: value => {
+						let modsetName = name === 'default' ? '' : name;
+						if (value || name === 'default') {
+							// Uncheck all checkboxes
+							options.forEach((opt) => opt.button.setPressed(false));
+
+							currentModSet = modsetName;
+							localStorage.setItem(optionName, modsetName);
+						}
+						modsetOption.button.setPressed(value);
+					}
+				});
+			}
+			this.options.reload();
+
+		}
+
+		_initializeModOptions(){
 			const mods = window.inactiveMods
 				.concat(window.activeMods)
 				.sort((a, b) => ('' + a.name).localeCompare(b.name));
@@ -433,7 +494,7 @@
 					continue;
 				}
 
-				const optionName = 'modEnabled-' + mod.name.toLowerCase();
+				const optionName = mod.enableKey;
 				const modOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 				// checkboxRightAlign is a custom field, see _hookRow
 				modOption.checkboxRightAlign = true;
@@ -589,6 +650,7 @@
 			this.tabs = [];
 			this._getVarNames()
 				.then(() => {
+					this._addModSetOption();
 					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();
@@ -774,6 +836,13 @@
 						.forEach(mod => mod.setPos(11, mod.hook.pos.y));
 				}
 			});
+		}
+
+		_addModSetOption() {
+			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
+
+			sc.OPTION_TYPES.MODSET = Object.keys(sc.OPTION_TYPES).length;
+			sc.OPTION_GUIS[sc.OPTION_TYPES.MODSET] = sc.OPTION_GUIS[sc.OPTION_TYPES.CHECKBOX];
 		}
 
 		_addModOption() {

@@ -55,21 +55,21 @@ export class Filemanager {
 		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
-	getAllModsFiles() {
-		const subs = this._getFolders();
+	getAllModsFiles(modFolder = '') {
+		const subs = this._getFolders(modFolder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
 	}
 
-	getAllCCModFiles() {
-		const subs = this._getFolders();
+	getAllCCModFiles(modFolder = '') {
+		const subs = this._getFolders(modFolder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'ccmod.json')));
 	}
 
-	getAllModPackages() {
+	getAllModPackages(modFolder = '') {
 		if (isAndroid && this._androidModPackages) {
 			return this._androidModPackages;
 		}
-		return this._getResourcesInFolder(null, '.ccmod');
+		return this._getResourcesInFolder(modFolder, '.ccmod');
 	}
 
 	getExtensions() {

@@ -113,14 +113,22 @@ export class ModLoader {
 		}
 	}
 
+
+	_getOverrideModFolder() {
+		// TODO: Implement checking for modsets in mod directory
+		return '';
+	}
+
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available.
 	 * @returns {Promise<void>}
 	 */
 	async _loadModPackages() {
-		const modFiles = this.filemanager.getAllModsFiles();
-		const ccmodFiles = this.filemanager.getAllCCModFiles();
-		const packedMods = this.filemanager.getAllModPackages();
+		const modFolder = this._getOverrideModFolder();
+
+		const modFiles = this.filemanager.getAllModsFiles(modFolder);
+		const ccmodFiles = this.filemanager.getAllCCModFiles(modFolder);
+		const packedMods = this.filemanager.getAllModPackages(modFolder);
 
 		if (packedMods.length > 0) {
 			if (window.CrossAndroid) {
