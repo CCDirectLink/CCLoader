@@ -4,6 +4,7 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
+import { Modset } from './modset.js';
 
 const CCLOADER_VERSION = '2.22.1';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
@@ -16,6 +17,9 @@ export class ModLoader {
 
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
+
+		/** @type {Modset[]} */
+		this.modsets = [];
 
 		/** @type {Mod[]} */
 		this.mods = [];
@@ -34,6 +38,7 @@ export class ModLoader {
 		await this.loader.initialize();
 
 		await this._loadModPackages();
+		this._registerModsets();
 		this._orderCheckMods();
 		this._registerMods();
 
@@ -114,19 +119,36 @@ export class ModLoader {
 	}
 
 
-	_getOverrideModFolder() {
-		// TODO: Implement checking for modsets in mod directory
-		return '';
-	}
-
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available.
 	 * @returns {Promise<void>}
 	 */
 	async _loadModPackages() {
-		const modFolder = this._getOverrideModFolder();
+		let requiredMods = [];
+		const modsetFiles = this.filemanager.getAllModSetsFiles();
+		let modFolder = '';	
+		let modset = '';
+		let modsets = modsetFiles.map((p) => new Modset(this, p));
+		
+		if (modsets.length > 0) {	
+			await Promise.all(modsets.map(modset => modset.load()));
+			// If there are modsets with the same name
+			// the first one found will be loaded in;
+			this.modsets = modsets;
+			const activeModsetName = localStorage.getItem('modset');
+			const activeModset = modsets.find(e => e.name === activeModsetName);
+			if (activeModset && activeModset.loaded) {
+				modset = activeModset.name;
+				modFolder = activeModset.baseDirectory;
+				requiredMods = this.filemanager.getNecessaryModsFiles();
+				console.log("Loading in", activeModsetName, "located at", modFolder);
+			} else if(activeModsetName) {
+				console.log("Could not load", activeModsetName, "loading default");
+			}
 
-		const modFiles = this.filemanager.getAllModsFiles(modFolder);
+		}
+
+		const modFiles = requiredMods.concat(this.filemanager.getAllModsFiles(modFolder));
 		const ccmodFiles = this.filemanager.getAllCCModFiles(modFolder);
 		const packedMods = this.filemanager.getAllModPackages(modFolder);
 
@@ -159,10 +181,10 @@ export class ModLoader {
 		/** @type {Package[]} */
 		const packages = [];
 		for (const modFile of modFiles) {
-			packages.push(new Package(this, modFile));
+			packages.push(new Package(this, modFile, modset));
 		}
 		for (const ccmodFile of ccmodFiles) {
-			const pkg = new Package(this, ccmodFile, true);
+			const pkg = new Package(this, ccmodFile, modset, true);
 
 			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
 			if (existing > -1) {
@@ -304,10 +326,19 @@ export class ModLoader {
 		return result;
 	}
 
+	/*
+	 * Exposes all detected modsets to the game window's object
+	 */
+	_registerModsets() {
+		window.modsets = this.modsets;
+		window.modsets = Object.freeze(window.modsets);
+	}
+
 	/**
 	 * Pushes mods into the game window's inactiveMods and activeMods arrays and registers their versions.
 	 */
 	_registerMods() {
+
 		const inactiveMods = window.inactiveMods = [];
 		const activeMods = window.activeMods = [];
 

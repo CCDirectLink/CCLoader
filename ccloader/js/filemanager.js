@@ -55,6 +55,20 @@ export class Filemanager {
 		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
+	getAllModSetsFiles(modFolder = '') {
+		const subs = this._getFolders(modFolder);
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'mods.json')));
+
+	}
+
+	getNecessaryModsFiles(modsFolder = '') {
+		const subs = [
+			'simplify',
+			'ccloader-version-display',	
+		].map(e => `assets/mods/${e}`);
+		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
+	}
+
 	getAllModsFiles(modFolder = '') {
 		const subs = this._getFolders(modFolder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));

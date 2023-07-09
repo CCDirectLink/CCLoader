@@ -1,6 +1,7 @@
 (() => {
 	const ICON_MAPPING = {
-		'mods': [0,0]
+		'mods': [0,0],
+		'modsets' : [0,0],
 	};
 
 	class Simplify {
@@ -417,32 +418,44 @@
 
 		_initializeModSetOptions() {
 			const tab = this.options.addTab('modsets', 'ModSets');
-			const infoBoxSupported = !!sc.OptionInfoBox;
 			
-			// Test modsets
-			window.modsets = [
-				{name: "test1"},
-				{name: "test2"},
-			];
 			const modsets = [{name: 'default'}].concat(window.modsets);
+
+			const infoBoxSupported = !!sc.OptionInfoBox;
 			if (infoBoxSupported) {
 				ig.lang.labels.sc.gui.options['modsets-description'] = {description: 'In this menu you can \\c[3]enable or disable installed modsets. \\c[1]The game needs to be restarted\\c[0] if you change any options here!'};
+				const descriptionEntry = this.options.addEntry('modsets-description', 'INFO', undefined, tab, 'options.modsets-description.description');
+				// marginBottom is a custom field, see _hookInfoBox
+				descriptionEntry.marginBottom = 6;
 
 			}
 
-			// Assume names are not duplicated, empty, or 
-			const options = [];
 			// In memory cache
 			let currentModSet = localStorage.getItem('modset');
+			let loaded = {};
 			for (const modset of modsets) {
 				const name = modset.name;
-				const optionName = `modset-${name}`;
+				const uniqueName = name.toLowerCase();
+				// Duplicates are not supported
+				if (loaded[uniqueName] === true) {
+					continue;
+				}
+				loaded[uniqueName] = true;
+				let description;
+
+				if (infoBoxSupported) {
+					description = (modset.description || 'If checked this modset is enabled.') + ' \\c[1]Needs a restart!';
+				} else {
+					description = modset.description || ' ';
+				}
+
+				const optionName = `modsets-${name}`;
 				const modsetOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
-				options.push(modsetOption);	
 				modsetOption.checkboxRightAlign = true;
 
 				const lang = ig.lang.labels.sc.gui.options;
-				lang[optionName] = {name, description:""};
+
+				lang[optionName] = {name, description};
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => {
@@ -459,10 +472,14 @@
 					},
 					set: value => {
 						let modsetName = name === 'default' ? '' : name;
-						const options = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui.submenus.options.hook.gui.listBox.rows;
+						let options = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui.submenus.options;
+						if (!options) {
+							return;
+						}
+						options = options.hook.gui.listBox.rows;
 						if (value || name === 'default') {
 							// Uncheck all checkboxes
-							options.forEach((opt) => opt.typeGui.button.setPressed(false));
+							options.filter((opt) => opt instanceof sc.OptionRow).forEach((opt) => opt.typeGui.button.setPressed(false));
 
 							currentModSet = modsetName;
 							localStorage.setItem('modset', modsetName);
@@ -507,7 +524,6 @@
 				
 				const lang = ig.lang.labels.sc.gui.options;
 				lang[optionName] = {name, description};
-
 				// default icon
 				modOption.icon = {
 					path: 'media/gui/menu.png',
