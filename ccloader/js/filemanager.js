@@ -24,6 +24,12 @@ export class Filemanager {
 			this.pathJoin = (...args) => args.join('/');
 		}
 
+		this.endings = [
+			this.pathSep + 'package.json',
+			this.pathSep + 'ccmod.json',
+			'.ccmod',
+		];
+
 		if (isAndroid) {
 			this._receiveInfoFromAndroid();
 		}
@@ -62,8 +68,6 @@ export class Filemanager {
 	}
 
 	getSelectModsFiles(folderNames = [], modsFolder = '') {
-		// Assume all strings in folderNames
-		// are valid folders
 		let subs;
 		if (!modsFolder) {
 			modsFolder = 'assets/mods/';
@@ -74,16 +78,11 @@ export class Filemanager {
 			subs = folderNames.map(e => `${modsFolder}/${e}`);
 		}
 
-		const endings = [
-			'ccmod.json',
-			'package.json'
-		].map(e => this.pathSep + e);
-		endings.push('.ccmod');
 
 		const out = [];
 		for(const sub of subs) {
 			let resource = [];
-			for(const ending of endings) {
+			for(const ending of this.endings) {
 				resource = this._getResourcesInFolder(sub, ending);
 				if (resource.length) {
 					break;

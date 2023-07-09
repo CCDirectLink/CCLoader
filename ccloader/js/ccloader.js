@@ -120,11 +120,7 @@ export class ModLoader {
 
 
 	_sortModByExtension(manifestPath, modFiles, ccmodFiles, packedMods) {
-		const endings = [
-			'package.json',
-			'ccmod.json',
-			'.ccmod',
-		];
+		const endings = this.filemanager.endings;
 		const selectedArray = [
 			modFiles,
 			ccmodFiles,
