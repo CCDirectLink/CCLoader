@@ -61,10 +61,9 @@ export class Filemanager {
 		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
-	getAllModSetsFiles(modFolder = '') {
-		const subs = this._getFolders(modFolder);
-		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'mods.json')));
 
+	getAllModsetFiles(modFolder = '') {
+		return this._getResourcesInFolder(modFolder, '-mods.json');
 	}
 
 	/**
@@ -76,19 +75,23 @@ export class Filemanager {
 		if (!modsFolder) {
 			modsFolder = 'assets/mods/';
 		}
+		if (!modsFolder.endsWith('/')) {
+			modsFolder += '/';
+		}
 
 		const out = [];
 		for(const folderName of folderNames) {
 			let resource = [];
 			if (typeof folderName === "string") {
-				let sub;
-				if (modsFolder.endsWith('/')) {
-					sub = modsFolder + folderName;
-				} else {
-					sub = `${modsFolder}/${folderName}`;
-				}
+				let sub = modsFolder + folderName;
 				for(const ending of this.endings) {
-					resource = this._getResourcesInFolder(sub, ending);
+					let searchFolder = sub;
+					let searchEnding = ending;
+					if (ending === '.ccmod') {
+						searchFolder = modsFolder;
+						searchEnding = folderName + ending;
+					}
+					resource = this._getResourcesInFolder(searchFolder, searchEnding);
 					if (resource.length) {
 						break;
 					}
@@ -173,7 +176,7 @@ export class Filemanager {
 		if (!this.isPacked(file)) {
 			return false;
 		}
-		
+
 		return (await fetch(file, {
 			headers: {
 				'X-Cmd': 'isFile'
@@ -288,12 +291,13 @@ export class Filemanager {
 			folder = 'assets/mods/';
 
 		if (isLocal) {
-			return this._getResoucesInLocalFolder(folder, ending);
+			return this._getResourcesInLocalFolder(folder, ending);
 		} else if (folder.endsWith('mods/')) {
-			var results = [];
-			for (var i in this.modList) {
-				if (this._resourceExists(folder + this.modList[i] + ending)) {
-					results.push(folder + this.modList[i] + ending);
+			const results = [];
+			for (const i in this.modList) {
+				const resourcePath = folder + this.modList[i] + ending;
+				if (this._resourceExists(resourcePath)) {
+					results.push(resourcePath);
 				}
 			}
 			return results;
@@ -456,7 +460,7 @@ export class Filemanager {
 	 * @param {string} folder
 	 * @param {string?} ending
 	 */
-	_getResoucesInLocalFolder(folder, ending) {
+	_getResourcesInLocalFolder(folder, ending) {
 		/** @type {string[]} */
 		let results = [];
 

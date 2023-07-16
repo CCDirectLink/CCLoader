@@ -80,26 +80,17 @@ export class ModLoader {
 	 * @param {string[]} packedMods
 	 */
 	async _loadPackedMods(packedMods) {
-		const names = packedMods.map((m) => m.substring(12, m.length));
-		await this._sendPackedModNames(packedMods);
-		this.filemanager.setPackedMods(names);
-	}
-
-	/**
-	 *
-	 * Notifies the serviceworker about existing packed mods.
-	 * @param {string[]} packedMods
-	 */
-	async _sendPackedModNames(packedMods) {
+		const names = packedMods.map((m) => {
+			const pieces = m.split(/\\|\//g);
+			return pieces.pop();
+		});
+		// Reset the cache for this session
 		const caches = window.caches;
 		const keys = await caches.keys();
 		await Promise.all(keys.map(name => caches.delete(name)));
 
-		const packedCache = await caches.open('packedMods');
-		const dummyResponse = () => new Response('', { status: 200 });
-		// CacheStorage does not like the chrome-extension:// schema
-		const dummyPrefix = 'http://localhost/';
-		await Promise.all(packedMods.map(path => packedCache.put(dummyPrefix + path, dummyResponse())));
+
+		this.filemanager.setPackedMods(names);
 	}
 
 	async _buildCrosscodeVersion() {
@@ -141,7 +132,7 @@ export class ModLoader {
 	 */
 	async _loadModPackages() {
 		let requiredMods = [];
-		const modsetFiles = this.filemanager.getAllModSetsFiles();
+		const modsetFiles = this.filemanager.getAllModsetFiles();
 		let modFolder = '';	
 		let modset = null;
 		let modsets = modsetFiles.map((manPath) => new Modset(this, manPath));
@@ -186,27 +177,19 @@ export class ModLoader {
 					this._sortModByExtension(loaderModFiles[0], modFiles, ccmodFiles, packedMods);
 				}
 			}
-			// Build mod-name to repo mapping
-			const modToRepo = {};
-			for (const [repoName, repo] of Object.entries(modset.repos)) {
-				for (const modName of repo) {
-					modToRepo[modName] = repoName;
-				}
-			}
-			// TODO: Make flexible
-			const reposRoot = `assets/repos/`;
-			
 			for (const modName of modset.mods) {
-				let parentFolder;
-				if (modToRepo[modName] == null) {
-					parentFolder = modsFolder;
-				} else {
-					parentFolder = reposRoot + modToRepo[modName];
+				let foundModFiles = [];
+				for (let searchPath of modset.searchPaths) {
+					console.log("Searching for", modName,"in", searchPath);
+					const selectFiles = this.filemanager.getSelectModsFiles([modName],searchPath);
+					foundModFiles = selectFiles.pop() || [];
+					if (foundModFiles.length > 0) {
+						break;
+					}
 				}
-				const selectFiles = this.filemanager.getSelectModsFiles([modName],parentFolder);
-				const foundModFiles = selectFiles.pop() || [];
+
 				if (foundModFiles.length === 0) {
-					console.log("Could not find", modName, "inside", modFolder);
+					console.log("Could not find", modName);
 				} else {
 					this._sortModByExtension(foundModFiles[0], modFiles, ccmodFiles, packedMods);
 				}

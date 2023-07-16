@@ -24,7 +24,7 @@ export class Modset {
 			const manifest = await this._parse(this.manifestPath);
 			this.manifest = manifest;
 
-			const {name, mods, repos} = manifest;
+			const {name, mods, searchPaths} = manifest;
 
 			assert(typeof name === "string", "modset name must be a string.");
 			assert(name !== "default", "modset name default is reserved.");
@@ -36,23 +36,25 @@ export class Modset {
 				assert(typeof mod === "string", "modset mods must be an array of strings.");
 			}
 			this.mods = mods;
-
-			if (repos != null) {
-				assert(typeof repos === "object", "repos must be an object");
-				assert(!Array.isArray(repos), "repos must not be an array.");
-				for (const repoName of Object.keys(repos)) {
-
-					assert(typeof repoName === "string", "repo name must be a string.");
-					assert(repoName.length, "repo name must not be empty.");
-					const repo = repos[repoName];
-					assert(Array.isArray(repo), `repo ${repoName} must be an array.`);
-					for(const mod of repo) {
-						assert(typeof mod === "string", `repo must be an array of strings.`);
+			let hasDot = false;
+			if (searchPaths) {
+				assert(Array.isArray(searchPaths), "modset searchPaths must be an array.");
+				for(const searchPath of searchPaths) {
+					assert(typeof searchPath === "string", "modset searchPaths must be an array of strings.");
+					if (searchPath === ".") {
+						hasDot = true;
 					}
 				}
-				this.repos = repos;
+				this.searchPaths = searchPaths;
 			} else {
-				this.repos = {};
+				this.searchPaths = [];
+			}
+			if (hasDot) {
+				const dotIndex = this.searchPaths.indexOf(".");
+				// Replace with assets/mods/
+				this.searchPaths.splice(dotIndex, 1, this.baseDirectory);
+			} else {
+				this.searchPaths.unshift(this.baseDirectory);
 			}
 			this.loaded = true;
 		} catch(e) {
