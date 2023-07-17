@@ -417,6 +417,13 @@
 		}
 
 		_initializeModSetOptions() {
+			if (!Array.isArray(window.modsets)) {
+				return;
+			}
+
+			if (window.modsets.length === 0) {
+				return;
+			}
 			const tab = this.options.addTab('modsets', 'Modsets');
 			
 			const modsets = [{name: 'default'}].concat(window.modsets);
