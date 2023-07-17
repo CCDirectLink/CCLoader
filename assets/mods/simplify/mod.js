@@ -469,8 +469,8 @@
 						return name === currentModSet;
 					},
 					set: value => {
-						let modsetName = name === 'default' ? '' : name;
-						let options = mainMenuGui._getMenuFromID(sc.MENU_SUBMENU.OPTIONS);
+						const modsetName = name === 'default' ? '' : name;
+						const options = mainMenuGui._getMenuFromID(sc.MENU_SUBMENU.OPTIONS);
 						if (!options) {
 							return;
 						}
