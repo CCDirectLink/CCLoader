@@ -432,6 +432,12 @@
 
 			// In memory cache
 			let currentModSet = localStorage.getItem('modset');
+
+			// Look if the currentModSet is invalid
+			if (!modsets.some((ms) => ms.name === currentModSet)) {
+				currentModSet = 'default';
+			}
+
 			let loaded = {};
 			const mainMenuGui = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui;
 			for (const modset of modsets) {
@@ -460,16 +466,7 @@
 
 				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
 					get: () => {
-						const isDefault = name === 'default';
-						let isActive = name === currentModSet;
-						if (isDefault && !isActive) {
-							// Look if the currentModSet is invalid
-							isActive = !modsets.some((ms) => ms.name === currentModSet);
-							if (isActive) {
-								currentModSet = name;
-							}
-						}
-						return isActive;
+						return name === currentModSet;
 					},
 					set: value => {
 						let modsetName = name === 'default' ? '' : name;
