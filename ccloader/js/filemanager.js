@@ -63,7 +63,17 @@ export class Filemanager {
 
 
 	getAllModsetFiles(modFolder = '') {
-		return this._getResourcesInFolder(modFolder, '-mods.json');
+		// Search root first
+		const modsets = this._getResourcesInFolder(modFolder, '-mods.json');
+		// Search first layer of subdirectories
+		const subs = this._getFolders(modFolder);
+		for(const sub of subs) {
+			const modset = this._getResourcesInFolder(sub, '/modset.json');
+			while (modset.length) {
+				modsets.push(modset);
+			}
+		}
+		return modsets;
 	}
 
 	/**
