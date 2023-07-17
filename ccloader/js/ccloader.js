@@ -114,9 +114,9 @@ export class ModLoader {
 	 * Adds manifestPath to the proper array based upon its extension.
 	 * Ignored if no ending matches found.
 	 * @param {string} manifestPath
-	 * @param {string[]} modFiles grouped by /package.json ending
-	 * @param {string[]} ccmodFiles grouped by /ccmod.json ending
-	 * @param {string[]} packedMods grouped by .ccmod ending
+	 * @param {string[]} modFiles - grouped by /package.json ending
+	 * @param {string[]} ccmodFiles - grouped by /ccmod.json ending
+	 * @param {string[]} packedMods - grouped by .ccmod ending
 	 */
 	_sortModByExtension(manifestPath, modFiles, ccmodFiles, packedMods) {
 		const endings = this.filemanager.endings;
