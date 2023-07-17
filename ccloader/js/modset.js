@@ -24,12 +24,14 @@ export class Modset {
 			const manifest = await this._parse(this.manifestPath);
 			this.manifest = manifest;
 
-			const {name, mods, searchPaths} = manifest;
+			const {id, name, mods, searchPaths} = manifest;
 
-			assert(typeof name === "string", "modset name must be a string.");
-			assert(name.toLowerCase() !== "default", "modset name default is reserved.");
-			assert(name.length > 0, "modset name can not be empty.");
-			this.name = name;
+			assert(typeof id === "string", "modset id must be a string.");
+			assert(id.toLowerCase() === id, "modset id can not be capitalized.");
+			assert(id.toLowerCase() !== "default", "modset id default is reserved.");
+			assert(id.length > 0, "modset id can not be empty.");
+			this.id = id;
+			this.name = name || id;
 
 			assert(Array.isArray(mods), "modset mods must be an array.");
 			for(const mod of mods) {
