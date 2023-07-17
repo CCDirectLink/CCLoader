@@ -1,7 +1,7 @@
 (() => {
 	const ICON_MAPPING = {
 		'mods': [0,0],
-		'modsets' : [0,0],
+		'modsets': [0,0],
 	};
 
 	class Simplify {
@@ -445,9 +445,9 @@
 				let description;
 
 				if (infoBoxSupported) {
-					description = (modset.description || 'If checked this modset is enabled.') + ' \\c[1]Needs a restart!';
-				} else {
 					description = modset.description || ' ';
+				} else {
+					description = (modset.description || 'If checked this modset is enabled.') + ' \\c[1]Needs a restart!';
 				}
 
 				const optionName = `modsets-${name}`;
