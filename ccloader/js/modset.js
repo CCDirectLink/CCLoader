@@ -27,7 +27,7 @@ export class Modset {
 			const {name, mods, searchPaths} = manifest;
 
 			assert(typeof name === "string", "modset name must be a string.");
-			assert(name !== "default", "modset name default is reserved.");
+			assert(name.toLowerCase() !== "default", "modset name default is reserved.");
 			assert(name.length > 0, "modset name can not be empty.");
 			this.name = name;
 
