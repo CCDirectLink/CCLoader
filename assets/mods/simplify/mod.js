@@ -417,7 +417,7 @@
 		}
 
 		_initializeModSetOptions() {
-			const tab = this.options.addTab('modsets', 'ModSets');
+			const tab = this.options.addTab('modsets', 'Modsets');
 			
 			const modsets = [{name: 'default'}].concat(window.modsets);
 
