@@ -129,7 +129,7 @@ import CustomDebugState from './lib/custom-debug-state.js';
 		loadJSON(path, callback, errorCb) {
 			const result = new Promise((resolve, reject) => {
 				this.loadFile(path)
-					.then(data => resolve(JSON.parse(stripJsonComments(data))))
+					.then(data => resolve(JSON.parse(stripJsonComments(data, {trailingCommas: true}))))
 					.catch(err => reject(err));
 			});
 	
