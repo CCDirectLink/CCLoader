@@ -1,4 +1,5 @@
 import * as patchSteps from './lib/patch-steps-lib/src/patchsteps.js';
+import stripJsonComments from './lib/strip-json-comments.js';
 import CustomDebugState from './lib/custom-debug-state.js';
 (() => {
 	const igroot = window.IG_ROOT || '';
@@ -128,7 +129,7 @@ import CustomDebugState from './lib/custom-debug-state.js';
 		loadJSON(path, callback, errorCb) {
 			const result = new Promise((resolve, reject) => {
 				this.loadFile(path)
-					.then(data => resolve(JSON.parse(data)))
+					.then(data => resolve(JSON.parse(stripJsonComments(data, {trailingCommas: true}))))
 					.catch(err => reject(err));
 			});
 	
