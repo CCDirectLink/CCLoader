@@ -65,8 +65,9 @@ export class UI {
 		/** @type {import('fs')} */
 		this.fs = window.require && window.require('fs');
 
+		this._clearLogFile();
 		this._loadImage();
-		this.applyBindings(console);
+		this.applyBindings(window.console);
 	}
 
 	get container() {
@@ -172,12 +173,12 @@ export class UI {
 				}
 
 				if (stats.size > 10490000) { //10 Mib
-					this.fs.truncate('biglog.txt', (err) => {
+					this.fs.truncate('biglog.txt', 0, (err) => {
 						return;
 					})
 				}
 			});
-			this.fs.truncate('log.txt', (err) => {
+			this.fs.truncate('log.txt', 0, (err) => {
 				return;
 			});
 		}

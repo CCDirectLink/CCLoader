@@ -323,8 +323,6 @@ export class ModLoader {
 	 * Sets up all global objects from ccloader in the game window.
 	 */
 	_setupGamewindow() {
-		this.ui.applyBindings(window.console);
-
 		const versions = Object.assign(this.versions, {
 			ccloader: CCLOADER_VERSION,
 			crosscode: this.ccVersion
