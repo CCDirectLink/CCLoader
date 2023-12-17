@@ -141,19 +141,19 @@ export class UI {
 	 */
 	_logMessageToFile(level, ...msg) {
 		if (this.fs) {
-			let msg = new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n';
+			let result = new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n';
 
 			for (const part of msg) {
 				if (part && part instanceof Error) {
-					msg += part.stack + '\n';
+					result += part.stack + '\n';
 				}
 			}
 
-			this.fs.appendFile('log.txt', msg, (err) => {
+			this.fs.appendFile('log.txt', result, (err) => {
 				//No error handling since that would cause an endless loop
 				return;
 			});
-			this.fs.appendFile('biglog.txt', msg, (err) => {
+			this.fs.appendFile('biglog.txt', result, (err) => {
 				//No error handling since that would cause an endless loop
 				return;
 			});
@@ -172,12 +172,12 @@ export class UI {
 				}
 
 				if (stats.size > 10490000) { //10 Mib
-					this.fs.writeFile('biglog.txt', '', (err) => {
+					this.fs.truncate('biglog.txt', (err) => {
 						return;
 					})
 				}
 			});
-			this.fs.writeFile('log.txt', '', (err) => {
+			this.fs.truncate('log.txt', (err) => {
 				return;
 			});
 		}
