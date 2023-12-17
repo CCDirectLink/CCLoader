@@ -315,8 +315,8 @@ export class ModLoader {
 		window.activeMods = Object.freeze(window.activeMods);
 		window.inactiveMods = Object.freeze(window.inactiveMods);
 
-		console.log('Active mods: ', activeMods.map(m => m.name + ' ' +  m.version).join(', '));
-		console.log('Inactive mods: ', inactiveMods.map(m => m.name + ' ' +  m.version).join(', '));
+		console.logToFile('Active mods: ', activeMods.map(m => m.name + ' ' +  m.version).join(', '));
+		console.logToFile('Inactive mods: ', inactiveMods.map(m => m.name + ' ' +  m.version).join(', '));
 	}
 
 	/**

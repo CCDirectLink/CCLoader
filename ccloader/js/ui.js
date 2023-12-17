@@ -101,6 +101,9 @@ export class UI {
 			}
 			log.apply(console, msg);
 		};
+		console.logToFile = (...msg) => {
+			this._logMessageToFile('file', ...msg);
+		}
 	}
 
 	/**
@@ -138,19 +141,45 @@ export class UI {
 	 */
 	_logMessageToFile(level, ...msg) {
 		if (this.fs) {
-			this.fs.appendFile('log.txt', new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n', (err) => {
-				//No error handling since that would cause an endless loop
-				return;
-			});
+			let msg = new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n';
 
 			for (const part of msg) {
 				if (part && part instanceof Error) {
-					this.fs.appendFile('log.txt', part.stack + '\n', (err) => {
-						//No error handling since that would cause an endless loop
-						return;
-					});
+					msg += part.stack + '\n';
 				}
 			}
+
+			this.fs.appendFile('log.txt', msg, (err) => {
+				//No error handling since that would cause an endless loop
+				return;
+			});
+			this.fs.appendFile('biglog.txt', msg, (err) => {
+				//No error handling since that would cause an endless loop
+				return;
+			});
+		}
+	}
+
+	/**
+	 * 
+	 */
+	_clearLogFile() {
+		if (this.fs) {
+			//The log shouldn't get that big but just in case we check it and clear it if necessary.
+			this.fs.stat('biglog.txt', (err, stats) => {
+				if (err) {
+					return null;
+				}
+
+				if (stats.size > 10490000) { //10 Mib
+					this.fs.writeFile('biglog.txt', '', (err) => {
+						return;
+					})
+				}
+			});
+			this.fs.writeFile('log.txt', '', (err) => {
+				return;
+			});
 		}
 	}
 
