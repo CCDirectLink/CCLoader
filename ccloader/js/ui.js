@@ -62,6 +62,9 @@ export class UI {
 		this.modloader = modloader;
 		this.nextID = 1;
 
+		/** @type {import('fs')} */
+		this.fs = window.require && window.require('fs');
+
 		this._loadImage();
 		this.applyBindings(console);
 	}
@@ -77,24 +80,27 @@ export class UI {
 
 		const logFlags = localStorage.getItem('logFlags') || 3;
 
-		if (logFlags & LOG_TYPE.ERROR) {
-			console.error = (...msg) => {
+		console.error = (...msg) => {
+			this._logMessageToFile('error', ...msg);
+			if (logFlags & LOG_TYPE.ERROR) {
 				this.error.apply(this, msg);
-				err.apply(console, msg);
-			};
-		}
-		if (logFlags & LOG_TYPE.WARNING) {
-			console.warn = (...msg) => {
+			}
+			err.apply(console, msg);
+		};
+		console.warn = (...msg) => {
+			this._logMessageToFile('warn', ...msg);
+			if (logFlags & LOG_TYPE.WARNING) {
 				this.warn.apply(this, msg);
-				warn.apply(console, msg);
-			};
-		}
-		if (logFlags & LOG_TYPE.INFO) {
-			console.log = (...msg) => {
+			}
+			warn.apply(console, msg);
+		};
+		console.log = (...msg) => {
+			this._logMessageToFile('log', ...msg);
+			if (logFlags & LOG_TYPE.INFO) {
 				this.log.apply(this, msg);
-				log.apply(console, msg);
-			};
-		}
+			}
+			log.apply(console, msg);
+		};
 	}
 
 	/**
@@ -123,6 +129,29 @@ export class UI {
 		}
 
 		this._drawMessage(msg.join(' '), buttons.red, 15);
+	}
+
+	/**
+	 * 
+	 * @param {string} level 
+	 * @param  {...unknown} msg 
+	 */
+	_logMessageToFile(level, ...msg) {
+		if (this.fs) {
+			this.fs.appendFile('log.txt', new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n', (err) => {
+				//No error handling since that would cause an endless loop
+				return;
+			});
+
+			for (const part of msg) {
+				if (part && part instanceof Error) {
+					this.fs.appendFile('log.txt', part.stack + '\n', (err) => {
+						//No error handling since that would cause an endless loop
+						return;
+					});
+				}
+			}
+		}
 	}
 
 	/**

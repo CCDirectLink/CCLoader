@@ -5,7 +5,7 @@ import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.22.1';
+const CCLOADER_VERSION = '2.23.0';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
@@ -314,6 +314,9 @@ export class ModLoader {
 
 		window.activeMods = Object.freeze(window.activeMods);
 		window.inactiveMods = Object.freeze(window.inactiveMods);
+
+		console.log('Active mods: ', activeMods.map(m => m.name + ' ' +  m.version).join(', '));
+		console.log('Inactive mods: ', inactiveMods.map(m => m.name + ' ' +  m.version).join(', '));
 	}
 
 	/**
