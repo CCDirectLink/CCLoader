@@ -62,8 +62,12 @@ export class UI {
 		this.modloader = modloader;
 		this.nextID = 1;
 
+		/** @type {import('fs')} */
+		this.fs = window.require && window.require('fs');
+
+		this._clearLogFile();
 		this._loadImage();
-		this.applyBindings(console);
+		this.applyBindings(window.console);
 	}
 
 	get container() {
@@ -77,23 +81,29 @@ export class UI {
 
 		const logFlags = localStorage.getItem('logFlags') || 3;
 
-		if (logFlags & LOG_TYPE.ERROR) {
-			console.error = (...msg) => {
+		console.error = (...msg) => {
+			this._logMessageToFile('error', ...msg);
+			if (logFlags & LOG_TYPE.ERROR) {
 				this.error.apply(this, msg);
-				err.apply(console, msg);
-			};
-		}
-		if (logFlags & LOG_TYPE.WARNING) {
-			console.warn = (...msg) => {
+			}
+			err.apply(console, msg);
+		};
+		console.warn = (...msg) => {
+			this._logMessageToFile('warn', ...msg);
+			if (logFlags & LOG_TYPE.WARNING) {
 				this.warn.apply(this, msg);
-				warn.apply(console, msg);
-			};
-		}
-		if (logFlags & LOG_TYPE.INFO) {
-			console.log = (...msg) => {
+			}
+			warn.apply(console, msg);
+		};
+		console.log = (...msg) => {
+			this._logMessageToFile('log', ...msg);
+			if (logFlags & LOG_TYPE.INFO) {
 				this.log.apply(this, msg);
-				log.apply(console, msg);
-			};
+			}
+			log.apply(console, msg);
+		};
+		console.logToFile = (...msg) => {
+			this._logMessageToFile('file', ...msg);
 		}
 	}
 
@@ -123,6 +133,55 @@ export class UI {
 		}
 
 		this._drawMessage(msg.join(' '), buttons.red, 15);
+	}
+
+	/**
+	 * 
+	 * @param {string} level 
+	 * @param  {...unknown} msg 
+	 */
+	_logMessageToFile(level, ...msg) {
+		if (this.fs) {
+			let result = new Date().toISOString() + ' ' + level + ': ' + msg.join(' ') + '\n';
+
+			for (const part of msg) {
+				if (part && part instanceof Error) {
+					result += part.stack + '\n';
+				}
+			}
+
+			this.fs.appendFile('log.txt', result, (err) => {
+				//No error handling since that would cause an endless loop
+				return;
+			});
+			this.fs.appendFile('biglog.txt', result, (err) => {
+				//No error handling since that would cause an endless loop
+				return;
+			});
+		}
+	}
+
+	/**
+	 * 
+	 */
+	_clearLogFile() {
+		if (this.fs) {
+			//The log shouldn't get that big but just in case we check it and clear it if necessary.
+			this.fs.stat('biglog.txt', (err, stats) => {
+				if (err) {
+					return null;
+				}
+
+				if (stats.size > 10490000) { //10 Mib
+					this.fs.truncate('biglog.txt', 0, (err) => {
+						return;
+					})
+				}
+			});
+			this.fs.truncate('log.txt', 0, (err) => {
+				return;
+			});
+		}
 	}
 
 	/**
