@@ -5,7 +5,7 @@ import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.23.0';
+const CCLOADER_VERSION = '2.23.1';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
@@ -190,7 +190,7 @@ export class ModLoader {
 		}
 
 		for (const mod of this.mods.filter(m => m.isEnabled)) {
-			this._printMissingDependencies(mod, this.mods);
+			this._printMissingDependencies(mod, [...mods, ...this.mods]);
 		}
 
 		for (const mod of this.mods) {
@@ -280,7 +280,7 @@ export class ModLoader {
 			if (isExtension && !this.extensions.includes(depName)) {
 				result[depName] = `${depDesc} is missing`
 			} else if (!enabled) {
-				result[depName] = `${depDesc} is disabled`;
+				result[depName] = `${depDesc} is disabled or could not be loaded`;
 			} else if (depVersion === null) {
 				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {
