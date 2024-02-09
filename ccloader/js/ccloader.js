@@ -189,13 +189,13 @@ export class ModLoader {
 			}
 		}
 
+		for (const mod of this.mods.filter(m => m.isEnabled)) {
+			this._printMissingDependencies(mod, [...mods, ...this.mods]);
+		}
+
 		for (const mod of this.mods) {
 			mod.disabled = true;
 			mods.push(mod);
-		}
-
-		for (const mod of this.mods.filter(m => m.isEnabled)) {
-			this._printMissingDependencies(mod, mods);
 		}
 
 		this.mods = mods;
