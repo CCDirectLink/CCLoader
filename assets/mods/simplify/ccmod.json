@@ -10,7 +10,7 @@
 		"ccloader": "^2.22.0",
 		"crosscode": "^1.0.0"
 	},
-	"main": "mod.js",
+	"poststart": "mod.js",
 	"preload": "preload.js",
 	"postload": "postload.js",
 	"prestart": "prestart.js",
