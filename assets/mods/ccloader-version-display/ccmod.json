@@ -1,0 +1,13 @@
+{
+	"id": "CCLoader display version",
+	"version": "1.1.3",
+	"title": "CCLoader display version",
+    "description": "Displays the current CCLoader version.",
+    "repository": "https://github.com/CCDirectLink/CCLoader",
+    "tags": ["base"],
+    "authors": ["2767mr", "dmitmel", "ac2pic"],
+	"dependencies": {
+		"crosscode": "^1.1.0 || 1.0.2"
+	},
+	"prestart": "prestart.js"
+}
