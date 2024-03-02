@@ -1,0 +1,9 @@
+{
+    "id": "ccloader",
+    "version": "2.23.1",
+    "title": "CCLoader",
+    "description": "Modloader for CrossCode. This or a similar modloader is needed for most mods.",
+    "repository": "https://github.com/CCDirectLink/CCLoader",
+    "tags": ["base"],
+    "authors": ["2767mr", "dmitmel", "ac2pic", "Vankerkom", "20kdc", "lexisother", "L-Sherry", "elluminance", "omegalink12", "Silverfeelin"]
+}

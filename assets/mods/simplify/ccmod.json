@@ -1,0 +1,18 @@
+{
+	"id": "Simplify",
+	"version": "2.13.0",
+	"title": "Simplify",
+    "description": "Library mod for CCLoader2.",
+    "repository": "https://github.com/CCDirectLink/CCLoader",
+    "tags": ["library", "base"],
+    "authors": ["2767mr", "lexisother","dmitmel", "elluminance", "ac2pic", "20kdc"],
+	"dependencies": {
+		"ccloader": "^2.22.0",
+		"crosscode": "^1.0.0"
+	},
+	"poststart": "mod.js",
+	"preload": "preload.js",
+	"postload": "postload.js",
+	"prestart": "prestart.js",
+	"plugin": "plugin.js"
+}
