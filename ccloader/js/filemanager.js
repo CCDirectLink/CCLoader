@@ -24,6 +24,12 @@ export class Filemanager {
 			this.pathJoin = (...args) => args.join('/');
 		}
 
+		this.endings = [
+			this.pathSep + 'package.json',
+			this.pathSep + 'ccmod.json',
+			'.ccmod',
+		];
+
 		if (isAndroid) {
 			this._receiveInfoFromAndroid();
 		}
@@ -55,21 +61,73 @@ export class Filemanager {
 		return this._loadScript(file, document, isModule ? 'module' : 'text/javascript');
 	}
 
-	getAllModsFiles() {
-		const subs = this._getFolders();
+
+	getAllModsetFiles(modFolder = '') {
+		// Search root first
+		const modsets = this._getResourcesInFolder(modFolder, '-mods.json');
+		// Search first layer of subdirectories
+		const subs = this._getFolders(modFolder);
+		for(const sub of subs) {
+			const modset = this._getResourcesInFolder(sub, '/modset.json');
+			while (modset.length) {
+				modsets.push(modset);
+			}
+		}
+		return modsets;
+	}
+
+	/**
+	 *
+	 * @param {string[]} folderNames
+	 * @param {string} modsFolder
+	 */
+	getSelectModsFiles(folderNames = [], modsFolder = '') {
+		if (!modsFolder) {
+			modsFolder = 'assets/mods/';
+		}
+		if (!modsFolder.endsWith('/')) {
+			modsFolder += '/';
+		}
+
+		const out = [];
+		for(const folderName of folderNames) {
+			let resource = [];
+			if (typeof folderName === "string") {
+				let sub = modsFolder + folderName;
+				for(const ending of this.endings) {
+					let searchFolder = sub;
+					let searchEnding = ending;
+					if (ending === '.ccmod') {
+						searchFolder = modsFolder;
+						searchEnding = folderName + ending;
+					}
+					resource = this._getResourcesInFolder(searchFolder, searchEnding);
+					if (resource.length) {
+						break;
+					}
+				}
+			}
+
+			out.push(resource);
+		}
+		return out;
+	}
+
+	getAllModsFiles(modFolder = '') {
+		const subs = this._getFolders(modFolder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'package.json')));
 	}
 
-	getAllCCModFiles() {
-		const subs = this._getFolders();
+	getAllCCModFiles(modFolder = '') {
+		const subs = this._getFolders(modFolder);
 		return [].concat(...subs.map(sub => this._getResourcesInFolder(sub, this.pathSep + 'ccmod.json')));
 	}
 
-	getAllModPackages() {
+	getAllModPackages(modFolder = '') {
 		if (isAndroid && this._androidModPackages) {
 			return this._androidModPackages;
 		}
-		return this._getResourcesInFolder(null, '.ccmod');
+		return this._getResourcesInFolder(modFolder, '.ccmod');
 	}
 
 	getExtensions() {
@@ -128,7 +186,7 @@ export class Filemanager {
 		if (!this.isPacked(file)) {
 			return false;
 		}
-		
+
 		return (await fetch(file, {
 			headers: {
 				'X-Cmd': 'isFile'
@@ -243,12 +301,13 @@ export class Filemanager {
 			folder = 'assets/mods/';
 
 		if (isLocal) {
-			return this._getResoucesInLocalFolder(folder, ending);
+			return this._getResourcesInLocalFolder(folder, ending);
 		} else if (folder.endsWith('mods/')) {
-			var results = [];
-			for (var i in this.modList) {
-				if (this._resourceExists(folder + this.modList[i] + ending)) {
-					results.push(folder + this.modList[i] + ending);
+			const results = [];
+			for (const i in this.modList) {
+				const resourcePath = folder + this.modList[i] + ending;
+				if (this._resourceExists(resourcePath)) {
+					results.push(resourcePath);
 				}
 			}
 			return results;
@@ -411,7 +470,7 @@ export class Filemanager {
 	 * @param {string} folder
 	 * @param {string?} ending
 	 */
-	_getResoucesInLocalFolder(folder, ending) {
+	_getResourcesInLocalFolder(folder, ending) {
 		/** @type {string[]} */
 		let results = [];
 

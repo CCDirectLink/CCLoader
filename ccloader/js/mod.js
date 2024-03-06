@@ -5,9 +5,9 @@ export class Mod {
 	 *
 	 * @param {import('./ccloader').ModLoader} modloader
 	 */
-	constructor(modloader){
+	constructor(modloader, modset){
 		this.filemanager = modloader.filemanager;
-
+		this.modset = modset || 'default';
 		this.name = '';
 		this.displayName = '';
 		this.description = '';
@@ -48,11 +48,16 @@ export class Mod {
 		return this._loadPlugin();
 	}
 	
+	get enableKey() {
+		const name = this.name.toLowerCase();
+		const prefix = this.modset === 'default' ? '' : (this.modset + '-');
+		return `${prefix}modEnabled-${name}`;
+	}
+
 	get isEnabled(){
 		if(this.disabled)
 			return false;
-
-		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
+		return localStorage.getItem(this.enabledKey) !== 'false';
 	}
 
 	/**
@@ -92,6 +97,7 @@ export class Mod {
 
 	async _loadPlugin() {
 		window._tmp = this.plugin;
+		// This code is relative to 
 		const module = await window.eval.bind(this)(`
 			import('../../assets/' + window._tmp);
 		`);

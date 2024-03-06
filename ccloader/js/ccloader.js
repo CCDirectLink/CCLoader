@@ -4,6 +4,7 @@ import { Loader } from './loader.js';
 import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
+import { Modset } from './modset.js';
 
 const CCLOADER_VERSION = '2.23.1';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
@@ -16,6 +17,9 @@ export class ModLoader {
 
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
+
+		/** @type {Modset[]} */
+		this.modsets = [];
 
 		/** @type {Mod[]} */
 		this.mods = [];
@@ -34,6 +38,7 @@ export class ModLoader {
 		await this.loader.initialize();
 
 		await this._loadModPackages();
+		this._registerModsets();
 		this._orderCheckMods();
 		this._registerMods();
 
@@ -75,26 +80,17 @@ export class ModLoader {
 	 * @param {string[]} packedMods
 	 */
 	async _loadPackedMods(packedMods) {
-		const names = packedMods.map((m) => m.substring(12, m.length));
-		await this._sendPackedModNames(packedMods);
-		this.filemanager.setPackedMods(names);
-	}
-
-	/**
-	 *
-	 * Notifies the serviceworker about existing packed mods.
-	 * @param {string[]} packedMods
-	 */
-	async _sendPackedModNames(packedMods) {
+		const names = packedMods.map((m) => {
+			const pieces = m.split(/\\|\//g);
+			return pieces.pop();
+		});
+		// Reset the cache for this session
 		const caches = window.caches;
 		const keys = await caches.keys();
 		await Promise.all(keys.map(name => caches.delete(name)));
 
-		const packedCache = await caches.open('packedMods');
-		const dummyResponse = () => new Response('', { status: 200 });
-		// CacheStorage does not like the chrome-extension:// schema
-		const dummyPrefix = 'http://localhost/';
-		await Promise.all(packedMods.map(path => packedCache.put(dummyPrefix + path, dummyResponse())));
+
+		this.filemanager.setPackedMods(names);
 	}
 
 	async _buildCrosscodeVersion() {
@@ -113,14 +109,101 @@ export class ModLoader {
 		}
 	}
 
+
+	/**
+	 * Adds manifestPath to the proper array based upon its extension.
+	 * Ignored if no ending matches found.
+	 * @param {string} manifestPath
+	 * @param {string[]} modFiles - grouped by /package.json ending
+	 * @param {string[]} ccmodFiles - grouped by /ccmod.json ending
+	 * @param {string[]} packedMods - grouped by .ccmod ending
+	 */
+	_sortModByExtension(manifestPath, modFiles, ccmodFiles, packedMods) {
+		const endings = this.filemanager.endings;
+		const selectedArray = [
+			modFiles,
+			ccmodFiles,
+			packedMods
+		];
+		for (let i = 0; i < endings.length; i++) {
+			const ending = endings[i];
+			if (manifestPath.endsWith(ending)) {
+				selectedArray[i].push(manifestPath);
+				break;
+			}
+		}
+	}
+
 	/**
 	 * Loads the package.json of the mods. This makes sure all necessary data needed for loading the mod is available.
 	 * @returns {Promise<void>}
 	 */
 	async _loadModPackages() {
-		const modFiles = this.filemanager.getAllModsFiles();
-		const ccmodFiles = this.filemanager.getAllCCModFiles();
-		const packedMods = this.filemanager.getAllModPackages();
+		let requiredMods = [];
+		const modsetFiles = this.filemanager.getAllModsetFiles();
+		let modFolder = '';	
+		let modset = null;
+		let modsets = modsetFiles.map((manPath) => new Modset(this, manPath));
+		
+		let modFiles = [];
+		let ccmodFiles = [];
+		let packedMods = [];
+		if (modsets.length > 0) {	
+			await Promise.all(modsets.map(modset => modset.load()));
+			// If there are modsets with the same name
+			// the first one found will be loaded in;
+			this.modsets = modsets;
+			const activeModsetName = localStorage.getItem('modset');
+			const activeModset = modsets.find(modset => modset.name === activeModsetName);
+			if (activeModset && activeModset.loaded) {
+				modset = activeModset;
+			} else if(activeModsetName) {
+				console.log("Could not load", activeModsetName, "loading default");
+			}
+		} 
+	
+		// load default folder
+		if (modset == null) {
+			modset = {name: 'default'};
+			modFiles = this.filemanager.getAllModsFiles();
+			ccmodFiles = this.filemanager.getAllCCModFiles();
+			packedMods = this.filemanager.getAllModPackages();
+		} else {
+			const modsFolder = modset.baseDirectory;
+			console.log("Loading in", modset.name, "located at", modsFolder);
+			const loaderMods = [
+				'simplify',
+				'ccloader-version-display',	
+			];
+			// Find necessary files
+			const loaderModsFiles = this.filemanager.getSelectModsFiles(loaderMods);
+			for(let i = 0; i < loaderModsFiles.length; i++) {
+				const loaderModFiles = loaderModsFiles[i];
+				if (loaderModFiles.length === 0) {
+					// Can not proceed
+				} else {
+					this._sortModByExtension(loaderModFiles[0], modFiles, ccmodFiles, packedMods);
+				}
+			}
+			for (const modName of modset.mods) {
+				let foundModFiles = [];
+				for (let searchPath of modset.searchPaths) {
+					console.log("Searching for", modName,"in", searchPath);
+					const selectFiles = this.filemanager.getSelectModsFiles([modName],searchPath);
+					foundModFiles = selectFiles.pop() || [];
+					if (foundModFiles.length > 0) {
+						break;
+					}
+				}
+
+				if (foundModFiles.length === 0) {
+					console.log("Could not find", modName);
+				} else {
+					this._sortModByExtension(foundModFiles[0], modFiles, ccmodFiles, packedMods);
+				}
+			}
+
+		}
 
 		if (packedMods.length > 0) {
 			if (window.CrossAndroid) {
@@ -151,10 +234,10 @@ export class ModLoader {
 		/** @type {Package[]} */
 		const packages = [];
 		for (const modFile of modFiles) {
-			packages.push(new Package(this, modFile));
+			packages.push(new Package(this, modFile, modset.name));
 		}
 		for (const ccmodFile of ccmodFiles) {
-			const pkg = new Package(this, ccmodFile, true);
+			const pkg = new Package(this, ccmodFile, modset.name, true);
 
 			const existing = packages.findIndex(p => p.baseDirectory === pkg.baseDirectory);
 			if (existing > -1) {
@@ -296,10 +379,19 @@ export class ModLoader {
 		return result;
 	}
 
+	/*
+	 * Exposes all detected modsets to the game window's object
+	 */
+	_registerModsets() {
+		window.modsets = this.modsets;
+		window.modsets = Object.freeze(window.modsets);
+	}
+
 	/**
 	 * Pushes mods into the game window's inactiveMods and activeMods arrays and registers their versions.
 	 */
 	_registerMods() {
+
 		const inactiveMods = window.inactiveMods = [];
 		const activeMods = window.activeMods = [];
 

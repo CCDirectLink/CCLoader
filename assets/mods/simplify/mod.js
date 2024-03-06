@@ -1,6 +1,7 @@
 (() => {
 	const ICON_MAPPING = {
-		'mods': [0,0]
+		'mods': [0,0],
+		'modsets': [0,0],
 	};
 
 	class Simplify {
@@ -402,7 +403,8 @@
 		}
 		async _postInitialize(){
 			this._initializeFont();
-			this._initializeOptions();
+			this._initializeModSetOptions();
+			this._initializeModOptions();
 			
 			document.body.dispatchEvent(new Event('simplifyInitialized', { bubbles: true }));
 		}
@@ -413,7 +415,89 @@
 			this.font.prepareMapping(ICON_MAPPING, page);
 			this.font.setMapping(ICON_MAPPING);
 		}
-		_initializeOptions(){
+
+		_initializeModSetOptions() {
+			if (!Array.isArray(window.modsets)) {
+				return;
+			}
+
+			if (window.modsets.length === 0) {
+				return;
+			}
+			const tab = this.options.addTab('modsets', 'Modsets');
+			
+			const modsets = [{name: 'default'}].concat(window.modsets);
+
+			const infoBoxSupported = !!sc.OptionInfoBox;
+			if (infoBoxSupported) {
+				ig.lang.labels.sc.gui.options['modsets-description'] = {description: 'In this menu you can \\c[3]enable or disable installed modsets. \\c[1]The game needs to be restarted\\c[0] if you change any options here!'};
+				const descriptionEntry = this.options.addEntry('modsets-description', 'INFO', undefined, tab, 'options.modsets-description.description');
+				// marginBottom is a custom field, see _hookInfoBox
+				descriptionEntry.marginBottom = 6;
+
+			}
+
+			// In memory cache
+			let currentModSet = localStorage.getItem('modset');
+
+			// Look if the currentModSet is invalid
+			if (!modsets.some((ms) => ms.name === currentModSet)) {
+				currentModSet = 'default';
+			}
+
+			let loaded = {};
+			const mainMenuGui = ig.gui.guiHooks.find((h) => h.gui instanceof sc.MainMenu).gui;
+			for (const modset of modsets) {
+				const name = modset.name;
+				const uniqueName = name.toLowerCase();
+				// Duplicates are not supported
+				if (loaded[uniqueName] === true) {
+					continue;
+				}
+				loaded[uniqueName] = true;
+				let description;
+
+				if (infoBoxSupported) {
+					description = modset.description || ' ';
+				} else {
+					description = (modset.description || 'If checked this modset is enabled.') + ' \\c[1]Needs a restart!';
+				}
+
+				const optionName = `modsets-${name}`;
+				const modsetOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
+				modsetOption.checkboxRightAlign = true;
+
+				const lang = ig.lang.labels.sc.gui.options;
+
+				lang[optionName] = {name, description};
+
+				Object.defineProperty(sc.options[this.options.valuesName], optionName, {
+					get: () => {
+						return name === currentModSet;
+					},
+					set: value => {
+						const modsetName = name === 'default' ? '' : name;
+						const options = mainMenuGui._getMenuFromID(sc.MENU_SUBMENU.OPTIONS);
+						if (!options) {
+							return;
+						}
+						options = options.hook.gui.listBox.rows;
+						if (value || name === 'default') {
+							// Uncheck all checkboxes
+							options.filter((opt) => opt instanceof sc.OptionRow).forEach((opt) => opt.typeGui.button.setPressed(false));
+
+							currentModSet = modsetName;
+							localStorage.setItem('modset', modsetName);
+						}
+						options.find(e => e.optionName == optionName).typeGui.button.setPressed(value);
+					}
+				});
+			}
+			this.options.reload();
+
+		}
+
+		_initializeModOptions(){
 			const mods = window.inactiveMods
 				.concat(window.activeMods)
 				.sort((a, b) => ('' + a.name).localeCompare(b.name));
@@ -433,7 +517,7 @@
 					continue;
 				}
 
-				const optionName = 'modEnabled-' + mod.name.toLowerCase();
+				const optionName = mod.enableKey;
 				const modOption = this.options.addEntry(optionName, 'CHECKBOX', true, tab, undefined, true);
 				// checkboxRightAlign is a custom field, see _hookRow
 				modOption.checkboxRightAlign = true;
@@ -445,7 +529,6 @@
 				
 				const lang = ig.lang.labels.sc.gui.options;
 				lang[optionName] = {name, description};
-
 				// default icon
 				modOption.icon = {
 					path: 'media/gui/menu.png',
@@ -475,7 +558,7 @@
 					get: () => localStorage.getItem(optionName) !== 'false',
 					set: value => {
 						value 
-							? localStorage.setItem(optionName, 'true')
+							? localStorage.removeItem(optionName)
 							: localStorage.setItem(optionName, 'false');
 					}
 				});
@@ -589,6 +672,7 @@
 			this.tabs = [];
 			this._getVarNames()
 				.then(() => {
+					this._addModSetOption();
 					this._addModOption();
 					this._hookTabBox();
 					this._hookRow();
@@ -774,6 +858,13 @@
 						.forEach(mod => mod.setPos(11, mod.hook.pos.y));
 				}
 			});
+		}
+
+		_addModSetOption() {
+			if (!sc.OPTION_GUIS || !sc.OPTION_TYPES) return;
+
+			sc.OPTION_TYPES.MODSET = Object.keys(sc.OPTION_TYPES).length;
+			sc.OPTION_GUIS[sc.OPTION_TYPES.MODSET] = sc.OPTION_GUIS[sc.OPTION_TYPES.CHECKBOX];
 		}
 
 		_addModOption() {

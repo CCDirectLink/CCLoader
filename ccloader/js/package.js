@@ -6,11 +6,11 @@ export class Package {
 	 * @param {import('./ccloader').ModLoader} modloader
 	 * @param {string} file 
 	 */
-	constructor(modloader, file, ccmod = false) {
+	constructor(modloader, file, modset = '', ccmod = false) {
 		this.file = file;
 		this.modloader = modloader;
 		this.ccmod = ccmod;
-
+		this.modset = modset;
 		this.baseDirectory = this._getBaseName(file).replace(/\\/g, '/').replace(/\/\//g, '/') + '/';
 	}
 
@@ -27,7 +27,7 @@ export class Package {
 	 * @returns {Mod}
 	 */
 	async _loadPackage() {
-		const result = new Mod(this.modloader);
+		const result = new Mod(this.modloader, this.modset);
 		const file = this.file;
 
 		/** @type {{name: string, displayName?: string, ccmodHumanName?: string, version?: string, description?: string, icons?: {[size: string]: string}, module?: boolean, hidden?: boolean, main?: string, preload?: string, postload?: string, prestart?: string, assets: string[], ccmodDependencies: {[key: string]: string}}} */
@@ -70,7 +70,7 @@ export class Package {
 	 * @returns {Mod}
 	 */
 	async _loadCCMod() {
-		const result = new Mod(this.modloader);
+		const result = new Mod(this.modloader, this.modset);
 		const file = this.file;
 
 		let manifest;
