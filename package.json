@@ -2,7 +2,7 @@
   "name": "CrossCode",
   "version" : "0.2.3",
   "main": "ccloader/index.html",
-  "chromium-args" : "--ignore-gpu-blacklist --disable-direct-composition --disable-background-networking --in-process-gpu --password-store=basic --auto-open-devtools-for-tabs",
+  "chromium-args" : "--ignore-gpu-blacklist --disable-direct-composition --disable-background-networking --in-process-gpu --password-store=basic",
   "window" : {
 	"toolbar" : false,
 	"icon" : "favicon.png",
