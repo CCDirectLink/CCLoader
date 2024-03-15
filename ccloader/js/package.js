@@ -93,7 +93,7 @@ export class Package {
 		result.icons = manifest.icons;
 		result.version = manifest.version || '0.0.0';
 		result.module = manifest.module === undefined || !!manifest.module;
-		result.hidden = false;
+		result.hidden = manifest.id === 'Simplify';
 
 		result.main = this._normalizeScript(file, manifest.poststart);
 		result.preload = this._normalizeScript(file, manifest.preload);

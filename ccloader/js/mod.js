@@ -51,6 +51,8 @@ export class Mod {
 	get isEnabled(){
 		if(this.disabled)
 			return false;
+		if(this.hidden)
+			return true;
 
 		return localStorage.getItem('modEnabled-' + this.name.toLowerCase()) !== 'false';
 	}
