@@ -31,7 +31,14 @@ declare namespace ccloader {
         get baseDirectory(): string;
         get isEnabled(): boolean;
 
-	    getAsset(path: string): string | undefined;
-        setAsset(original: string, newPath: string): void;
+	    getAsset(path: string): string | string[] | undefined;
+        setAsset(original: string, newPath: string | string[]): void;
+        
+        /**
+         * Adds a patch to the mod.
+         * @param original The original file path without .patch
+         * @param patchPath The patch file path with .patch
+         */
+        addPatch(original: string, ...patchPath: string[]): void;
     }
 }

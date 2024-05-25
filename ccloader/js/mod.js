@@ -27,6 +27,8 @@ export class Mod {
 
 		/** @type {string[]} */
 		this.assets = [];
+		/** @type {Record<string, string|string[]>} */
+		this.runtimeAssets = {};
 		/** @type {Record<string, string>} */
 		this.dependencies = {};
 	}
@@ -60,18 +62,19 @@ export class Mod {
 	/**
 	 *
 	 * @param {string} path
+	 * @returns {string|string[]|undefined}
 	 */
 	getAsset(path){
 		path = path.replace(/\\/g, '/').trim();
 
-		if (this.runtimeAssets && this.runtimeAssets[path]) {
+		if (this.runtimeAssets[path]) {
 			return this.runtimeAssets[path];
 		}
 
-		const base = this.baseDirectory.substr(7) + 'assets/';
+		const base = this.baseDirectory.substring(7) + 'assets/';
 		for (const asset of this.assets) {
 			if (asset.startsWith(base)) {
-				if (asset.substr(base.length) === path) {
+				if (asset.substring(base.length) === path) {
 					return asset;
 				}
 			} else {
@@ -85,10 +88,26 @@ export class Mod {
 	/**
 	 *
 	 * @param {string} original
-	 * @param {string} newPath
+	 * @param {string|string[]} newPath
 	 */
 	setAsset(original, newPath){
 		this.runtimeAssets[original] = newPath;
+	}
+
+	/**
+	 * Adds a patch to the mod.
+	 * @param {string} original The original file path without .patch
+	 * @param {string[]} patchPath The patch file path with .patch
+	 */
+	addPatch(original, ...patchPath) {
+		const originalPatchPath = original + '.patch';
+		let list = this.runtimeAssets[originalPatchPath] || [];
+		if (typeof patchPath === 'string') {
+			list = [list, ...patchPath];
+		} else {
+			list.push(...patchPath);
+		}
+		this.runtimeAssets[originalPatchPath] = list;
 	}
 
 

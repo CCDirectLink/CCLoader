@@ -402,7 +402,11 @@ import CustomDebugState from './lib/custom-debug-state.js';
 			for (const mod of window.activeMods) {
 				const asset = mod.getAsset(name);
 				if(asset) {
-					result.push(asset);
+					if (typeof asset === 'string') {
+						result.push(asset);
+					} else {
+						result.push(...asset);
+					}
 				}
 			}
 
@@ -425,10 +429,19 @@ import CustomDebugState from './lib/custom-debug-state.js';
 			for (const mod of window.activeMods) {
 				const asset = mod.getAsset(name);
 				if(asset) {
-					result.push({
-						mod: mod,
-						path: asset
-					});
+					if (typeof asset === 'string') {
+						result.push({
+							mod: mod,
+							path: asset
+						});
+					} else {
+						for (const subasset of asset) {
+							result.push({
+								mod: mod,
+								path: subasset
+							});
+						}
+					}
 				}
 			}
 
