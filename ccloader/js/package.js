@@ -105,6 +105,9 @@ export class Package {
 		result.assets = await this._findAssets(this._getBaseName(file) + '/assets/', manifest.assets);
 		result.dependencies = manifest.ccmodDependencies || manifest.dependencies || {};
 
+		result.repository = manifest.repository;
+		result.homepage = manifest.homepage;
+
 		return result;
 	}
 	
