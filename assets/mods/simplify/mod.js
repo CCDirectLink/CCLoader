@@ -140,7 +140,7 @@
 		 * 
 		 * @param {string|Mod} mod 
 		 * @param {string} name 
-		 * @returns {string}
+		 * @returns {string|string[]}
 		 */
 		getAsset(mod, name) {
 			if(!mod) {
@@ -164,7 +164,11 @@
 			for (const mod of window.activeMods) {
 				const asset = mod.getAsset(name);
 				if(asset) {
-					result.push(asset);
+					if (typeof asset === 'string') {
+						result.push(asset);
+					} else {
+						result.push(...asset);
+					}
 				}
 			}
 
