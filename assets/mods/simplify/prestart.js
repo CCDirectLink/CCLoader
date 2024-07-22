@@ -3,6 +3,12 @@ ig.module('impact.feature.greenworks.greenworks-fix').requires('impact.feature.g
 		init: function() {
 			this.name = 'Greenworks';
 			this.greenworks = null;
+
+			const onError = (errorMsg) => {
+				this.steps.push('error');
+				this.errorMsg = errorMsg;
+			};
+
 			try {
 				const semver = window.semver;
 				
@@ -26,11 +32,10 @@ ig.module('impact.feature.greenworks.greenworks-fix').requires('impact.feature.g
 						this.greenworks.init();	
 					}
 				} else {
-					throw Error('Did not start from steam.');
+					onError('Did not start from steam.');
 				}
 			} catch (error) {
-				this.steps.push('error');
-				this.errorMsg = error.toString();
+				onError(error.toString());
 			}
 
 			if (this.greenworks) {
