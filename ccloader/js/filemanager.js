@@ -273,10 +273,10 @@ export class Filemanager {
 			})).json();
 		}
 
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			this.fs.readdir(dir, (err, files) => {
 				if (err) {
-					reject(err);
+					resolve([]);
 				} else {
 					resolve(files);
 				}
