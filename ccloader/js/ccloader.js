@@ -34,6 +34,7 @@ export class ModLoader {
 		await this.loader.initialize();
 
 		await this._loadModPackages();
+		this._removeDuplicateMods();
 		this._orderCheckMods();
 		this._registerMods();
 
@@ -165,6 +166,29 @@ export class ModLoader {
 		}
 
 		this.mods = await Promise.all(packages.map(pkg => pkg.load()));
+	}
+
+	_removeDuplicateMods() {
+		/** @type {Map<string, Mod>} The key is the name/id of the mod */
+		const mods = new Map();
+		for (const mod of this.mods) {
+			if (mods.has(mod.name)) {
+				const existing = mods.get(mod.name);
+				if (semver.lt(mod.version, existing.version)) {
+					console.warn(`Duplicate mod found: ${existing.displayName} preferred version ${existing.version} over ${mod.version}`);
+					mod.disabled = true;
+					continue;
+				} else if (semver.eq(mod.version, existing.version)) {
+					console.warn(`Duplicate mod found: ${mod.displayName} version ${mod.version}. Picking the first one.`);
+					existing.disabled = true;
+				} else {
+					console.warn(`Duplicate mod found: ${mod.displayName} preferred version ${mod.version} over ${existing.version}`);
+					existing.disabled = true;
+				}
+			}
+			
+			mods.set(mod.name, mod);
+		}
 	}
 
 	/**
