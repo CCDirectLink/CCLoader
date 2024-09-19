@@ -1,7 +1,8 @@
 /// <reference path="../../../ccloader/js/types/plugin.d.ts" />
 
 import * as compat from './compat.js';
-import './classInject.js'
+import './classInject.js';
+import { fixPatterns } from './pattern-fix.js';
 
 /**
  * @extends {ccloader.Plugin}
@@ -18,7 +19,7 @@ export default class Simplify extends Plugin {
 		this._applyArgs();
 		this._hookStart();
 	}
-	
+
 	postload() {
 		this._applyArgs();
 		return import('./postloadModule.js');
@@ -28,12 +29,16 @@ export default class Simplify extends Plugin {
 		await compat.apply(this.baseDir);
 	}
 
+	prestart() {
+		fixPatterns();
+	}
+
 	_hookStart() {
 		let original = window.startCrossCode;
 		Object.defineProperty(window, 'startCrossCode', {
 			get() {
 				if (original) {
-					return async(...args) => {
+					return async (...args) => {
 						if (window.CrossAndroid && window.CrossAndroid.executePostGameLoad) {
 							window.CrossAndroid.executePostGameLoad();
 						}
@@ -44,11 +49,11 @@ export default class Simplify extends Plugin {
 								console.error(`Could not run prestart of mod '${mod.name}': `, e);
 							}
 						}
-						
+
 						const event = document.createEvent('Event');
 						event.initEvent('prestart', true, false);
 						document.dispatchEvent(event);
-	
+
 						return original(...args);
 					};
 				}
@@ -67,7 +72,7 @@ export default class Simplify extends Plugin {
 			window[name] = value;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @returns {[string, string][]}
@@ -77,7 +82,7 @@ export default class Simplify extends Plugin {
 		if (nwGui) {
 			return nwGui.App.argv.map(e => e.split('='));
 		} else {
-			return Array.from(new URL(window.location.href).searchParams.entries())
+			return Array.from(new URL(window.location.href).searchParams.entries());
 		}
 	}
 }
