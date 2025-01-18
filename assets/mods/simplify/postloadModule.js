@@ -29,7 +29,7 @@ import CustomDebugState from './lib/custom-debug-state.js';
 			const baseDir = mod.baseDirectory.substr(7);
 			const assets = window.simplify.getAssets(mod);
 			for (const asset of assets) {
-				if(asset.endsWith('.patch')) {
+				if(!asset.endsWith('.json')) {
 					continue;
 				}
 	
@@ -96,19 +96,7 @@ import CustomDebugState from './lib/custom-debug-state.js';
 		 * @returns {Promise<string>}
 		 */
 		loadFile(path, callback, errorCb) {
-			const result = new Promise((resolve, reject) => {
-				path = this._stripAssets(path);
-		
-				const req = new XMLHttpRequest();
-				req.open('GET', path, true);
-				req.onreadystatechange = function(){
-					if(req.readyState === 4 && req.status >= 200 && req.status < 300) {
-						resolve(req.responseText);
-					}
-				};
-				req.onerror = err => reject(err);
-				req.send();
-			});
+			const result = fetch(this._stripAssets(path)).then(resp => resp.text());
 	
 			if (callback || errorCb) {
 				result
