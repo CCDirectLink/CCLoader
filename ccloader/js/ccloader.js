@@ -400,14 +400,14 @@ export class ModLoader {
 	 * @returns {Promise<void>}
 	 */
 	_waitForGame() {
-		return new Promise(resolve => {
-			const intervalid = setInterval(() => {
-				if (window.ig && window.ig.ready) {
-					clearInterval(intervalid);
-					resolve();
-				}
-			}, 1000);
-		});
+		sc.StartLoader.inject({
+			onEnd() {
+				this.parent();
+				ig.waitingForGame();
+			}
+		})
+
+		return new Promise(res => (ig.waitingForGame = res));
 	}
 
 	async _executeMain() {
