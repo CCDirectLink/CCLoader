@@ -401,9 +401,11 @@ export class ModLoader {
 	 */
 	_waitForGame() {
 		sc.StartLoader.inject({
-			onEnd() {
+			finalize() {
 				this.parent();
-				ig.waitingForGame();
+				if (ig.ready) {
+					ig.waitingForGame();
+				}
 			}
 		})
 
