@@ -400,11 +400,12 @@ export class ModLoader {
 	 * @returns {Promise<void>}
 	 */
 	_waitForGame() {
-		sc.StartLoader.inject({
+		ig.Loader.inject({
 			finalize() {
 				this.parent();
-				if (ig.ready) {
+				if (ig.ready && ig.waitingForGame) {
 					ig.waitingForGame();
+					ig.waitingForGame = undefined
 				}
 			}
 		})
