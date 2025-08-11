@@ -107,6 +107,8 @@ export class Package {
 
 		result.repository = manifest.repository;
 		result.homepage = manifest.homepage;
+		result.tags = manifest.tags;
+		result.authors = manifest.authors;
 
 		return result;
 	}
