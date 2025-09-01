@@ -104,7 +104,19 @@ export class UI {
 		};
 		console.logToFile = (...msg) => {
 			this._logMessageToFile('file', ...msg);
-		}
+		};
+
+		this.attachErrorListeners(window);
+	}
+
+	attachErrorListeners(window) {
+		window.addEventListener('error',  error => {
+			this._logMessageToFile('unhandled exception', error.message, error.error);
+		});
+		
+		window.addEventListener('unhandledrejection',  error => {
+			this._logMessageToFile('unhandled rejection', error.reason.message, error.reason);
+		});
 	}
 
 	/**
@@ -204,6 +216,10 @@ export class UI {
 	 * @param {number} timeout Timeout in seconds
 	 */
 	_drawButton(text, type, timeout) {
+		if (!this.container) {
+			return;
+		}
+
 		const id = 'uimsg_' + this.nextID++;
 		
 		const entry = document.createElement('div');

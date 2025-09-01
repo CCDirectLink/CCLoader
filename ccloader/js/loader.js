@@ -2,9 +2,11 @@ export class Loader {
 	/**
 	 *
 	 * @param {import('./filemanager.js').Filemanager} filemanager
+	 * @param {import('./ui.js').UI} ui
 	 */
-	constructor(filemanager) {
+	constructor(filemanager, ui) {
 		this.filemanager = filemanager;
+		this.ui = ui;
 		/** @type {Document} */
 		this.doc = null;
 		/** @type {HTMLElement} */
@@ -84,6 +86,8 @@ export class Loader {
 		document.open();
 		document.write(this.doc.documentElement.outerHTML);
 		document.close();
+
+		this.ui.attachErrorListeners(window);
 	}
 
 	_copyUI() {

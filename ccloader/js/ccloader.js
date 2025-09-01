@@ -5,14 +5,14 @@ import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.25.5';
+const CCLOADER_VERSION = '2.25.6';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
 	constructor() {
 		this.filemanager = new Filemanager(this);
 		this.ui = new UI(this);
-		this.loader = new Loader(this.filemanager);
+		this.loader = new Loader(this.filemanager, this.ui);
 
 		this.overlay = document.getElementById('overlay');
 		this.status = document.getElementById('status');
