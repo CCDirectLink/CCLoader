@@ -268,7 +268,7 @@ export class ModLoader {
 			if (!Object.prototype.hasOwnProperty.call(deps, depName))
 				continue;
 
-			const depRange = semver.validRange(deps[depName]);
+			const depRange = semver.validRange(deps[depName], { includePrerelease: true });
 			if (!depRange) {
 				result[depName] = `Syntax error in version range "${deps[depName]}" for dependency ${depName}`;
 				continue;
@@ -309,7 +309,7 @@ export class ModLoader {
 				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {
 				result[depName] = `${depDesc}'s version "${depVersion}" has a syntax error`;
-			} else if (!semver.satisfies(depVersion, depRange)) {
+			} else if (!semver.satisfies(depVersion, depRange, { includePrerelease: true })) {
 				result[depName] = `requires ${depDesc} version ${depRange} but version ${depVersion} present`;
 			}
 		}
