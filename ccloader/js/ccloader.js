@@ -5,7 +5,7 @@ import { Plugin } from './plugin.js';
 import { Greenworks } from './greenworks.js';
 import { Package } from './package.js';
 
-const CCLOADER_VERSION = '2.25.8';
+const CCLOADER_VERSION = '2.25.9';
 const KNOWN_EXTENSIONS = ["post-game", "manlea", "ninja-skin", "fish-gear", "flying-hedgehag", "scorpion-robo", "snowman-tank"]
 
 export class ModLoader {
@@ -268,7 +268,7 @@ export class ModLoader {
 			if (!Object.prototype.hasOwnProperty.call(deps, depName))
 				continue;
 
-			const depRange = semver.validRange(deps[depName]);
+			const depRange = semver.validRange(deps[depName], { includePrerelease: true });
 			if (!depRange) {
 				result[depName] = `Syntax error in version range "${deps[depName]}" for dependency ${depName}`;
 				continue;
@@ -309,7 +309,7 @@ export class ModLoader {
 				result[depName] = `${depDesc} is missing`;
 			} else if (semver.valid(depVersion) === null) {
 				result[depName] = `${depDesc}'s version "${depVersion}" has a syntax error`;
-			} else if (!semver.satisfies(depVersion, depRange)) {
+			} else if (!semver.satisfies(depVersion, depRange, { includePrerelease: true })) {
 				result[depName] = `requires ${depDesc} version ${depRange} but version ${depVersion} present`;
 			}
 		}
