@@ -115,7 +115,7 @@ export class UI {
 		});
 		
 		window.addEventListener('unhandledrejection',  error => {
-			this._logMessageToFile('unhandled rejection', error.reason.message, error.reason);
+			this._logMessageToFile('unhandled rejection', error.reason ? error.reason.message : undefined, error.reason);
 		});
 	}
 
