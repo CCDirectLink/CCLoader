@@ -124,29 +124,31 @@ export class ModLoader {
 		const packedMods = this.filemanager.getAllModPackages();
 
 		if (packedMods.length > 0) {
-			if (window.CrossAndroid) {
-				console.warn('Mods using .ccmod files are not supported yet. Please rename them to .zip and extract them before using CrossAndroid.');
-			} else {
+			if (!window.CrossAndroid) {
 				await this._initializeServiceWorker();
 				await this._loadPackedMods(packedMods);
-				await Promise.all(packedMods.map(async packed => {
-					const path = packed.substring(0, packed.length);
-	
-					const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
-					if (isCCMod) {
-						ccmodFiles.push(path + '/ccmod.json');
-						return;
-					}
-	
-					const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
-					if (isPkg) {
-						modFiles.push(path + '/package.json');
-						return;
-					}
-					
-					console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
-				}));
+			} else {
+				// CrossAndroid handles ccmod files natively, but filemanager still needs to know about them
+				const names = packedMods.map((m) => m.substring(12, m.length));
+				this.filemanager.setPackedMods(names);
 			}
+			await Promise.all(packedMods.map(async packed => {
+				const path = packed.substring(0, packed.length);
+
+				const isCCMod = await this.filemanager.packedFileExists(path + '/ccmod.json');
+				if (isCCMod) {
+					ccmodFiles.push(path + '/ccmod.json');
+					return;
+				}
+
+				const isPkg = await this.filemanager.packedFileExists(path + '/package.json');
+				if (isPkg) {
+					modFiles.push(path + '/package.json');
+					return;
+				}
+
+				console.error(`Invalid ccmod file. (Did you package it correctly?): ${path}`);
+			}));
 		}
 
 		/** @type {Package[]} */
