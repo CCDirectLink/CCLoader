@@ -69,7 +69,11 @@ export default class Simplify extends Plugin {
 	_applyArgs() {
 		const args = this._parseArgs();
 		for (const [name, value] of args) {
-			window[name] = value;
+			try {
+				window[name] = value;
+			} catch {
+				console.warn("Failed to apply arguments (" + name + "=" + value + "). Make sure your launch arguments are valid.");
+			}
 		}
 	}
 
