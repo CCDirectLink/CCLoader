@@ -10,3 +10,8 @@ assets/mods/*
 !assets/mods/simplify/
 !assets/mods/ccloader-version-display/
 !assets/mods/ccmodmanager.ccmod
+!assets/mods/cc-dev/
+!tests/
+tests/*
+!tests/cc-dev-live.mjs
+.cc-dev-session.json

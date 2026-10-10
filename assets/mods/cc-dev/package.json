@@ -1,0 +1,9 @@
+{
+  "name": "cc-dev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Opt-in development tools for CCLoader.",
+  "plugin": "plugin.js",
+  "ccmodDependencies": { "ccloader": ">=2.22.0" }
+}

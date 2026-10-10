@@ -1,0 +1,9 @@
+{
+  "id": "cc-dev",
+  "version": "0.1.0",
+  "title": "CC Dev",
+  "description": "Opt-in development tools: plugin hot reload and local HTTP evaluation.",
+  "plugin": "plugin.js",
+  "dependencies": { "ccloader": ">=2.22.0" },
+  "tags": ["development"]
+}
