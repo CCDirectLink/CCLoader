@@ -405,10 +405,95 @@
 			document.createEvent('Event').initEvent('mapUnloaded', true, true);
 		}
 		async _postInitialize(){
-			this._initializeFont();
+			await this._initializeFont();
 			this._initializeOptions();
+			this._initializeDependencyTab();
 			
 			document.body.dispatchEvent(new Event('simplifyInitialized', { bubbles: true }));
+		}
+		_initializeDependencyTab() {
+			const manager = window.modmanager;
+			const gui = manager && manager.gui;
+			if (!gui || !gui.MenuList || !gui.ModListEntry || gui.simplifyDependencyTabInstalled) {
+				return;
+			}
+
+			const installedMods = window.activeMods.concat(window.inactiveMods);
+			const dependencyIds = new Set();
+			for (const mod of installedMods) {
+				for (const id of Object.keys(mod.dependencies || {})) {
+					if (id !== mod.name) dependencyIds.add(id);
+				}
+				if ((mod.tags || []).includes('library')) {
+					dependencyIds.add(mod.name);
+				}
+			}
+			const isDependency = mod => dependencyIds.has(mod.id)
+				|| (mod.tags || []).includes('library')
+				|| !!(mod.serverCounterpart && (mod.serverCounterpart.tags || []).includes('library'));
+			const addDependencyTab = list => {
+				if (list.tabz.some(tab => tab.simplifyDependencyTab)) {
+					return;
+				}
+				const index = list.tabz.length;
+				gui.MOD_MENU_TAB_INDEXES.DEPS = index;
+				list.tabz.push({
+					name: 'Deps', icon: 'simplify-deps',
+					populateFunc: list.populateDependencies,
+					simplifyDependencyTab: true
+				});
+				list.addTab('Deps', index, {});
+			};
+
+			gui.MenuList.inject({
+				init() {
+					this.parent();
+					addDependencyTab(this);
+				},
+				populateDependencies(list, buttonGroup, sort) {
+					const previousEntries = this._simplifyDependencyEntries;
+					const previousFilters = this.filters;
+					const entries = [];
+					this._simplifyDependencyEntries = entries;
+					// Deps remains useful even when the normal library-hiding filter is set.
+					this.filters = Object.assign({}, previousFilters, { hideLibraryMods: false });
+					try {
+						this.populateEnabled(list, buttonGroup, sort);
+						this.populateDisabled(list, buttonGroup, sort);
+					} finally {
+						this.filters = previousFilters;
+						this._simplifyDependencyEntries = previousEntries;
+					}
+					// Populate once so sorting and grid column positions span both groups.
+					this.sortModEntries(entries, sort);
+					this.populateListFromMods(entries, list);
+				},
+				populateListFromMods(mods, list) {
+					if (this._simplifyDependencyEntries) {
+						this._simplifyDependencyEntries.push(...mods.filter(isDependency));
+						return;
+					}
+					const tabs = gui.MOD_MENU_TAB_INDEXES;
+					if (this.currentTabIndex === tabs.ENABLED || this.currentTabIndex === tabs.DISABLED) {
+						mods = mods.filter(mod => !isDependency(mod));
+					}
+					return this.parent(mods, list);
+				}
+			});
+			gui.ModListEntry.inject({
+				onButtonPress() {
+					if (this.mod.isLocal && this.modList.currentTabIndex === gui.MOD_MENU_TAB_INDEXES.DEPS) {
+						// Retain CCModManager's checks and dependency-aware confirmation dialogs.
+						return this.mod.active ? this.tryDisableMod(this.mod) : this.tryEnableMod(this.mod);
+					}
+					return this.parent();
+				}
+			});
+			gui.simplifyDependencyTabInstalled = true;
+			// The manager may have constructed its menu before modsLoaded fired.
+			if (gui.menu && gui.menu.list) {
+				addDependencyTab(gui.menu.list);
+			}
 		}
 		_initializeFont() {
 			const icons = new cc.ig.Font('mods/simplify/media/icons.png', 16, 2000);
@@ -416,6 +501,17 @@
 			
 			this.font.prepareMapping(ICON_MAPPING, page);
 			this.font.setMapping(ICON_MAPPING);
+
+			const dependencies = new cc.ig.Font('mods/simplify/media/deps-icon.png', 16, 2001);
+			const dependencyPage = this.font.pushIconSet(dependencies);
+			this.font.setMapping({ 'simplify-deps': [dependencyPage, 0] });
+			// Tab text caches its glyphs; build it only after the font image is ready.
+			return new Promise(resolve => dependencies.addLoadListener({
+				onLoadableComplete(loaded) {
+					if (!loaded) console.error('Could not load the Deps tab icon.');
+					resolve();
+				}
+			}));
 		}
 		_initializeOptions(){
 			const mods = window.inactiveMods
